@@ -7,6 +7,7 @@ import ChatCard from "../Chat/ChatCard";
 import TableOne from "../Tables/TableOne";
 import CardDataStats from "../CardDataStats";
 
+
 const MapOne = dynamic(() => import("@/components/Maps/MapOne"), {
   ssr: false,
 });

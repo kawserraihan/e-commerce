@@ -1,4 +1,11 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-export default nextConfig;
+const nextConfig = {
+    productionBrowserSourceMaps: false, // Disable source maps in production
+    // other settings can go here
+  };
+  
+  // Add this line to verify during the build process
+  console.log("Next.js config:", nextConfig);
+  
+  export default nextConfig;    
+  

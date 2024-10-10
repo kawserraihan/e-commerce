@@ -34,7 +34,7 @@ const menuGroups = [
         // children: [{ label: "eCommerce", route: "/" }],
 
         label: "Dashboard",
-        route: "/",
+        route: "/dashboard",
       },
       // {
       //   icon: (
