@@ -1,9 +1,9 @@
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import Category from "@/components/Core/Core-Categories/CoreCategories";
-
+import Head from 'next/head';
+import CategoriesComponent from "../../../components/Core/Core-Categories/CoreCategories";
 
 import { Metadata } from "next";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 export const metadata: Metadata = {
   title: "MS Mart - Category",
@@ -11,16 +11,22 @@ export const metadata: Metadata = {
     "MS- Mart - Category",
 };
 
-const Categories = () => {
+const CategoriesPage = () => {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Categories"/>
-
+      <Breadcrumb pageName="Categories" />
+      <Head>
+        <title>Categories</title>
+        <meta name="description" content="Manage categories on this page." />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <div className="flex flex-col gap-10">
-        <Category/>
+        {/* Render the CategoriesComponent which handles the data fetching and pagination */}
+        <CategoriesComponent />
       </div>
     </DefaultLayout>
   );
 };
 
-export default Categories;
+export default CategoriesPage;

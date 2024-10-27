@@ -1,26 +1,32 @@
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import Subcategory from "@/components/Core/Core-Subcategories/CoreSubcategories";
-
+import Head from 'next/head';
+import SubcategoriesComponent from "@/components/Core/Core-Subcategories/CoreSubcategories";
 
 import { Metadata } from "next";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Subcategory",
+  title: "MS Mart - SubCategory",
   description:
-    "MS- Mart - Subcategory",
+    "MS- Mart - SubCategory",
 };
 
-const Subcategories = () => {
+const SubcategoriesPage = () => {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Sub-Categories"/>
-
+      <Breadcrumb pageName="SubCategory" />
+      <Head>
+        <title>SubCategory</title>
+        <meta name="description" content="Manage Subcategories on this page." />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <div className="flex flex-col gap-10">
-        <Subcategory/>
+        {/* Render the SubcategoriesComponent which handles the data fetching and pagination */}
+        <SubcategoriesComponent />
       </div>
     </DefaultLayout>
   );
 };
 
-export default Subcategories;
+export default SubcategoriesPage;

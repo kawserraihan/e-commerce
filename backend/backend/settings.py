@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'users',
+    'core',
+    'products',
 ]
 
 MIDDLEWARE = [
@@ -81,7 +83,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME' : 'auth_api',
+        'NAME' : 'ecom',
         'USER' : 'root',
         'PASSWORD' : '',
         'HOST' : 'localhost',     
@@ -139,7 +141,10 @@ REST_FRAMEWORK = {
 
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10  # Set the default page size
+    
 }
 
 DJOSER = {
@@ -152,7 +157,7 @@ DJOSER = {
 }
 
 AUTH_COOKIE = 'access'
-AUTH_COOKIE_ACCESS_MAX_AGE = 60 * 5
+AUTH_COOKIE_ACCESS_MAX_AGE = 60 * 60 * 24
 AUTH_COOKIE_REFRESH_MAX_AGE = 60 * 60 * 24
 AUTH_COOKIE_SECURE= getenv('AUTH_COOKIE_SECURE', 'True') == 'True'
 AUTH_COOKIE_HTTP_ONLY= True
@@ -171,18 +176,18 @@ AUTH_USER_MODEL = "users.UserAccount"
 
 
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['console'],
-#             'level': 'DEBUG',
-#         },
-#     },
-# }
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}

@@ -1,5 +1,5 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import Sizes from "@/components/Core/Core-Size/CoreSize";
+import SizesComponent from "@/components/Core/Core-Size/CoreSize";
 
 
 import { Metadata } from "next";
@@ -17,7 +17,7 @@ const Color = () => {
       <Breadcrumb pageName="Size"/>
 
       <div className="flex flex-col gap-10">
-        <Sizes/>
+        <SizesComponent/>
       </div>
     </DefaultLayout>
   );

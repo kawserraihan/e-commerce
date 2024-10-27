@@ -1,19 +1,32 @@
+// Toggle.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const Toggle: React.FC = () => {
-  const [isChecked, setIsChecked] = useState(true);
+interface ToggleProps {
+  isChecked: boolean; // Prop to determine the initial checked state
+  onToggle: (checked: boolean) => void; // Function to handle toggle changes
+}
+
+const Toggle: React.FC<ToggleProps> = ({ isChecked, onToggle }) => {
+  const [isToggled, setIsToggled] = useState(isChecked); // Initialize state with the prop
 
   const handleToggle = () => {
-    setIsChecked(!isChecked);
+    const newToggleState = !isToggled;
+    setIsToggled(newToggleState);
+    onToggle(newToggleState); // Call the function passed as a prop to notify about the change
   };
+
+  // Update local state when prop changes (if needed)
+  useEffect(() => {
+    setIsToggled(isChecked);
+  }, [isChecked]);
 
   return (
     <label className="inline-flex items-center cursor-pointer">
       <input
         type="checkbox"
         className="sr-only peer"
-        checked={isChecked}
+        checked={isToggled}
         onChange={handleToggle}
       />
       <div
@@ -22,7 +35,7 @@ const Toggle: React.FC = () => {
       >
         <div
           className={`after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all 
-          ${isChecked ? "after:translate-x-full rtl:after:-translate-x-full after:border-white" : ""}`}
+          ${isToggled ? "after:translate-x-full rtl:after:-translate-x-full after:border-white" : ""}`}
         ></div>
       </div>
     </label>

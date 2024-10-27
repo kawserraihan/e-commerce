@@ -1,171 +1,169 @@
-import { Subcategories } from "@/types/subcategories";
-import SearchComponent from "@/components/FormElements/searchComponent";
-import Pagination from '@/components/FormElements/Pagination';
-import ToggleButton from'@/components/FormElements/ToggleButton';
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useGetSubcategoriesQuery } from '../../../../redux/features/authApiSlice';
+import ToggleButton from '@/components/FormElements/ToggleButton';
+import AddSubcategoryModal from './AddSubcategoryModal';
+import EditSubcategoryModal from './EditSubcategoryModal';
+import DeleteSubcategoryModal from './DeleteSubcategoryModal';
 
 
-const subCategoryData: Subcategories[] = [
-  {
-    no: 1,
-    categoryName: "Electronics",
-    subCategoryName: "Smart-Watch",
-    subCategoryStatus: "Active",
-  },
-  
-  {
-    no: 2,
-    categoryName: "Electronics",
-    subCategoryName: "Smartphone",
-    subCategoryStatus: "Active",
-  },
-  {
-    no: 3,
-    categoryName: "Men Wear",
-    subCategoryName: "Shirt",
-    subCategoryStatus: "Active",
-  },
-  {
-    no: 4,
-    categoryName: "Women Fashion",
-    subCategoryName: "Necklace",
-    subCategoryStatus: "Active",
-  },
-  {
-    no: 5,
-    categoryName: "Electronics",
-    subCategoryName: "Headset",
-    subCategoryStatus: "Active",
-  },
-];
+// Subcategory type
+interface Subcategory {
+  id: number;
+  categoryid: number;
+  category_name: string;
+  subcategory_name: string;
+  is_active: boolean;
+  created_at: string;
+  modified_at: string;
+}
 
-const Subcategory = () => {
-  const currentPage = 2; // This could come from query params or state
-  const totalPages = 10;
-  
+const SubcategoriesComponent = () => {
+  const router = useRouter();
+
+  // Pagination state
+  const [page, setPage] = useState<number>(1); // Current page
+  const [pageSize] = useState<number>(10); // Page size
+
+  // Fetch Subcategory from Redux slice
+  const { data, isLoading, error } = useGetSubcategoriesQuery({ page, page_size: pageSize });
+
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [subcategoryToEdit, setSubcategoryToEdit] = useState<Subcategory | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [subcategoryToDelete, setSubcategoryToDelete] = useState<Subcategory | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Modal Handlers
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  const openEditModal = (subcategory: Subcategory) => {
+    setSubcategoryToEdit(subcategory);
+    setIsEditModalOpen(true);
+  };
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setSubcategoryToEdit(null);
+  };
+
+  const openDeleteModal = (subcategory: Subcategory) => {
+    setSubcategoryToDelete(subcategory);
+    setIsDeleteModalOpen(true);
+  };
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setSubcategoryToDelete(null);
+  };
+
+  // Navigate to view Subcategory details dynamically
+  const handleViewSubcategory = (id: number) => {
+    router.push(`/core/core-subcategories/${id}`);
+  };
+
+  if (isLoading) return <p>Loading Subcategory...</p>;
+  if (error) return <p>Error loading Subcategory.</p>;
+
+  // Filter subcategory based on search query
+  const filteredSubcategories= data?.results?.filter((subcategory: Subcategory) =>
+    subcategory.subcategory_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Calculate total number of pages based on total count and page size
+  const totalPages = Math.ceil((data?.count || 0) / pageSize);
+
+  // Function to render page numbers for navigation
+  const renderPageNumbers = () => {
+    let pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(
+        <button
+          key={i}
+          onClick={() => setPage(i)}
+          className={`px-3 py-1 rounded-md text-sm font-medium ${
+            page === i ? 'bg-primary text-white' : 'bg-white text-gray-700 border'
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+    return pageNumbers;
+  };
+
   return (
     <div>
-      
-      {/* Header with Search and Add New button */}
+      {/* Header with Add New button and Search box */}
       <div className="flex justify-between items-center pb-4">
-        {/* Search input */}
-        <div>
-          <SearchComponent/>
+        <button
+          style={{ backgroundColor: '#67c5c3' }}
+          className="text-md text-white px-4 py-2 font-bold rounded-full shadow hover:bg-opacity-90 focus:outline-none mr-3"
+          onClick={openModal}
+        >
+          Add New
+        </button>
 
-        </div>
-
-        {/* Add New button */}
-            <div>
-              
-            <button style={{ backgroundColor: '#67c5c3' }} className="text-md text-white px-4 py-2 font-bold rounded-full shadow hover:bg-opacity-90 focus:outline-none mr-3">
-                Add New
-            </button>
-            </div>
+        {/* Search Input */}
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search Subcategory"
+          className="px-4 py-2 border rounded-md text-sm focus:ring focus:ring-primary"
+        />
       </div>
 
-      {/* Table */}
+      {/* Table displaying filtered Subcategory */}
       <div className="max-w-full rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         <table className="w-full table-auto">
           <thead>
             <tr className="bg-gray-2 text-center dark:bg-meta-4">
-              <th className="min-w-[30px] px-1 py-4 text-sm text-black text-center dark:text-white">
-                No
-              </th>
-              <th className="min-w-[140px] px-5 py-4 text-sm text-center text-black dark:text-white xl:pl-1">
-                Category Name
-              </th>
-              <th className="min-w-[140px] px-5 py-4 text-sm text-center text-black dark:text-white xl:pl-1">
-                Subcategory Name
-              </th>
-              <th className="min-w-[100px] px-5 py-4 text-sm text-center text-black dark:text-white">
-                Status
-              </th>
-              <th className="px-8 py-4 text-sm text-black text-center dark:text-white">
-                Actions
-              </th>
+              <th className="min-w-[30px] px-1 py-4 text-sm text-black dark:text-white">No.</th>
+              <th className="min-w-[140px] px-5 py-4 text-sm text-black dark:text-white">SubCategory Name</th>
+              <th className="min-w-[140px] px-5 py-4 text-sm text-black dark:text-white">Category Name</th>
+              <th className="min-w-[140px] px-5 py-4 text-sm text-black dark:text-white">Status</th>
+              <th className="min-w-[100px] px-5 py-4 text-sm text-black dark:text-white">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {subCategoryData.map((subcategoryItem, key) => (
-              <tr key={key}>
-                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark text-center">
-                  <p className="text-black dark:text-white">
-                    {subcategoryItem.no}
-                  </p>
+            {filteredSubcategories?.map((item, rowIndex) => (
+              <tr key={item.id} className="border-b border-[#eee] dark:border-strokedark">
+                <td className="px-4 py-5 text-center">
+                  <span className="text-black dark:text-white">{rowIndex + 1}</span>
                 </td>
-                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark text-center xl:pl-2">
-                  <p className="text-black dark:text-white">
-                    {subcategoryItem.categoryName}
-                  </p>
+                <td className="px-4 py-5 text-center">
+                  <span className="text-black dark:text-white">{item.subcategory_name}</span>
                 </td>
-                <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark text-center xl:pl-2">
-                  <p className="text-black dark:text-white">
-                    {subcategoryItem.subCategoryName}
-                  </p>
+                <td className="px-4 py-5 text-center">
+                  <span className="text-black dark:text-white">{item.category_name}</span>
                 </td>
-                <td className="border-b border-[#eee] px-4 py-5 text-center dark:border-strokedark">
-                  <ToggleButton/>
+                <td className="px-4 py-5 text-center">
+                  <ToggleButton 
+                    isChecked={item.is_active} 
+                    onToggle={(newStatus: boolean) => {}}
+                  />
                 </td>
-                <td className="border-b border-[#eee] px-4 py-5 text-center dark:border-strokedark">
-                  <div className="flex items-center justify-center space-x-3.5">
-                    <button className="hover:text-primary">
-                      {/* View Icon */}
-                      <svg
-                        className="fill-current"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 18 18"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M8.99981 14.8219C3.43106 14.8219 0.674805 9.50624 0.562305 9.28124C0.47793 9.11249 0.47793 8.88749 0.562305 8.71874C0.674805 8.49374 3.43106 3.20624 8.99981 3.20624C14.5686 3.20624 17.3248 8.49374 17.4373 8.71874C17.5217 8.88749 17.5217 9.11249 17.4373 9.28124C17.3248 9.50624 14.5686 14.8219 8.99981 14.8219ZM1.85605 8.99999C2.4748 10.0406 4.89356 13.5562 8.99981 13.5562C13.1061 13.5562 15.5248 10.0406 16.1436 8.99999C15.5248 7.95936 13.1061 4.44374 8.99981 4.44374C4.89356 4.44374 2.4748 7.95936 1.85605 8.99999Z"
-                          fill=""
-                        />
-                        <path
-                          d="M9 11.3906C7.67812 11.3906 6.60938 10.3219 6.60938 9C6.60938 7.67813 7.67812 6.60938 9 6.60938C10.3219 6.60938 11.3906 7.67813 11.3906 9C11.3906 10.3219 10.3219 11.3906 9 11.3906ZM9 7.875C8.38125 7.875 7.875 8.38125 7.875 9C7.875 9.61875 8.38125 10.125 9 10.125C9.61875 10.125 10.125 9.61875 10.125 9C10.125 8.38125 9.61875 7.875 9 7.875Z"
-                          fill=""
-                        />
-                      </svg>
+                <td className="px-3 py-5 text-center">
+                  <div className='space-x-3'>
+                    <button
+                      className="text-blue-500 hover:underline"
+                      onClick={() => handleViewSubcategory(item.id)}
+                    >
+                      View
                     </button>
-                    <button className="hover:text-primary">
-                      {/* Edit Icon */}
-                      <svg
-                        className="fill-current"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 18 18"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M13.7535 2.47502H11.5879V1.9969C11.5879 1.15315 10.9129 0.478149 10.0691 0.478149H7.90352C7.05977 0.478149 6.38477 1.15315 6.38477 1.9969V2.47502H4.21914C3.40352 2.47502 2.72852 3.15002 2.72852 3.96565V4.8094C2.72852 5.42815 3.09414 5.9344 3.62852 6.1594L4.07852 15.4688C4.13477 16.6219 5.09102 17.5219 6.24414 17.5219H11.7004C12.8535 17.5219 13.8098 16.6219 13.866 15.4688L14.3441 6.13127C14.8785 5.90627 15.2441 5.3719 15.2441 4.78127V3.93752C15.2441 3.15002 14.5691 2.47502 13.7535 2.47502ZM7.67852 1.9969C7.67852 1.85627 7.79102 1.74377 7.93164 1.74377H10.0973C10.2379 1.74377 10.3504 1.85627 10.3504 1.9969V2.47502H7.70664V1.9969H7.67852ZM4.02227 3.96565C4.02227 3.85315 4.10664 3.74065 4.24727 3.74065H13.7535C13.866 3.74065 13.9785 3.82502 13.9785 3.96565V4.8094C13.9785 4.9219 13.8941 5.0344 13.7535 5.0344H4.24727C4.13477 5.0344 4.02227 4.95002 4.02227 4.8094V3.96565ZM12.7348 15.3094C12.7098 15.8531 12.2785 16.2844 11.7348 16.2844H6.27852C5.73477 16.2844 5.30352 15.8531 5.27852 15.3094L4.84414 6.1719H13.2004L12.7348 15.3094Z"
-                          fill=""
-                        />
-                      </svg>
+                    <button
+                      className="text-primary hover:underline"
+                      onClick={() => openEditModal(item)}
+                    >
+                      Edit
                     </button>
-                    <button className="hover:text-primary">
-                      {/* Delete Icon */}
-                      <svg
-                        className="fill-current"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 18 18"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M16.3285 3.50627H12.4223V1.9469C12.4223 1.31252 11.8973 0.787521 11.2629 0.787521H6.75352C6.11914 0.787521 5.59414 1.31252 5.59414 1.9469V3.50627H1.68789C1.39727 3.50627 1.15664 3.7469 1.15664 4.03752C1.15664 4.32815 1.39727 4.56877 1.68789 4.56877H2.21289L2.81289 15.1875C2.88414 16.5406 4.02227 17.5844 5.37539 17.5844H12.6254C13.9785 17.5844 15.1166 16.5406 15.1879 15.1875L15.7879 4.56877H16.3129C16.6035 4.56877 16.8441 4.32815 16.8441 4.03752C16.8441 3.7469 16.6035 3.50627 16.3285 3.50627ZM7.12539 1.9469C7.12539 1.8344 7.20977 1.7219 7.35039 1.7219H10.641C10.7535 1.7219 10.866 1.80627 10.866 1.9469V3.50627H7.12539V1.9469ZM14.1254 15.1219C14.0723 16.1156 13.2 16.9781 12.2066 16.9781H5.37539C4.38164 16.9781 3.50977 16.1156 3.45664 15.1219L2.86539 4.56877H14.1379L14.1254 15.1219Z"
-                          fill=""
-                        />
-                        <path
-                          d="M7.59375 14.2884C7.88437 14.2884 8.09375 14.0665 8.09375 13.7628V7.7984C8.09375 7.50777 7.88437 7.2984 7.59375 7.2984C7.30312 7.2984 7.09375 7.50777 7.09375 7.7984V13.7628C7.09375 14.0665 7.30312 14.2884 7.59375 14.2884Z"
-                          fill=""
-                        />
-                        <path
-                          d="M10.5 14.2884C10.7906 14.2884 11 14.0665 11 13.7628V7.7984C11 7.50777 10.7906 7.2984 10.5 7.2984C10.2094 7.2984 10 7.50777 10 7.7984V13.7628C10 14.0665 10.2094 14.2884 10.5 14.2884Z"
-                          fill=""
-                        />
-                      </svg>
+                    <button
+                      className="text-red hover:underline"
+                      onClick={() => openDeleteModal(item)}
+                    >
+                      Delete
                     </button>
                   </div>
                 </td>
@@ -174,15 +172,65 @@ const Subcategory = () => {
           </tbody>
         </table>
 
-        <div className="pt-4 pb-13">
-      <Pagination currentPage={currentPage} totalPages={totalPages} />
-    </div>
-      
-        
-        
+              {/* Pagination controls with page numbers */}
+      <div className="flex justify-end items-center mt-4 mb-4 mr-12 space-x-2">
+        {/* Previous Button */}
+        <button
+          onClick={() => setPage((prevPage) => Math.max(prevPage - 1, 1))}
+          disabled={!data?.previous}
+          className={`px-4 py-2 text-center rounded-md border text-sm font-medium ${
+            !data?.previous ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white'
+          }`}
+        >
+          Previous
+        </button>
+
+        {/* Page Numbers */}
+        {renderPageNumbers()}
+
+        {/* Next Button */}
+        <button
+          onClick={() => setPage((prevPage) => (data?.next ? prevPage + 1 : prevPage))}
+          disabled={!data?.next}
+          className={`px-4 py-2 text-center rounded-md border text-sm font-medium ${
+            !data?.next ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white'
+          }`}
+        >
+          Next
+        </button>
       </div>
+
+        {filteredSubcategories?.length === 0 && (
+          <div className="py-4 text-center text-gray-500">
+            No Subcategory found for "{searchQuery}"
+          </div>
+        )}
+      </div>
+
+
+
+      {/* Add Subcategory Modal */}
+      <AddSubcategoryModal isOpen={isModalOpen} onClose={closeModal} />
+
+      {/* Edit Subcategory Modal */}
+      {subcategoryToEdit && (
+        <EditSubcategoryModal
+          isOpen={isEditModalOpen}
+          onClose={closeEditModal}
+          subcategory={subcategoryToEdit}
+        />
+      )}
+
+      {/* Delete Subcategory Modal */}
+      {subcategoryToDelete && (
+        <DeleteSubcategoryModal
+          isOpen={isDeleteModalOpen}
+          onClose={closeDeleteModal}
+          subcategory={subcategoryToDelete}
+        />
+      )}
     </div>
   );
 };
 
-export default Subcategory;
+export default SubcategoriesComponent;

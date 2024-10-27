@@ -1,26 +1,32 @@
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import Colors from "@/components/Core/Core-Color/CoreColor";
-
+import Head from 'next/head';
+import ColorsComponent from "../../../components/Core/Core-Color/CoreColor";
 
 import { Metadata } from "next";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Core Data - Color",
+  title: "MS Mart - Color",
   description:
-    "MS- Mart - Core Data - Color",
+    "MS- Mart - Color",
 };
 
-const Color = () => {
+const ColorsPage = () => {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Colors"/>
-
+      <Breadcrumb pageName="Colors" />
+      <Head>
+        <title>Colors</title>
+        <meta name="description" content="Manage colors on this page." />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <div className="flex flex-col gap-10">
-        <Colors/>
+        {/* Render the ColorsComponent which handles the data fetching and pagination */}
+        <ColorsComponent />
       </div>
     </DefaultLayout>
   );
 };
 
-export default Color;
+export default ColorsPage;

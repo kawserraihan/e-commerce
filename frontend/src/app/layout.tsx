@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import CustomProvider from "../../redux/provider"; // Import your CustomProvider
-import Loader from "@/components/common/Loader";
+// import Loader from "@/components/common/Loader";
 
 import { ToastContainer } from 'react-toastify';
 
@@ -36,7 +36,7 @@ export default function RootLayout({
           <div className="dark:bg-boxdark-2 dark:text-bodydark">
          
 
-            {loading ? <Loader /> : children}
+            {children}
             
             
           

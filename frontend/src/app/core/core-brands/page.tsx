@@ -1,26 +1,26 @@
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import Brands from "@/components/Core/Core-Brand/corebrand";
-
-
-import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import BrandsComponent from "../../../components/Core/Core-Brands/CoreBrands";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Brands",
+  title: "MS Mart - Brand",
   description:
-    "MS- Mart - Brands",
+    "MS- Mart - Brand",
+    
 };
 
-const Categories = () => {
+const BrandsPage = () => {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Brands"/>
+      <Breadcrumb pageName="Brands" />
 
       <div className="flex flex-col gap-10">
-        <Brands/>
+        {/* Render the BrandsComponent which handles the data fetching and pagination */}
+        <BrandsComponent />
       </div>
     </DefaultLayout>
   );
 };
 
-export default Categories;
+export default BrandsPage;

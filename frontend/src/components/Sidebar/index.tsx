@@ -139,9 +139,11 @@ const menuGroups = [
           { label: "Category", route: "/core/core-categories" },
           { label: "Sub Category", route: "/core/core-subcategories" },
           { label: "Child Category", route: "/core/core-childcategories"},
+          { label: "Brands", route: "/core/core-brands"},
+          { label: "Models", route: "/core/core-models"},
           { label: "Sizes", route: "/core/core-size"},
           { label: "Colors", route: "/core/core-color"},
-          { label: "Brands", route: "/core/core-brands"},
+          
           
         ],
       },
