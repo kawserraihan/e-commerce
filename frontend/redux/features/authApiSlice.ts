@@ -95,17 +95,22 @@ interface Product {
 	product_type: string;
 	product_description: string;
 	product_code: string;
-	product_image: string;
-	price: string;
+	product_image: File | null;
+	price: number;
 	slug: string;
 	is_active: boolean;
 	created_at: string;        // Add the created timestamp
     modified_at: string;
 	category: number;
+	category_name: string;
 	sub_category: number;
+	subcategory_name: string;
 	child_category: number;
+	childcategory_name: string;
 	brand: number;
+	brand_name: string;
 	model: number;
+	model_name: string;
 }
 
 const authApiSlice = apiSlice.injectEndpoints({
@@ -520,21 +525,21 @@ const authApiSlice = apiSlice.injectEndpoints({
 				query: (id) => `products/${id}/`, // Adjust the endpoint according to your API
 			}),
 
-		addProduct: builder.mutation<Product, Partial<Product>>({
-			query: (product) => ({
+		addProduct: builder.mutation<Product, FormData>({
+			query: (formData) => ({
 				url: '/products/',
 				method: 'POST',
-				body: product,
+				body: formData,
 			}),
 			}),
 
-		updateProduct: builder.mutation<Product, Partial<Product>>({
-			query: (product) => ({
-				url: `/products/${product.id}/`,
-				method: 'PUT',
-				body: product
-			}),
-			}),
+			updateProduct: builder.mutation<Product, { id: number; formData: FormData }>({
+				query: ({ id, formData }) => ({
+				  url: `/products/${id}/`,
+				  method: 'PUT',
+				  body: formData,
+				}),
+			  }),
 
 		deleteProduct: builder.mutation<{ success: boolean; id: number }, number>({
 			query: (id) => ({

@@ -4,6 +4,7 @@ from .serializers import ProductSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from users.authentication import CustomJwtAuthentication
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
@@ -11,3 +12,4 @@ class ProductViewSet(viewsets.ModelViewSet):
     authentication_classes = [CustomJwtAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = PageNumberPagination
+    parser_classes = (MultiPartParser, FormParser)  # To handle file uploads

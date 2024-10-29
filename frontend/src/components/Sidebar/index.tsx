@@ -68,7 +68,7 @@ const menuGroups = [
         
         ),
         label: "Products",
-        route: "/product",
+        route: "/products",
         
       },
       {

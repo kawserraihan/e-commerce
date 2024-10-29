@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import Category, SubCategory, ChildCategory, Brand, Model
+from core.models import Category, SubCategory, ChildCategory, Brand, Model, Color, Size
 
 # Products Model
 
@@ -23,6 +23,8 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     slug = models.SlugField(unique=True)
+    colors = models.ManyToManyField(Color, blank=True, related_name='products')  # Many-to-many relationship for colors
+    sizes = models.ManyToManyField(Size, blank=True, related_name='products')  # Many-to-many relationship for sizes
     guarantee = models.DateTimeField(null=True, blank=True)
     warranty = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)

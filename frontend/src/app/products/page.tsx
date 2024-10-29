@@ -1,26 +1,26 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import Products from "@/components/Products/products";
+import ProductsComponent from "@/components/Products/products";
 
 
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 export const metadata: Metadata = {
-  title: "Products",
+  title: "MS Mart - Products",
   description:
-    "This is Next.js Tables page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
+    "MS- Mart - Products",
 };
 
-const ProductPage = () => {
+const Product = () => {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Products" />
+      <Breadcrumb pageName="Products"/>
 
       <div className="flex flex-col gap-10">
-        <Products/>
+        <ProductsComponent/>
       </div>
     </DefaultLayout>
   );
 };
 
-export default ProductPage;
+export default Product;
