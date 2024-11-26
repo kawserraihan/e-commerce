@@ -1,3 +1,4 @@
+import { list } from 'postcss';
 import { apiSlice } from '../services/apiSlice';
 import { setAuth } from './authSlice';
 // import { CategoryType } from '@/types/categories';
@@ -96,6 +97,7 @@ interface Product {
 	product_description: string;
 	product_code: string;
 	product_image: File | null;
+	quantity: number;
 	price: number;
 	slug: string;
 	is_active: boolean;
@@ -111,6 +113,61 @@ interface Product {
 	brand_name: string;
 	model: number;
 	model_name: string;
+	colors: number[] | null;
+	color_names: string;
+	sizes: number[] | null;
+	size_names: string;
+	additionalImages: FileList | null;
+
+}
+
+interface ProductImage {
+	id: number;
+	additionalImages: FileList | null;
+	product?: number;
+	alt_text: string;
+}
+
+interface UpdateStock {
+	id: number;
+	quantity: number;
+}
+
+interface OrderItem {
+	id: number;
+	product: number;
+	product_name: string;
+	product_image: string | null;
+	quantity: number;
+	price: number;
+	total_price: number;
+}
+
+interface UserOrder {
+	id: number;
+	user: number;
+	user_name: string;
+	user_phone: string;
+	payment_status: string;
+	amount_paid: number;
+	total_amount: number;
+	delivery_status: string;
+	created_at: string; 
+ 	items: OrderItem[];
+}
+
+// Incentives - Coupon
+
+interface Coupon {
+	id: number;
+	coupon: number;
+    commision: number;
+    minumum_amount: number;
+    is_active : boolean;
+    created_at : string;
+    expiry_at : string | null;
+    modified_at : string;
+
 }
 
 const authApiSlice = apiSlice.injectEndpoints({
@@ -553,6 +610,117 @@ const authApiSlice = apiSlice.injectEndpoints({
 
 
 
+// ---------------------ProductImage-related endpoints-----------------------------
+
+    // Fetch images for a product
+    getProductImages: builder.query<ProductImage[], number>({
+		query: (productId) => `product-images/product/${productId}/`,
+	  }),
+  
+	  // Add a new image to a product
+	  addProductImage: builder.mutation<ProductImage, FormData>({
+		query: (formData) => ({
+		  url: '/product-images/',
+		  method: 'POST',
+		  body: formData,
+		}),
+	  }),
+  
+	  // Delete a product image
+	  deleteProductImage: builder.mutation<{ success: boolean }, number>({
+		query: (imageId) => ({
+		  url: `/product-images/${imageId}/`,
+		  method: 'DELETE',
+		}),
+	  }),
+
+	  // -------------------------- END Product Images ----------------------------------
+
+	  // ------------------------------- Stock Update -----------------------------------
+
+	  updateProductStock: builder.mutation<{ new_stock_quantity: number }, { id: number; quantity: number }>({
+		query: ({ id, quantity }) => ({
+		  url: `/products/${id}/update-stock/`,
+		  method: 'PATCH',
+		  body: { quantity }, // Send as JSON, not FormData
+		}),
+	}),
+
+	 // ------------------------------- Stock End -----------------------------------
+
+	// ------------------------------- Order Products -----------------------------------
+
+	getOrders: builder.query<{
+		count: number;
+		next: string | null;
+		previous: string | null;
+		results: UserOrder[];
+	}, { page: number; page_size: number }>({
+		query: ({ page, page_size }) => `/orders/?page=${page}&page_size=${page_size}`,
+	}),
+
+	getOrderById: builder.query<UserOrder, number>({
+		query: (id) => `orders/${id}/`, // Adjust the endpoint according to your API
+	}),
+
+	addOrder: builder.mutation<UserOrder, Partial<UserOrder>>({
+		query: (orderData) => ({
+		  url: '/orders/',
+		  method: 'POST',
+		  body: orderData,
+		}),
+	  }),
+
+
+	  //---------------------------END Orders-------------------------
+
+
+	  // --------------------------------------Incentives----------------------------------
+
+
+	  // --------------------- Coupons --------------------------
+
+		getCoupons: builder.query<{
+			count: number;
+			next: string | null;
+			previous: string | null;
+			results: Coupon[];
+		}, { page: number; page_size: number }>({
+			query: ({ page, page_size }) => `/coupons/?page=${page}&page_size=${page_size}`,
+		}),
+
+			getCouponById: builder.query<Coupon, number>({
+				query: (id) => `coupons/${id}/`, // Adjust the endpoint according to your API
+			}),
+
+		addCoupon: builder.mutation<Coupon, Partial<Coupon>>({
+			query: (coupon) => ({
+				url: '/coupons/',
+				method: 'POST',
+				body: coupon,
+			}),
+			}),
+
+		updateCoupon: builder.mutation<Coupon,Partial<Coupon>>({
+			query: (coupon) => ({
+				url: `/coupons/${coupon.id}/`,
+				method: 'PUT',
+				body: coupon
+			}),
+			}),
+
+		deleteCoupon: builder.mutation<{ success: boolean; id: number }, number>({
+			query: (id) => ({
+				url: `/coupons/${id}/`,
+				method: 'DELETE',
+			}),
+			}),
+
+// --------------------- END Coupon --------------------------
+
+
+
+
 
 	}),
 });
@@ -639,6 +807,30 @@ export const {
 	useAddProductMutation,
 	useUpdateProductMutation,
 	useDeleteProductMutation,
+
+	// Additional Product Images queries
+
+	useGetProductImagesQuery,
+	useAddProductImageMutation,
+	useDeleteProductImageMutation,
+
+	//Update Product Stock
+
+	useUpdateProductStockMutation,
+
+	// Orders Queries
+
+	useGetOrdersQuery,
+	useAddOrderMutation,
+	useGetOrderByIdQuery,
+
+	// Coupond Queries
+
+	useGetCouponsQuery,
+	useGetCouponByIdQuery, 
+	useAddCouponMutation,
+	useUpdateCouponMutation,
+	useDeleteCouponMutation,
 
 
 } = authApiSlice;

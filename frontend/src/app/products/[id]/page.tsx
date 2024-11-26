@@ -3,6 +3,8 @@ import ViewProduct from "../../../components/Products/ViewProduct";
 
 import { Metadata } from "next";
 
+
+
 export const metadata: Metadata = {
   title: "MS Mart - Product",
   description:

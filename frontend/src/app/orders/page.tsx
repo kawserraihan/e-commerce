@@ -1,5 +1,5 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import Orders from "@/components/Orders/orders";
+import UserOrder from "@/components/Orders/Orders";
 
 
 import { Metadata } from "next";
@@ -17,7 +17,7 @@ const OrdersPage = () => {
       <Breadcrumb pageName="Orders" />
 
       <div className="flex flex-col gap-10">
-        <Orders/>
+        <UserOrder/>
       </div>
     </DefaultLayout>
   );

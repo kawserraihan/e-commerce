@@ -37,9 +37,12 @@ const InvoiceView = () => {
       <div key={index} className="max-w-full bg-white shadow-lg rounded-lg p-8 relative">
         {/* Print Button */}
         <div className="absolute top-4 right-4">
-          <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-            Invoice Print
-          </button>
+        <button
+          onClick={() => window.print()}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
+          Invoice Print
+        </button>
         </div>
 
         <h1 className="text-2xl font-bold mb-4">Invoice No # {invoice.invoiceID}</h1>
