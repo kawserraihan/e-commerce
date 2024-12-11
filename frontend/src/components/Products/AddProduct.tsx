@@ -15,6 +15,7 @@ import {
 } from '../../../redux/features/authApiSlice'; // Adjust the import as per your file structure
 import { toast } from 'react-toastify'; // Import toast from react-toastify
 import 'react-toastify/dist/ReactToastify.css'; // Import the Toastify CSS
+import Image from "next/image";
 
 const AddProductPage = () => {
   const [productName, setProductName] = useState<string>('');
@@ -393,7 +394,7 @@ const handleRemoveImage = (indexToRemove: number) => {
         <input id="productImage" type="file" onChange={handleImageChange} required className="border border-gray-300 rounded-md p-2 mb-4" />
         {previewImage && (
           <div className="border border-gray-300 p-4 rounded-md mb-4">
-            <img src={previewImage} alt="Preview" className="object-cover h-48 w-48 rounded-md" />
+            <Image src={previewImage} alt="Preview" className="object-cover h-48 w-48 rounded-md" />
           </div>
         )}
 
@@ -418,7 +419,7 @@ const handleRemoveImage = (indexToRemove: number) => {
         <div className="flex flex-col gap-2 mt-4">
           {additionalPreviews.map((imageSrc, index) => (
             <div key={index} className="relative flex items-center border border-gray-300 rounded-md p-2 w-32 h-32">
-              <img src={imageSrc} alt={`Preview ${index + 1}`} className="object-cover w-full h-full rounded-md" />
+              <Image src={imageSrc} alt={`Preview ${index + 1}`} className="object-cover w-full h-full rounded-md" />
               <button
                 type="button"
                 onClick={() => handleRemoveImage(index)}

@@ -57,3 +57,37 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+
+# ---------------- Role ----------------
+
+class Role(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+class Menu(models.Model):
+    name = models.CharField(max_length=50)
+    link = models.CharField(max_length=100, blank=True, null=True)
+    sort_order = models.IntegerField(default=0)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='submenus')
+    icon = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+    
+class Permission(models.Model):
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.role.name} - {self.menu.name}"
+    
+class UserRole(models.Model):
+    user = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+

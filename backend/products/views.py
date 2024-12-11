@@ -1,7 +1,8 @@
 from rest_framework import viewsets, permissions, status
+from rest_framework.viewsets import ModelViewSet
 
-from .models import Product, ProductImage, UserOrder
-from .serializers import ProductSerializer, ProductImageSerializer, UserOrderSerializer
+from .models import Product, ProductImage, UserOrder, ProductVariant, WholesalePrice
+from .serializers import ProductSerializer, ProductImageSerializer, ProductVariantSerializer, WholesalePriceSerializer, UserOrderSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from users.authentication import CustomJwtAuthentication
 from rest_framework.pagination import PageNumberPagination
@@ -25,6 +26,68 @@ class ProductViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     parser_classes = (MultiPartParser, FormParser)  # To handle file uploads
 
+
+class ProductVariantViewSet(ModelViewSet):
+    """
+    API for managing product variants.
+    """
+    queryset = ProductVariant.objects.all()
+    serializer_class = ProductVariantSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    @action(detail=False, methods=['get'], url_path='(?P<product_id>[^/.]+)')
+    def list_of_variants(self, request, product_id=None):
+        """
+        Custom action to retrieve variants for a specific product by product_id.
+        """
+        variants = self.queryset.filter(product_id=product_id)
+        page = self.paginate_queryset(variants)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(variants, many=True)
+        return Response(serializer.data)
+
+class WholesalePriceViewSet(ModelViewSet):
+    """
+    API for managing wholesale prices.
+    """
+    queryset = WholesalePrice.objects.all()
+    serializer_class = WholesalePriceSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    @action(detail=False, methods=['get'], url_path='(?P<product_id>[^/.]+)')
+    def list_wholesale_price(self, request, product_id=None):
+        """
+        Custom action to retrieve prices for a specific product by product_id.
+        """
+        prices = self.queryset.filter(product_id=product_id)
+        page = self.paginate_queryset(prices)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(prices, many=True)
+        return Response(serializer.data)
+
+
 class ProductImageViewSet(viewsets.ModelViewSet):
     queryset = ProductImage.objects.all()
     serializer_class = ProductImageSerializer
@@ -34,7 +97,7 @@ class ProductImageViewSet(viewsets.ModelViewSet):
     parser_classes = (MultiPartParser, FormParser)
     
 
-    @action(detail=False, methods=['get'], url_path='product/(?P<product_id>[^/.]+)')
+    @action(detail=False, methods=['get'], url_path='(?P<product_id>[^/.]+)')
     def list_product_images(self, request, product_id=None):
         """
         Custom action to retrieve images for a specific product by product_id.
@@ -47,6 +110,7 @@ class ProductImageViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(images, many=True)
         return Response(serializer.data)
+    
     
 
 class UserOrderViewSet(viewsets.ModelViewSet):

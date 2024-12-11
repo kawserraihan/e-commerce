@@ -214,7 +214,7 @@ const SizesComponent = () => {
 
         {filteredSizes?.length === 0 && (
           <div className="py-4 text-center text-gray-500">
-            No size found for "{searchQuery}"
+            No size found for {searchQuery}
           </div>
         )}
       </div>

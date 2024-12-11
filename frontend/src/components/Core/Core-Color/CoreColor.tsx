@@ -196,7 +196,7 @@ const ColorsComponent = () => {
 
         {filteredColors?.length === 0 && (
           <div className="py-4 text-center text-gray-500">
-            No colors found for "{searchQuery}"
+            No colors found for {searchQuery}
           </div>
         )}
       </div>

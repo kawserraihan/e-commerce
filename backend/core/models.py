@@ -3,6 +3,8 @@ from django.db import models
 class Category(models.Model):
     category_name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
+    sort = models.IntegerField(default=0, blank=True, null=True)
+    home_view = models.BooleanField(default=False, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True, blank=True, null=True)
 

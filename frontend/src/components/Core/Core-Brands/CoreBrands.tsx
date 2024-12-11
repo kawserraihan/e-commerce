@@ -202,7 +202,7 @@ const BrandsComponent = () => {
 
         {filteredBrands?.length === 0 && (
           <div className="py-4 text-center text-gray-500">
-            No brands found for "{searchQuery}"
+            No brands found for {searchQuery}
           </div>
         )}
       </div>

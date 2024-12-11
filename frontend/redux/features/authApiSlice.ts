@@ -170,7 +170,32 @@ interface Coupon {
 
 }
 
+// Menu Permissions
+
+// Define types for Menu and Role
+interface Menu {
+	id: number;
+	name: string;
+	link?: string | null;
+	icon?: string | null;
+	sort_order: number;
+	parent?: number | null; // Parent menu ID
+	submenus?: Menu[]; // Nested submenus
+  }
+  
+interface Role {
+	id: number;
+	name: string;
+  }
+
+  interface MenuTag {
+	type: 'Menu';
+	id: number;
+  }
+
+
 const authApiSlice = apiSlice.injectEndpoints({
+	
 	endpoints: builder => ({
 		retrieveUser: builder.query<User, void>({
 			query: () => '/users/me/',
@@ -718,11 +743,18 @@ const authApiSlice = apiSlice.injectEndpoints({
 
 // --------------------- END Coupon --------------------------
 
+		getMenu: builder.query<Menu[], void>({
+			query: () => '/user-menu/', // Assuming your backend has an endpoint to retrieve all menus
+		}),
+
+
+
 
 
 
 
 	}),
+	
 });
 
 export const {
@@ -831,6 +863,10 @@ export const {
 	useAddCouponMutation,
 	useUpdateCouponMutation,
 	useDeleteCouponMutation,
+
+	// Menu Permission Queries
+
+	useGetMenuQuery 
 
 
 } = authApiSlice;

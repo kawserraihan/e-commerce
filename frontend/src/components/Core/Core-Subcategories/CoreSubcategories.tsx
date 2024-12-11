@@ -202,7 +202,7 @@ const SubcategoriesComponent = () => {
 
         {filteredSubcategories?.length === 0 && (
           <div className="py-4 text-center text-gray-500">
-            No Subcategory found for "{searchQuery}"
+            No Subcategory found for {searchQuery}
           </div>
         )}
       </div>

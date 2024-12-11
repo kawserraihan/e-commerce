@@ -9,6 +9,7 @@ import {
 } from '../../../redux/features/authApiSlice'; // Adjust the import as per your file structure
 import { toast } from 'react-toastify'; // Import toast from react-toastify
 import 'react-toastify/dist/ReactToastify.css'; // Import the Toastify CSS
+import Image from "next/image";
 
 const AddProductPage = () => {
   const [productName, setProductName] = useState<string>('');
@@ -151,7 +152,7 @@ const AddProductPage = () => {
 {productImage && (
   <div className="mt-2">
     <h2 className="text-sm font-medium">Primary Image Preview:</h2>
-    <img
+    <Image
       src={URL.createObjectURL(productImage)}
       alt="Primary product preview"
       className="w-32 h-32 object-cover rounded"
@@ -179,7 +180,7 @@ const AddProductPage = () => {
     <h2 className="text-sm font-medium">Additional Images Preview:</h2>
     <div className="grid grid-cols-3 gap-2">
       {Array.from(additionalImages).map((image, index) => (
-        <img
+        <Image
           key={index}
           src={URL.createObjectURL(image)}
           alt={`Additional image ${index + 1}`}

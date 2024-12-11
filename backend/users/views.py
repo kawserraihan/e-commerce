@@ -1,3 +1,5 @@
+from rest_framework import viewsets, permissions, status
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.shortcuts import render
 from django.conf import settings
 from rest_framework.views import APIView
@@ -8,10 +10,16 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView
 )
+from .models import Menu, Permission, UserRole, Role, UserAccount
+from .serializers import MenuSerializer, RoleSerializer, UserAccountSerializer
+from users.authentication import CustomJwtAuthentication
+from django.http import Http404
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.decorators import action
 
-# import logging
+import logging
 
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -103,3 +111,110 @@ class LogoutView(APIView):
         response.delete_cookie('refresh')
 
         return response
+    
+#Role Permissions
+
+class MenuViewSet(viewsets.ModelViewSet):
+    queryset = Menu.objects.all()
+    serializer_class = MenuSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class RoleViewSet(viewsets.ModelViewSet):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class UserMenuView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [CustomJwtAuthentication]
+
+    def get(self, request):
+    # Get user roles
+        roles = UserRole.objects.filter(user=request.user).values_list('role_id', flat=True)
+
+        # Get allowed menu IDs for roles
+        menu_ids = Permission.objects.filter(role_id__in=roles).values_list('menu_id', flat=True)
+
+        # Fetch top-level menus (parent menus)
+        parent_menus = Menu.objects.filter(id__in=menu_ids, parent=None).order_by('sort_order')
+
+        # Create a dictionary to hold parent menus and their submenus
+        menus_data = []
+        for parent_menu in parent_menus:
+            # Fetch the submenus for each parent menu
+            submenus = Menu.objects.filter(parent=parent_menu).order_by('sort_order')
+
+            # Serialize the parent menu and submenus
+            parent_menu_data = MenuSerializer(parent_menu).data
+            submenus_data = MenuSerializer(submenus, many=True).data
+
+            # Add submenu data to parent menu data
+            parent_menu_data['submenus'] = submenus_data
+
+            menus_data.append(parent_menu_data)
+
+        return Response(menus_data)
+
+class PermissionManageView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [CustomJwtAuthentication]
+
+    def get(self, request):
+        # Only admin can manage permissions
+        if not request.user.is_staff:
+            raise Http404("You do not have permission to view this data.")
+
+        permissions_data = Permission.objects.all()
+        # Serialize data and return permissions
+        return Response(permissions_data.values())
+
+    def post(self, request):
+        # Only admin can modify permissions
+        if not request.user.is_superuser:
+            raise Http404("You do not have permission to modify permissions.")
+
+        # Assuming the payload is { "role_id": 1, "menu_id": 2 }
+        role_id = request.data.get('role_id')
+        menu_id = request.data.get('menu_id')
+
+        if not role_id or not menu_id:
+            return Response({"error": "Role and Menu ID are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            role = Role.objects.get(id=role_id)
+            menu = Menu.objects.get(id=menu_id)
+        except Role.DoesNotExist or Menu.DoesNotExist:
+            return Response({"error": "Invalid role or menu"}, status=status.HTTP_400_BAD_REQUEST)
+
+        permission = Permission(role=role, menu=menu)
+        permission.save()
+
+        return Response({"message": "Permission added successfully!"}, status=status.HTTP_201_CREATED)
+    
+
+
+class UserAccountViewSet(viewsets.ModelViewSet):
+    queryset = UserAccount.objects.all()
+    serializer_class = UserAccountSerializer
+    permission_classes = [IsAdminUser]  # Only allow superusers to access all users data
+
+    def get_permissions(self):
+        if self.action == 'list':
+            # Only superuser can view the list of users
+            return [permissions.IsAdminUser()]
+        return [permissions.IsAuthenticated()]  # Default permission for other actions
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        """Allow users to fetch their own details."""
+        serializer = UserAccountSerializer(request.user)
+        return Response(serializer.data)
+
+
+class UserDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Return the current user's information."""
+        serializer = UserAccountSerializer(request.user)
+        return Response(serializer.data)

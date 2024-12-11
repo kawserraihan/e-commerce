@@ -195,7 +195,7 @@ const CategoriesComponent = () => {
 
         {filteredCategories?.length === 0 && (
           <div className="py-4 text-center text-gray-500">
-            No categories found for "{searchQuery}"
+            No categories found for {searchQuery}
           </div>
         )}
       </div>

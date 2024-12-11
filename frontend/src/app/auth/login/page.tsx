@@ -176,7 +176,7 @@ export default function Page() {
 				{/* <SocialButtons /> */}
 
 				<p className='mt-10 text-center text-sm text-gray-500'>
-					Don't have an account?{' '}
+					Don&apos;t have an account?{' '}
 					<Link
 						href='/auth/signup'
 						className='font-semibold leading-6 text-primary hover:text-secondary'

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useGetOrderByIdQuery } from '../../../redux/features/authApiSlice';
+import Image from "next/image";
 
 interface OrderItem {
   id: number;
@@ -93,7 +94,7 @@ const OrdersView = () => {
                 <td className="text-center border dark:border-strokedark border-[#eee] py-5 p-3 px-6">{index + 1}</td>
                 <td className="text-center border dark:border-strokedark border-[#eee] py-5 p-3 px-6">
                   <div className="flex flex-col items-center">
-                    <img 
+                    <Image
                       src={item.product_image ?? '/media/products/invalid-product.png'} 
                       alt={item.product_name} 
                       className="w-10 h-10 mb-2" 

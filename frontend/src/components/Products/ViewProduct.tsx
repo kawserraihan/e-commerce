@@ -3,6 +3,7 @@
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { useGetProductByIdQuery } from "../../../redux/features/authApiSlice";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 // Receiving `params` as a prop in App Router (Next.js 13)
 const ViewProduct = ({ params }: { params: { id: string } }) => {
@@ -45,7 +46,7 @@ const ViewProduct = ({ params }: { params: { id: string } }) => {
             <button onClick={prevImage} className="px-4 py-2 text-lg font-bold">‹</button>
 
             {images.length > 0 && (
-              <img
+              <Image
                 src={images[currentImageIndex]}
                 alt={product?.product_name}
                 className="w-full max-w-md object-cover rounded-lg shadow-lg"

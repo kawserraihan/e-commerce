@@ -260,7 +260,7 @@ const UserOrdersComponent = () => {
 
         {filteredUserOrders?.length === 0 && (
           <div className="py-4 text-center text-gray-500">
-            No User Order found for "{searchQuery}"
+            No User Order found for {searchQuery}
           </div>
         )}
       </div>

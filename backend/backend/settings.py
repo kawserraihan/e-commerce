@@ -3,6 +3,9 @@ from pathlib import Path
 import dotenv
 from django.core.management.utils import get_random_secret_key
 import os
+import pymysql
+
+pymysql.install_as_MySQLdb()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,7 +23,7 @@ if path.isfile(dotenv_file):
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'django-insecure-sbmp+jgr-mlz&1qvpx10u%s=ocqe$yi#v@hs8z^9*tlnojk7zf'
-SECRET_KEY = getenv('DJANGO_SECRET_KEY', get_random_secret_key())
+SECRET_KEY = 'django-insecure-sbmp+jgr-mlz&1qvpx10u%s=ocqe$yi#v@hs8z^9*tlnojk7zf'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = getenv('DEBUG', 'False') == 'True'
@@ -28,7 +31,7 @@ DEBUG = True
 
 # ALLOWED_HOSTS = getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "*"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "demoapi.anticbyte.com"]
 
 
 # Application definition
@@ -167,7 +170,7 @@ AUTH_COOKIE_HTTP_ONLY= True
 AUTH_COOKIE_PATH='/'
 AUTH_COOKIE_SAMESITE='None'
 
-CORS_ALLOWED_ORIGINS = getenv('CORS_ALLOWED_ORIGINS',"http://localhost:3000,http://127.0.0.1:3000").split(',')
+CORS_ALLOWED_ORIGINS = getenv('CORS_ALLOWED_ORIGINS',"http://localhost:3000,http://127.0.0.1:3000,http://demoapi.anticbyte.com").split(',')
 CORS_ALLOW_CREDENTIALS = True
 
 # Default primary key field type

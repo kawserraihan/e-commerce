@@ -18,7 +18,7 @@ class Product(models.Model):
     product_type = models.CharField(max_length=20, choices=PRODUCT_TYPE_CHOICES)
     product_description = models.TextField()
     product_code = models.CharField(max_length=100, unique=True)
-    product_image = models.ImageField(upload_to='products/', null=True, blank=True)
+    product_image = models.FileField(upload_to='products/', null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     sub_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name='products')
     child_category = models.ForeignKey(ChildCategory, on_delete=models.SET_NULL, null=True, blank=True)
@@ -27,8 +27,6 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     slug = models.SlugField(unique=True)
-    colors = models.ManyToManyField(Color, blank=True, related_name='products')  # Many-to-many relationship for colors
-    sizes = models.ManyToManyField(Size, blank=True, related_name='products')  # Many-to-many relationship for sizes
     stock_quantity = models.IntegerField(default=0, null=True, blank=True)    # Manage Quantity
     guarantee = models.DateTimeField(null=True, blank=True)
     warranty = models.DateTimeField(null=True, blank=True)
@@ -38,11 +36,40 @@ class Product(models.Model):
 
     def __str__(self):
         return self.product_name
+    
+# Model for size and color-specific prices
+class ProductVariant(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
+    color = models.ForeignKey(Color, on_delete=models.SET_NULL, null=True, blank=True)
+    size = models.ForeignKey(Size, on_delete=models.SET_NULL, null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    discount = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    stock_quantity = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ('product', 'color', 'size')
+
+    def __str__(self):
+        return f"{self.product.product_name} - {self.color.name if self.color else 'No Color'} - {self.size.name if self.size else 'No Size'}"
+
+
+# Model for wholesale pricing tiers
+class WholesalePrice(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='wholesale_prices')
+    min_quantity = models.IntegerField()
+    max_quantity = models.IntegerField()
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.product.product_name}: {self.min_quantity}-{self.max_quantity} @ {self.price_per_unit}"
+    
+    
+
 
 # Model for additional images of a product
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='products/')
+    image = models.FileField(upload_to='products/')
     alt_text = models.CharField(max_length=255, null=True, blank=True)  # Optional: alt text for accessibility
 
     def __str__(self):

@@ -208,7 +208,7 @@ const ChildcategoriesComponent = () => {
 
         {filteredChildcategories?.length === 0 && (
           <div className="py-4 text-center text-gray-500">
-            No childcategory found for "{searchQuery}"
+            No childcategory found for {searchQuery}
           </div>
         )}
       </div>

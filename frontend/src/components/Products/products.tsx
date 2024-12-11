@@ -5,6 +5,7 @@ import { useGetProductsQuery } from '../../../redux/features/authApiSlice';
 import DeleteProductModal from './DeleteProductModal';
 import ToggleButton from '@/components/FormElements/ToggleButton';
 import Link from 'next/link';
+import Image from "next/image";
 
 interface Product {
   id: number;
@@ -128,10 +129,13 @@ const ProductsComponent = () => {
                 </td>
                 <td className="border-b border-[#eee] px-12 py-5 pl-9 dark:border-strokedark xl:pl-9">
                   <div className="flex justify-center items-center">
-                    <img
-                      src={typeof item.product_image === 'string' ? item.product_image : 'http://localhost:8000/media/products/invalid-product.png'}
+                    <Image
+                      src={typeof item.product_image === 'string' ? item.product_image : 'https://demoapi.anticbyte.com/media/products/invalid-product.png'}
                       alt={item.product_name}
-                      className="w-22 h-22 object-cover rounded"
+                      width={500}  // Arbitrary value for the intrinsic layout
+                      height={500} // Arbitrary value to maintain the aspect ratio
+                      className="object-cover rounded w-22 h-22"  // Use your existing Tailwind classes
+                      layout="intrinsic"  // Let Next.js calculate size based on width and height ratio
                     />
                   </div>
                 </td>
@@ -201,7 +205,7 @@ const ProductsComponent = () => {
 
         {filteredProducts?.length === 0 && (
           <div className="py-4 text-center text-gray-500">
-            No products found for "{searchQuery}"
+            No products found for {searchQuery}
           </div>
         )}
       </div>

@@ -4,7 +4,7 @@ import React from "react";
 import ChartOne from "../Charts/ChartOne";
 import ChartTwo from "../Charts/ChartTwo";
 import ChatCard from "../Chat/ChatCard";
-import TableOne from "../Tables/TableOne";
+
 import CardDataStats from "../CardDataStats";
 
 
@@ -111,9 +111,7 @@ const ECommerce: React.FC = () => {
         <ChartTwo />
         <ChartThree />
       
-        <div className="col-span-12 xl:col-span-7">
-          <TableOne />
-        </div>
+  
        
       </div>
     </>

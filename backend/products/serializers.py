@@ -1,6 +1,6 @@
 from django.db import transaction
 from rest_framework import serializers
-from .models import Product, ProductImage, OrderItem, UserOrder
+from .models import Product, ProductImage, OrderItem, UserOrder, ProductVariant, WholesalePrice
 from core.models import Category, SubCategory, ChildCategory, Brand, Model, Color, Size
 
 
@@ -9,6 +9,15 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ['id', 'image', 'alt_text', 'product']
 
+class ProductVariantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductVariant
+        fields = '__all__'
+
+class WholesalePriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WholesalePrice
+        fields = '__all__'
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -19,11 +28,11 @@ class ProductSerializer(serializers.ModelSerializer):
     brand_name = serializers.CharField(source='brand.brand_name', read_only=True)
     model_name = serializers.CharField(source='model.model_name', read_only=True)
     quantity = serializers.IntegerField(source='stock_quantity',  allow_null=True, required=False)
-
-    color_names = serializers.CharField(source='color.color_name', read_only=True)
-    size_names = serializers.CharField(source='size.size_name', read_only=True)
     
     additionalImages = ProductImageSerializer(many=True, read_only=True, source='images')
+    wholesale_prices = WholesalePriceSerializer(many=True, read_only=True, source='wholesaleproduct')
+    product_variants = ProductVariantSerializer(many=True, read_only=True, source='variants')
+
 
     class Meta:
         model = Product
@@ -48,16 +57,14 @@ class ProductSerializer(serializers.ModelSerializer):
             'price',
             'discount',
             'slug',  # Auto-generated, read-only field
-            'colors',  # Many-to-many relationship
-            'color_names',
-            'size_names',
-            'sizes',  # Many-to-many relationship
             'guarantee',
             'warranty',
             'additionalImages',
             'is_active',
             'created_at',  # Automatically generated field
             'modified_at',  # Automatically generated field
+            'wholesale_prices',
+            'product_variants',
         ]
         read_only_fields = ['id', 'slug', 'created_at', 'modified_at']
 
@@ -85,6 +92,7 @@ class ProductSerializer(serializers.ModelSerializer):
             instance.product_code = product_code.replace(" ", "_")
 
         return super().update(instance, validated_data)
+
 
 
 class OrderItemSerializer(serializers.ModelSerializer):

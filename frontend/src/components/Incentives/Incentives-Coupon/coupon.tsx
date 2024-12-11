@@ -206,7 +206,7 @@ const CouponsComponent = () => {
 
         {filteredCoupons?.length === 0 && (
           <div className="py-4 text-center text-gray-500">
-            No coupon found for "{searchQuery}"
+            No coupon found for {searchQuery}
           </div>
         )}
       </div>

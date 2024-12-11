@@ -200,7 +200,7 @@ const ModelsComponent = () => {
 
         {filteredModels?.length === 0 && (
           <div className="py-4 text-center text-gray-500">
-            No Model found for "{searchQuery}"
+            No Model found for {searchQuery}
           </div>
         )}
       </div>

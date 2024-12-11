@@ -1,6 +1,7 @@
 import { Discount } from "@/types/discount";
 import SearchComponent from "@/components/FormElements/searchComponent";
 import Pagination from '@/components/FormElements/Pagination';
+import Image from "next/image";
 
 
 
@@ -112,10 +113,13 @@ const Discounts = () => {
                 </td>
                 <td className="border-b border-[#eee] px-12 py-5 pl-9 dark:border-strokedark xl:pl-9">
                 <div className="flex justify-center items-center">
-                  <img
+                  <Image
                     src={discountItem.product_image}
                     alt={discountItem.product_name}
-                    className="w-22 h-22 object-cover rounded"
+                    width={500}  // Arbitrary value for the intrinsic layout
+                    height={500} // Arbitrary value to maintain the aspect ratio
+                    className="object-cover rounded w-22 h-22"  // Use your existing Tailwind classes
+                    layout="intrinsic"  // Let Next.js calculate size based on width and height ratio
                   />
                 </div>
                 </td>
