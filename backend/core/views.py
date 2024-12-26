@@ -7,6 +7,10 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+# Public Imports
+
+from .serializers import CategoryPublicSerializer, SubcategoryPublicSerializer, ColorPublicSerializer, BrandPublicSerializer
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -78,3 +82,32 @@ class ColorViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = PageNumberPagination
 
+
+
+#----------------------------------------------------XXXXXX----------------------------------------------------
+#----------------------------------------------------Public----------------------------------------------------
+
+
+class CategoryPublicViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategoryPublicSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+
+class SubCategoryPublicViewSet(viewsets.ModelViewSet):
+    queryset = SubCategory.objects.all()
+    serializer_class = SubcategoryPublicSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+
+class ColorPublicViewSet(viewsets.ModelViewSet):
+    queryset = Color.objects.all()
+    serializer_class = ColorPublicSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+
+class BrandPublicViewSet(viewsets.ModelViewSet):
+    queryset = Brand.objects.all()
+    serializer_class = BrandPublicSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination

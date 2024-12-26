@@ -9,9 +9,9 @@ import {
   useGetChildcategoryByCategorySubcategoryQuery,
   useGetBrandsQuery,
   useGetModelsQuery,
-} from '../../../redux/features/authApiSlice'; // Adjust the import as per your file structure
-import { toast } from 'react-toastify'; // Import toast from react-toastify
-import 'react-toastify/dist/ReactToastify.css'; // Import the Toastify CSS
+} from '../../../redux/features/authApiSlice';
+import { toast } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css'; 
 import { useRouter, useParams } from 'next/navigation';
 
 const EditProductPage = () => {
@@ -119,7 +119,7 @@ const EditProductPage = () => {
           onChange={(e) => setProductName(e.target.value)}
           placeholder="Enter product name"
           required
-          className="border border-gray-300 rounded-md p-2"
+          className="border border-[#B1C7E5] rounded-md p-2"
         />
 
         {/* Product Code Input */}
@@ -131,7 +131,7 @@ const EditProductPage = () => {
           onChange={(e) => setProductCode(e.target.value)}
           placeholder="Enter product code"
           required
-          className="border border-gray-300 rounded-md p-2"
+          className="border border-[#B1C7E5] rounded-md p-2"
         />
 
         {/* Product Type Input */}
@@ -141,7 +141,7 @@ const EditProductPage = () => {
           value={productType}
           onChange={(e) => setProductType(e.target.value)}
           required
-          className="border border-gray-300 rounded-md p-2"
+          className="border border-[#B1C7E5] rounded-md p-2"
         >
           <option value="" disabled>--Select a Product Type--</option>
           <option value="wholesale">Wholesale</option>
@@ -156,7 +156,7 @@ const EditProductPage = () => {
           value={selectedBrandId ?? ''}
           onChange={(e) => setSelectedBrandId(Number(e.target.value))}
           required
-          className="border border-gray-300 rounded-md p-2"
+          className="border border-[#B1C7E5] rounded-md p-2"
         >
           <option className='text-sm' value="" disabled>--Select a Brand--</option>
           {isBrandsLoading ? (
@@ -178,7 +178,7 @@ const EditProductPage = () => {
           id="productImage"
           type="file"
           onChange={(e) => setProductImage(e.target.files ? e.target.files[0] : null)}
-          className="border border-gray-300 rounded-md p-2"
+          className="border border-[#B1C7E5] rounded-md p-2"
         />
 
         {/* Product Description Input */}
@@ -190,7 +190,7 @@ const EditProductPage = () => {
           onChange={(e) => setProductDescription(e.target.value)}
           placeholder="Enter product description"
           required
-          className="border border-gray-300 rounded-md p-2"
+          className="border border-[#B1C7E5] rounded-md p-2"
         />
 
         {/* Product Price Input */}
@@ -202,7 +202,7 @@ const EditProductPage = () => {
           onChange={(e) => setProductPrice(Number(e.target.value))}
           placeholder="Enter product price"
           required
-          className="border border-gray-300 rounded-md p-2"
+          className="border border-[#B1C7E5] rounded-md p-2"
         />
 
         {/* Dropdown for Category Selection */}
@@ -212,7 +212,7 @@ const EditProductPage = () => {
           value={selectedCategoryId ?? ''}
           onChange={(e) => setSelectedCategoryId(Number(e.target.value))}
           required
-          className="border border-gray-300 rounded-md p-2"
+          className="border border-[#B1C7E5] rounded-md p-2"
         >
           <option className='text-sm' value="" disabled>--Select a Category--</option>
           {isCategoriesLoading ? (
@@ -235,7 +235,7 @@ const EditProductPage = () => {
           value={selectedSubcategoryId ?? ''}
           onChange={(e) => setSelectedSubcategoryId(Number(e.target.value))}
           required
-          className="border border-gray-300 rounded-md p-2"
+          className="border border-[#B1C7E5] rounded-md p-2"
         >
           <option value="" disabled>--Select a Subcategory--</option>
           {isSubcategoriesLoading ? (
@@ -258,7 +258,7 @@ const EditProductPage = () => {
           value={selectedChildcategoryId ?? ''}
           onChange={(e) => setSelectedChildcategoryId(Number(e.target.value))}
           required
-          className="border border-gray-300 rounded-md p-2"
+          className="border border-[#B1C7E5] rounded-md p-2"
         >
           <option value="" disabled>--Select a Childcategory--</option>
           {isChildcategoriesLoading ? (

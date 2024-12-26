@@ -4,7 +4,7 @@ const nextConfig = {
     // other settings can go here
 
     images: {
-      domains: ['demoapi.anticbyte.com'], // Allow external image domain for optimization
+      domains: ['demoapi.anticbyte.com'],
     },
   };
   

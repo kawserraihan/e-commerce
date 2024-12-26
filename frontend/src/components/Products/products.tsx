@@ -34,11 +34,11 @@ interface Product {
 const ProductsComponent = () => {
   const router = useRouter();
   const [page, setPage] = useState<number>(1);
-  const [pageSize] = useState<number>(10);
+  const [pageSize] = useState<number>(5);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<string>('all'); // State to control active tab
+  const [activeTab, setActiveTab] = useState<string>('all');
 
   const { data, isLoading, error } = useGetProductsQuery({ page, page_size: pageSize });
 
@@ -64,13 +64,12 @@ const ProductsComponent = () => {
     const matchesSearch = product.product_name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
+  const displayedProducts = filteredProducts?.slice((page - 1) * pageSize, page * pageSize);
 
   const totalPages = Math.ceil((data?.count || 0) / pageSize);
 
   return (
     <div>
-      
-
       {/* Header with Add New button and Search box */}
       <div className="flex justify-between items-center pb-4">
         <Link href="/products/add">
@@ -81,7 +80,6 @@ const ProductsComponent = () => {
             Add New
           </button>
         </Link>
-
         {/* Search Input */}
         <input
           type="text"
@@ -91,23 +89,21 @@ const ProductsComponent = () => {
           className="px-4 py-2 border rounded-md text-sm focus:ring focus:ring-primary"
         />
       </div>
-
       {/* Table displaying filtered products */}
       <div className="max-w-full rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
         {/* Tabs for filtering */}
-      <div className="flex space-x-4 mb-4">
-        {['all', 'wholesale', 'regular', 'seller'].map((type) => (
-          <button
-            key={type}
-            onClick={() => setActiveTab(type)}
-            className={`px-4 py-2 rounded-md font-medium ${
-              activeTab === type ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
-            }`}
-          >
-            {type.charAt(0).toUpperCase() + type.slice(1)}
-          </button>
-        ))}
-      </div>
+        <div className="flex space-x-4 mb-4">
+          {['all', 'wholesale', 'regular', 'seller'].map((type) => (
+            <button
+              key={type}
+              onClick={() => setActiveTab(type)}
+              className={`px-4 py-2 rounded-md font-medium ${activeTab === type ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
+                }`}
+            >
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </button>
+          ))}
+        </div>
         <table className="w-full table-auto">
           <thead>
             <tr className="bg-gray-2 text-center dark:bg-meta-4">
@@ -122,7 +118,7 @@ const ProductsComponent = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredProducts?.map((item, rowIndex) => (
+            {displayedProducts?.map((item, rowIndex) => (
               <tr key={item.id} className="border-b border-[#eee] dark:border-strokedark">
                 <td className="px-4 py-5 text-center">
                   <span className="text-black dark:text-white">{rowIndex + 1}</span>
@@ -130,7 +126,7 @@ const ProductsComponent = () => {
                 <td className="border-b border-[#eee] px-12 py-5 pl-9 dark:border-strokedark xl:pl-9">
                   <div className="flex justify-center items-center">
                     <Image
-                      src={typeof item.product_image === 'string' ? item.product_image : 'https://demoapi.anticbyte.com/media/products/invalid-product.png'}
+                      src={typeof item?.product_image === 'string' ? item?.product_image : 'https://demoapi.anticbyte.com/media/products/invalid-product.png'}
                       alt={item.product_name}
                       width={500}  // Arbitrary value for the intrinsic layout
                       height={500} // Arbitrary value to maintain the aspect ratio
@@ -155,9 +151,9 @@ const ProductsComponent = () => {
                   <span className="text-black dark:text-white">{item.price}</span>
                 </td>
                 <td className="px-4 py-5 text-center">
-                  <ToggleButton 
-                    isChecked={item.is_active} 
-                    onToggle={(newStatus: boolean) => {}}
+                  <ToggleButton
+                    isChecked={item.is_active}
+                    onToggle={(newStatus: boolean) => { }}
                   />
                 </td>
                 <td className="px-3 py-5 text-center">
@@ -182,26 +178,55 @@ const ProductsComponent = () => {
         </table>
 
         {/* Pagination controls */}
-        <div className="flex justify-end items-center mt-4 mb-4 mr-12 space-x-2">
+        {/* <div className="flex justify-end items-center mt-4 mb-4 mr-12 space-x-2">
           <button
             onClick={() => setPage((prevPage) => Math.max(prevPage - 1, 1))}
             disabled={!data?.previous}
-            className={`px-4 py-2 text-center rounded-md border text-sm font-medium ${
-              !data?.previous ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white'
-            }`}
-          >
+            className={`px-4 py-2 text-center rounded-md border text-sm font-medium ${!data?.previous ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white'
+              }`}>
             Previous
-          </button>
+          </button> 
           <button
             onClick={() => setPage((prevPage) => (data?.next ? prevPage + 1 : prevPage))}
             disabled={!data?.next}
-            className={`px-4 py-2 text-center rounded-md border text-sm font-medium ${
-              !data?.next ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white'
-            }`}
+            className={`px-4 py-2 text-center rounded-md border text-sm font-medium ${!data?.next ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white'
+              }`}
+          >
+            Next
+          </button>
+        </div> */}
+        {/* Pagination controls */}
+        <div className="flex justify-center items-center mt-4 space-x-2">
+          <button
+            onClick={() => setPage((prevPage) => Math.max(prevPage - 1, 1))}
+            disabled={page === 1}
+            className={`px-4 py-2 rounded border ${page === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-primary border-primary'
+              }`}
+          >
+            Previous
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+            <button
+              key={pageNum}
+              onClick={() => setPage(pageNum)}
+              className={`px-4 py-2 rounded border ${pageNum === page ? 'bg-orange-500 text-white' : 'bg-white text-primary border-primary'
+                }`}
+            >
+              {pageNum}
+            </button>
+          ))}
+
+          <button
+            onClick={() => setPage((prevPage) => Math.min(prevPage + 1, totalPages))}
+            disabled={page === totalPages}
+            className={`px-4 py-2 rounded border ${page === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-primary border-primary'
+              }`}
           >
             Next
           </button>
         </div>
+
 
         {filteredProducts?.length === 0 && (
           <div className="py-4 text-center text-gray-500">

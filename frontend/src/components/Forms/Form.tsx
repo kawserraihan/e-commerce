@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent } from 'react';
 import { Input } from '@/components/forms';
 import Spinner from '../common/Loader/Spinner';
-// import { ToastContainer } from 'react-toastify';
+
 interface Config {
 	labelText: string;
 	labelId: string;
@@ -20,6 +20,7 @@ interface Props {
 	btnText: string;
 	onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 	onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+	disabled?: boolean;  // Add the disabled prop for the submit button
 }
 
 export default function Form({
@@ -28,6 +29,7 @@ export default function Form({
 	btnText,
 	onChange,
 	onSubmit,
+	disabled = false,  // Default to false if not passed
 }: Props) {
 	return (
 		<form className='space-y-3 focus-visible:outline-secondary ' onSubmit={onSubmit}>
@@ -40,26 +42,20 @@ export default function Form({
 					value={input.value}
 					link={input.link}
 					required={input.required}
-					
+					placeholder={input.labelText}
 				>
 					{input.labelText}
 				</Input>
-				
 			))}
-
 			<div>
 				<button
 					type='submit'
 					className='flex w-full justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary'
-					disabled={isLoading}
+					disabled={isLoading || disabled}  // Disable if isLoading or disabled prop is true
 				>
 					{isLoading ? <Spinner sm /> : `${btnText}`}
 				</button>
 			</div>
-			
 		</form>
-		
-		
 	);
-	
 }

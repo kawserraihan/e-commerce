@@ -69,6 +69,9 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'slug', 'created_at', 'modified_at']
 
     def create(self, validated_data):
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            validated_data['user'] = request.user  # Automatically associate the user
         product_name = validated_data.get('product_name')
         product_code = validated_data.get('product_code')
 
@@ -142,4 +145,104 @@ class UserOrderSerializer(serializers.ModelSerializer):
         order.total_amount = total_amount
         order.save()
         return order
+    
+
+
+
+#----------------------------------------------------------------xxxxxxxx--------------------------------------------------------
+#----------------------------------------------------------------Publc----------------------------------------------------------
+
+class ProductPublicSerializer(serializers.ModelSerializer):
+
+    category_name = serializers.CharField(source='category.category_name', read_only=True)
+    subcategory_name = serializers.CharField(source='sub_category.subcategory_name', read_only=True)
+    childcategory_name = serializers.CharField(source='child_category.childcategory_name', read_only=True)
+    brand_name = serializers.CharField(source='brand.brand_name', read_only=True)
+    model_name = serializers.CharField(source='model.model_name', read_only=True)
+    quantity = serializers.IntegerField(source='stock_quantity',  allow_null=True, required=False)
+    
+    additionalImages = ProductImageSerializer(many=True, read_only=True, source='images')
+    wholesale_prices = WholesalePriceSerializer(many=True, read_only=True, source='wholesaleproduct')
+    product_variants = ProductVariantSerializer(many=True, read_only=True, source='variants')
+
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',  # Automatically generated field
+            'product_name',
+            'product_type',
+            'product_description',
+            'product_code',
+            'product_image',
+            'quantity',
+            'category',
+            'category_name',
+            'sub_category',
+            'subcategory_name',
+            'child_category',
+            'childcategory_name',
+            'brand',
+            'brand_name',
+            'model',
+            'model_name',
+            'price',
+            'discount',
+            'slug',  # Auto-generated, read-only field
+            'guarantee',
+            'warranty',
+            'additionalImages',
+            'is_active',
+            'created_at',  # Automatically generated field
+            'modified_at',  # Automatically generated field
+            'wholesale_prices',
+            'product_variants',
+        ]
+        read_only_fields = [            'id',  # Automatically generated field
+            'product_name',
+            'product_type',
+            'product_description',
+            'product_code',
+            'product_image',
+            'quantity',
+            'category',
+            'category_name',
+            'sub_category',
+            'subcategory_name',
+            'child_category',
+            'childcategory_name',
+            'brand',
+            'brand_name',
+            'model',
+            'model_name',
+            'price',
+            'discount',
+            'slug',  # Auto-generated, read-only field
+            'guarantee',
+            'warranty',
+            'additionalImages',
+            'is_active',
+            'created_at',  # Automatically generated field
+            'modified_at',  # Automatically generated field
+            'wholesale_prices',
+            'product_variants',
+            ]
+
+class WholesalePricePublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WholesalePrice
+        fields = ['product', 'min_quantity', 'max_quantity', 'price_per_unit']
+        read_only_fields = ['product', 'min_quantity', 'max_quantity', 'price_per_unit']
+
+class ProductVariantPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductVariant
+        fields = ['product', 'color', 'size', 'price', 'discount', 'stock_quantity']
+        read_only_fields = ['product', 'color', 'size', 'price', 'discount', 'stock_quantity']
+
+class ProductImagePublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image', 'alt_text', 'product']
+        read_only_fields = ['id', 'image', 'alt_text', 'product']
 

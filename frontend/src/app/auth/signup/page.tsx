@@ -166,15 +166,17 @@ const SignUp: React.FC = () => {
             </div>
           </div>
 
-          <div className="w-full -mt-5 border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
+          <div className="w-full -mt-10 border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
             <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
               <span className="mb-1.5 block font-medium">Sign Up for free</span>
               <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
                 Sign Up to MS Mart
               </h2>
-              <RegisterForm />
+              <div className="-mt-6">
+              <RegisterForm/>
+              </div>
               {/* <ToastContainer/> */}
-              <div className="mt-6 text-center">
+              <div className="mt-2 text-center">
                   <p>
                     Already have an account? {" "}
                     <Link href="/auth/login" className="text-primary">
@@ -182,7 +184,20 @@ const SignUp: React.FC = () => {
                     </Link>
                   </p>
                 </div>
-              
+          <div className="mt-4 text-center">
+            <p>
+              Want to be a seller?{" "}
+              <Link href="/auth/seller/signup" className="text-primary">
+                Create a seller account
+              </Link>
+            </p>
+            <p className="mt-1">
+              Want to be a dealer?{" "}
+              <Link href="/auth/dealer/signup" className="text-primary">
+                Create a dealer account
+              </Link>
+            </p>
+          </div>
               </div>
           </div>
         </div>

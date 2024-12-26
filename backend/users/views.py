@@ -10,17 +10,25 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView
 )
-from .models import Menu, Permission, UserRole, Role, UserAccount
-from .serializers import MenuSerializer, RoleSerializer, UserAccountSerializer
+from .models import Menu, Permission, UserRole, Role, UserAccount, SellerProfile, DealerProfile, OTP
+from .serializers import MenuSerializer, RoleSerializer, UserAccountSerializer, UserRoleSerializer, SellerProfileSerializer, DealerProfileSerializer, UserRoleForRouteSerializer
 from users.authentication import CustomJwtAuthentication
 from django.http import Http404
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from django.shortcuts import get_object_or_404
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.status import HTTP_200_OK
+from django.core.mail import send_mail
+from datetime import datetime, timedelta
 
 import logging
 
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
+
+User = UserAccount
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def get(self, request, *args, **kwargs):
@@ -112,7 +120,11 @@ class LogoutView(APIView):
 
         return response
     
-#Role Permissions
+
+
+#--------------------------------Role Permissions-----------------------------------
+
+
 
 class MenuViewSet(viewsets.ModelViewSet):
     queryset = Menu.objects.all()
@@ -160,20 +172,24 @@ class PermissionManageView(APIView):
     authentication_classes = [CustomJwtAuthentication]
 
     def get(self, request):
-        # Only admin can manage permissions
-        if not request.user.is_staff:
-            raise Http404("You do not have permission to view this data.")
+        # Fetch permissions based on the user's role(s)
+        if request.user.is_superuser:
+            # Superusers can fetch all permissions
+            permissions_data = Permission.objects.all()
+        else:
+            # Regular users fetch permissions only for their role(s)
+            role_ids = request.user.roles.values_list('id', flat=True)  # Fetch user's role IDs
+            permissions_data = Permission.objects.filter(role_id__in=role_ids)
 
-        permissions_data = Permission.objects.all()
-        # Serialize data and return permissions
-        return Response(permissions_data.values())
+        # Return raw permission data
+        return Response(list(permissions_data.values()), status=status.HTTP_200_OK)
 
     def post(self, request):
-        # Only admin can modify permissions
+        # Only superusers can modify permissions
         if not request.user.is_superuser:
-            raise Http404("You do not have permission to modify permissions.")
+            return Response({"error": "You do not have permission to modify permissions."}, status=status.HTTP_403_FORBIDDEN)
 
-        # Assuming the payload is { "role_id": 1, "menu_id": 2 }
+        # Extract role_id and menu_id from request
         role_id = request.data.get('role_id')
         menu_id = request.data.get('menu_id')
 
@@ -183,38 +199,354 @@ class PermissionManageView(APIView):
         try:
             role = Role.objects.get(id=role_id)
             menu = Menu.objects.get(id=menu_id)
-        except Role.DoesNotExist or Menu.DoesNotExist:
+        except (Role.DoesNotExist, Menu.DoesNotExist):
             return Response({"error": "Invalid role or menu"}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Create new permission
         permission = Permission(role=role, menu=menu)
         permission.save()
 
         return Response({"message": "Permission added successfully!"}, status=status.HTTP_201_CREATED)
-    
 
-
-class UserAccountViewSet(viewsets.ModelViewSet):
-    queryset = UserAccount.objects.all()
-    serializer_class = UserAccountSerializer
-    permission_classes = [IsAdminUser]  # Only allow superusers to access all users data
-
-    def get_permissions(self):
-        if self.action == 'list':
-            # Only superuser can view the list of users
-            return [permissions.IsAdminUser()]
-        return [permissions.IsAuthenticated()]  # Default permission for other actions
-
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
-    def me(self, request):
-        """Allow users to fetch their own details."""
-        serializer = UserAccountSerializer(request.user)
-        return Response(serializer.data)
 
 
 class UserDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    authentication_classes = [CustomJwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = PageNumberPagination
+    parser_classes = (MultiPartParser, FormParser)  # To handle file uploads
 
     def get(self, request, *args, **kwargs):
         """Return the current user's information."""
         serializer = UserAccountSerializer(request.user)
         return Response(serializer.data)
+
+class UserAccountViewSet(viewsets.ModelViewSet):
+    queryset = UserAccount.objects.filter(is_deleted=False)
+    serializer_class = UserAccountSerializer
+    authentication_classes = [CustomJwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = PageNumberPagination
+    parser_classes = (MultiPartParser, FormParser)  # To handle file uploads
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_deleted = True
+        instance.save()
+        return Response({"detail": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+    # @action(detail=True, methods=['get'])
+    # def roles(self, request, pk=None):
+    #     user = get_object_or_404(UserAccount, pk=pk)  # Get the user by primary key
+    #     user_roles = UserRole.objects.filter(user=user)  # Fetch roles for the user
+    #     roles = Role.objects.filter(id__in=user_roles.values_list('role_id', flat=True))  # Get Role objects
+    #     serializer = RoleSerializer(roles, many=True)  # Serialize Role objects
+    #     return Response(serializer.data)
+
+    
+
+
+#----------------------------------------User Role ViewSets--------------------------------
+
+
+class UserRoleViewSet(viewsets.ModelViewSet):
+    queryset = UserRole.objects.all()
+    serializer_class = UserRoleSerializer
+    permission_classes = [permissions.IsAuthenticated]  # Default to authenticated access
+
+    def get_permissions(self):
+        """
+        Override permissions for POST to use custom one-time permission.
+        """
+        if self.request.method == 'POST':
+            return [permissions.AllowAny()]  # Open access for first-time creation
+        return super().get_permissions()
+
+    def create(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')  # Get the user ID
+        role_id = request.data.get('role_id')  # Get the role ID
+
+        if not user_id or not role_id:
+            return Response(
+                {"detail": "user_id and role_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            user = UserAccount.objects.get(id=user_id)
+            role = Role.objects.get(id=role_id)
+        except UserAccount.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Role.DoesNotExist:
+            return Response({"detail": "Role not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if UserRole exists for the user and is not used
+        user_role, created = UserRole.objects.get_or_create(user=user, role=role)
+        if not created and user_role.is_used:
+            return Response(
+                {"detail": "User role already assigned and used."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Assign the role and mark as used
+        user_role.is_used = True
+        user_role.save()
+
+        return Response(
+            {"detail": "User role assigned successfully."},
+            status=status.HTTP_201_CREATED,
+        )
+
+class UserRolesByUserID(APIView):
+    authentication_classes = [CustomJwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated]  # Default to authenticated access
+
+
+    def get(self, request, user_id):
+        try:
+            # Check if the user exists
+            user = UserAccount.objects.get(id=user_id)
+
+            # Fetch roles associated with the user
+            user_roles = UserRole.objects.filter(user=user)
+            if not user_roles.exists():
+                return Response({"error": "No roles found for this user."}, status=status.HTTP_404_NOT_FOUND)
+
+            # Serialize roles
+            serializer = UserRoleSerializer(user_roles, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except UserAccount.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+#-------------------------------------------------------x-----------------------------------
+
+
+
+
+
+class SellerProfileViewSet(viewsets.ModelViewSet):
+    queryset = SellerProfile.objects.all()
+    serializer_class = SellerProfileSerializer
+    authentication_classes = [CustomJwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = PageNumberPagination
+    parser_classes = (MultiPartParser, FormParser)  # To handle file uploads
+
+    def get_permissions(self):
+        """
+        Override permissions for POST to use custom one-time permission.
+        """
+        if self.request.method == 'POST':
+            return [permissions.AllowAny()]  # Open access for first-time creation
+        return super().get_permissions()
+
+
+
+
+class DealerProfileViewSet(viewsets.ModelViewSet):
+    queryset = DealerProfile.objects.all()
+    serializer_class = DealerProfileSerializer
+    authentication_classes = [CustomJwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = PageNumberPagination
+    parser_classes = (MultiPartParser, FormParser)  # To handle file uploads
+
+    def create(self, request, *args, **kwargs):
+        user_data = request.data.pop('user')
+        user_serializer = UserAccountSerializer(data=user_data)
+        user_serializer.is_valid(raise_exception=True)
+        user = user_serializer.save()
+
+        dealer_data = request.data
+        dealer_data['user'] = user.id
+        serializer = self.get_serializer(data=dealer_data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UserProfileDetailAPI(APIView):
+    authentication_classes = [CustomJwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        user_data = UserAccountSerializer(user).data
+
+        # Determine if the user has additional profiles
+        profile_data = {}
+        if hasattr(user, 'seller_profile'):
+            profile_data['seller_profile'] = SellerProfile.objects.filter(user=user).values().first()
+        if hasattr(user, 'dealer_profile'):
+            profile_data['dealer_profile'] = DealerProfile.objects.filter(user=user).values().first()
+
+        # Fetch roles
+        roles = UserRole.objects.filter(user=user).values('role__id', 'role__name')
+
+        # Combine data
+        user_data.update({
+            'profiles': profile_data,
+            'roles': list(roles),
+        })
+
+        return Response(user_data, status=HTTP_200_OK)
+
+
+class UserProfileDetailAPI(APIView):
+    authentication_classes = [CustomJwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """Fetch user information with associated profiles and roles."""
+        user = request.user
+        user_data = UserAccountSerializer(user).data
+
+        # Determine if the user has additional profiles
+        profile_data = {}
+        if hasattr(user, 'seller_profile'):
+            profile_data['seller_profile'] = SellerProfileSerializer(user.seller_profile).data
+        if hasattr(user, 'dealer_profile'):
+            profile_data['dealer_profile'] = DealerProfileSerializer(user.dealer_profile).data
+
+        # Fetch roles
+        roles = UserRole.objects.filter(user=user).values('role__id', 'role__name')
+
+        # Combine data
+        user_data.update({
+            'profiles': profile_data,
+            'roles': list(roles),
+        })
+
+        return Response(user_data, status=status.HTTP_200_OK)
+
+    def patch(self, request, *args, **kwargs):
+        """Update user and profile information."""
+        user = request.user
+
+        # Update UserAccount information
+        user_data = request.data.get('user', {})
+        user_serializer = UserAccountSerializer(user, data=user_data, partial=True)
+        if user_serializer.is_valid(raise_exception=True):
+            user_serializer.save()
+
+        # Update SellerProfile if present
+        seller_data = request.data.get('seller_profile')
+        if seller_data and hasattr(user, 'seller_profile'):
+            seller_serializer = SellerProfileSerializer(user.seller_profile, data=seller_data, partial=True)
+            if seller_serializer.is_valid(raise_exception=True):
+                seller_serializer.save()
+
+        # Update DealerProfile if present
+        dealer_data = request.data.get('dealer_profile')
+        if dealer_data and hasattr(user, 'dealer_profile'):
+            dealer_serializer = DealerProfileSerializer(user.dealer_profile, data=dealer_data, partial=True)
+            if dealer_serializer.is_valid(raise_exception=True):
+                dealer_serializer.save()
+
+        # Prepare response data
+        updated_data = UserAccountSerializer(user).data
+        profiles = {
+            'seller_profile': SellerProfileSerializer(user.seller_profile).data if hasattr(user, 'seller_profile') else None,
+            'dealer_profile': DealerProfileSerializer(user.dealer_profile).data if hasattr(user, 'dealer_profile') else None,
+        }
+        roles = UserRole.objects.filter(user=user).values('role__id', 'role__name')
+
+        updated_data.update({
+            'profiles': profiles,
+            'roles': list(roles),
+        })
+
+        return Response(updated_data, status=status.HTTP_200_OK)
+    
+
+#------------------------------ OTP Registration ------------------------
+
+class OTPRegistrationView(APIView):
+    """
+    View to handle sending OTP for email verification.
+    """
+    permission_classes = [permissions.AllowAny]
+    def post(self, request, *args, **kwargs):
+        email_data = request.data.get('email')  # Get the email dictionary
+
+        # Extract the email string from the dictionary
+        if isinstance(email_data, dict):
+            email = email_data.get('email', '')  # Safely access the email inside the dictionary
+        else:
+            email = email_data  # Default to an empty string if email is not a dictionary or is missing
+
+        print(f"Received email for OTP registration: {email}")
+        
+        # Check if user is blocked
+        user = User.objects.filter(email=email).first()
+
+        if user and user.is_blocked:
+            return Response({"detail": "Account is temporarily blocked. Please try again later."}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Check if user exists and is verified
+        if user and user.is_verified:
+            return Response({"detail": "Account already verified."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create new user if they don't exist
+        if not user:
+            user = User.objects.create(email=email, **request.data)
+        
+        # Send OTP if user is not verified
+        if not user.is_verified:
+            otp = OTP.send_otp(email)
+            print(f"OTP sent for email: {email}, OTP ID: {otp.id}")
+            return Response({"message": "OTP sent successfully.", "otp_id": otp.id, "email": email}, status=status.HTTP_200_OK)
+        
+        return Response({"detail": "Account already verified."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OTPVerificationView(APIView):
+    """
+    View to verify OTP and complete registration.
+    """
+    permission_classes = [permissions.AllowAny]
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        otp_id = request.data.get('otp_id')
+        otp_code = request.data.get('otp_code')
+
+        # Check if user is blocked
+        user = User.objects.filter(email=email).first()
+        if user and user.is_blocked:
+            return Response({"detail": "Account is temporarily blocked. Please try again later."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Find the OTP record and check if it is expired
+        otp = OTP.objects.filter(id=otp_id, email=email).first()
+        if not otp:
+            return Response({"detail": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if otp.is_expired():
+            # OTP expired, handle attempts
+            if user:
+                user.otp_attempts += 1
+                user.save()
+
+                # Block user if they exceeded max resend attempts
+                if user.otp_attempts > settings.OTP_ATTEMPTS:
+                    user.is_blocked = True
+                    user.save()
+                    return Response({"detail": "Too many failed attempts. Account is blocked for 1 hour."}, status=status.HTTP_403_FORBIDDEN)
+
+            return Response({"detail": "OTP expired. Please request a new one."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # If OTP matches
+        if otp.otp_code == otp_code:
+            user.is_verified = True
+            user.is_active = True
+            user.is_blocked = False  # Reset blocked status if verification is successful
+            user.otp_attempts = 0  # Reset attempts
+            user.save()
+
+            return Response({"message": "User verified successfully."}, status=status.HTTP_200_OK)
+        
+        return Response({"detail": "Invalid OTP code."}, status=status.HTTP_400_BAD_REQUEST)

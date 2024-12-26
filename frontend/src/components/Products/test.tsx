@@ -95,7 +95,7 @@ const AddProductPage = () => {
   onChange={(e) => setProductCode(e.target.value)}
   placeholder="Enter product code"
   required
-  className="border border-gray-300 rounded-md p-2"
+  className="border border-[#B1C7E5] rounded-md p-2"
 />
 
 {/* Product Name Input */}
@@ -107,7 +107,7 @@ const AddProductPage = () => {
   onChange={(e) => setProductName(e.target.value)}
   placeholder="Enter product name"
   required
-  className="border border-gray-300 rounded-md p-2"
+  className="border border-[#B1C7E5] rounded-md p-2"
 />
 
 {/* Product Type Input */}
@@ -117,7 +117,7 @@ const AddProductPage = () => {
   value={productType}
   onChange={(e) => setProductType(e.target.value)}
   required
-  className="border border-gray-300 rounded-md p-2"
+  className="border border-[#B1C7E5] rounded-md p-2"
 >
   <option value="" disabled>--Select a Product Type--</option>
   <option value="wholesale">Wholesale</option>
@@ -135,7 +135,7 @@ const AddProductPage = () => {
           onChange={(e) => setProductDescription(e.target.value)}
           placeholder="Enter product description"
           required
-          className="border border-gray-300 rounded-md p-2"
+          className="border border-[#B1C7E5] rounded-md p-2"
         />
 
 {/* Product Image Input */}
@@ -145,7 +145,7 @@ const AddProductPage = () => {
   type="file"
   onChange={(e) => setProductImage(e.target.files ? e.target.files[0] : null)}
   required
-  className="border border-gray-300 rounded-md p-2"
+  className="border border-[#B1C7E5] rounded-md p-2"
 />
 
 {/* Preview Primary Image */}
@@ -171,7 +171,7 @@ const AddProductPage = () => {
       setAdditionalImages(Array.from(e.target.files)); // Convert FileList to an array
     }
   }}
-  className="border border-gray-300 rounded-md p-2"
+  className="border border-[#B1C7E5] rounded-md p-2"
 />
 
 {/* Preview Additional Images */}
@@ -200,7 +200,7 @@ const AddProductPage = () => {
   onChange={(e) => setProductPrice(Number(e.target.value))}
   placeholder="Enter product price"
   required
-  className="border border-gray-300 rounded-md p-2"
+  className="border border-[#B1C7E5] rounded-md p-2"
 />
 
 {/* Dropdown for Category Selection */}
@@ -210,7 +210,7 @@ const AddProductPage = () => {
   value={selectedCategoryId ?? ''}
   onChange={(e) => setSelectedCategoryId(Number(e.target.value))}
   required
-  className="border border-gray-300 rounded-md p-2"
+  className="border border-[#B1C7E5] rounded-md p-2"
 >
   <option className='text-sm' value="" disabled>--Select a Category--</option>
   {isCategoriesLoading ? (
@@ -233,7 +233,7 @@ const AddProductPage = () => {
   value={selectedSubcategoryId ?? ''}
   onChange={(e) => setSelectedSubcategoryId(Number(e.target.value))}
   required
-  className="border border-gray-300 rounded-md p-2"
+  className="border border-[#B1C7E5] rounded-md p-2"
 >
   <option value="" disabled>--Select a Subcategory--</option>
   {isSubcategoriesLoading ? (

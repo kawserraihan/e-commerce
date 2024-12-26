@@ -17,6 +17,7 @@ class Product(models.Model):
     product_name = models.CharField(max_length=255)
     product_type = models.CharField(max_length=20, choices=PRODUCT_TYPE_CHOICES)
     product_description = models.TextField()
+    sku = models.CharField(max_length=100, unique=True, blank=True, null=True)
     product_code = models.CharField(max_length=100, unique=True)
     product_image = models.FileField(upload_to='products/', null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')

@@ -6,13 +6,16 @@ from .serializers import ProductSerializer, ProductImageSerializer, ProductVaria
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from users.authentication import CustomJwtAuthentication
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db import transaction
 
 from rest_framework.exceptions import ValidationError  # Import ValidationError
+
+#----------------------------------------
+from .serializers import ProductVariantPublicSerializer, ProductPublicSerializer, WholesalePricePublicSerializer, ProductImagePublicSerializer
 
 import logging
 
@@ -24,7 +27,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     authentication_classes = [CustomJwtAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = PageNumberPagination
-    parser_classes = (MultiPartParser, FormParser)  # To handle file uploads
+    parser_classes = (MultiPartParser, FormParser, JSONParser)  # To handle file uploads
 
 
 class ProductVariantViewSet(ModelViewSet):
@@ -117,6 +120,7 @@ class UserOrderViewSet(viewsets.ModelViewSet):
     queryset = UserOrder.objects.all()
     serializer_class = UserOrderSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = PageNumberPagination
 
     def perform_create(self, serializer):
         print("perform_create called")  # Debug print statement
@@ -176,3 +180,108 @@ class ProductStockUpdateView(APIView):
         logger.debug(f"Updated product {product.id} stock quantity to {product.stock_quantity}")
 
         return Response({"new_stock_quantity": product.stock_quantity}, status=status.HTTP_200_OK)
+    
+
+
+
+#----------------------------------------------------------------xxxxxxxx--------------------------------------------------------
+#----------------------------------------------------------------Publc-----------------------------------------------------------
+
+
+class ProductPublicViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductPublicSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+
+class WholesalePricePublicViewSet(ModelViewSet):
+    """
+    API for managing wholesale prices.
+    """
+    queryset = WholesalePrice.objects.all()
+    serializer_class = WholesalePricePublicSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    @action(detail=False, methods=['get'], url_path='(?P<product_id>[^/.]+)')
+    def list_wholesale_price(self, request, product_id=None):
+        """
+        Custom action to retrieve prices for a specific product by product_id.
+        """
+        prices = self.queryset.filter(product_id=product_id)
+        page = self.paginate_queryset(prices)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(prices, many=True)
+        return Response(serializer.data)
+
+class ProductVariantPublicViewSet(ModelViewSet):
+    """
+    API for managing product variants.
+    """
+    queryset = ProductVariant.objects.all()
+    serializer_class = ProductVariantPublicSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    @action(detail=False, methods=['get'], url_path='(?P<product_id>[^/.]+)')
+    def list_of_variants(self, request, product_id=None):
+        """
+        Custom action to retrieve variants for a specific product by product_id.
+        """
+        variants = self.queryset.filter(product_id=product_id)
+        page = self.paginate_queryset(variants)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(variants, many=True)
+        return Response(serializer.data)
+    
+
+
+    
+class ProductImagePublicViewSet(viewsets.ModelViewSet):
+    queryset = ProductImage.objects.all()
+    serializer_class = ProductImagePublicSerializer
+    authentication_classes = [CustomJwtAuthentication]
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+    parser_classes = (MultiPartParser, FormParser)
+    
+
+    @action(detail=False, methods=['get'], url_path='(?P<product_id>[^/.]+)')
+    def list_product_images(self, request, product_id=None):
+        """
+        Custom action to retrieve images for a specific product by product_id.
+        """
+        images = self.queryset.filter(product_id=product_id)
+        page = self.paginate_queryset(images)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(images, many=True)
+        return Response(serializer.data)
+    
+
+
+

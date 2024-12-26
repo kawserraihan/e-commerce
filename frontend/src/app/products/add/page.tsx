@@ -8,15 +8,12 @@ const AddProductPageWrapper = () => {
   return (
     <DefaultLayout>
 
-    <Breadcrumb pageName="Add Products"/>
-
-    <div className="flex flex-col gap-10">
-        <AddProductPage/>
+      <Breadcrumb pageName="Add Products" />
+      <div className="flex flex-col gap-10">
+        <AddProductPage />
       </div>
-
-
     </DefaultLayout>
-    
+
   );
 };
 

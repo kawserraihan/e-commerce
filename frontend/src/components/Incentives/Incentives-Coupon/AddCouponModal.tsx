@@ -52,7 +52,7 @@ const AddCouponModal = ({ isOpen, onClose }: AddCouponModalProps) => {
             onChange={(e) => setCommission(e.target.value)}
             placeholder="Enter commission percentage"
             required
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           />
 
           {/* Minimum Amount Input */}
@@ -64,7 +64,7 @@ const AddCouponModal = ({ isOpen, onClose }: AddCouponModalProps) => {
             onChange={(e) => setMinimumAmount(e.target.value)}
             placeholder="Enter minimum amount"
             required
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           />
 
           {/* Expiry Date Input */}
@@ -74,7 +74,7 @@ const AddCouponModal = ({ isOpen, onClose }: AddCouponModalProps) => {
             type="date"
             value={expiryDate}
             onChange={(e) => setExpiryDate(e.target.value)}
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           />
 
           {/* Is Active Toggle */}

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'core',
     'products',
     'incentives',
+    'site_settings'
 ]
 
 MIDDLEWARE = [
@@ -89,13 +90,14 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME' : 'ecom',
+        'NAME' : 'anticbyt_ecommercedemo',
         'USER' : 'root',
         'PASSWORD' : '',
         'HOST' : 'localhost',     
         'PORT' : "3306",
         },
     }
+
 
 
 
@@ -170,8 +172,9 @@ AUTH_COOKIE_HTTP_ONLY= True
 AUTH_COOKIE_PATH='/'
 AUTH_COOKIE_SAMESITE='None'
 
-CORS_ALLOWED_ORIGINS = getenv('CORS_ALLOWED_ORIGINS',"http://localhost:3000,http://127.0.0.1:3000,http://demoapi.anticbyte.com").split(',')
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True  # Disable CORS policy for all origins
+CORS_ALLOW_CREDENTIALS = True  # Optional if cookies or credentials are needed
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -179,6 +182,14 @@ CORS_ALLOW_CREDENTIALS = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "users.UserAccount"
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Looking to send emails in production? Check out our Email API/SMTP product!
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_HOST_USER = '012d6578d30b50'
+EMAIL_HOST_PASSWORD = '24963d0ee3b73c'
+EMAIL_PORT = '2525'
+OTP_ATTEMPTS= 5
 
 
 

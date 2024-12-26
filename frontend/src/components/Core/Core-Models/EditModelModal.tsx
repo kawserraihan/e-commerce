@@ -63,7 +63,7 @@ const EditModelModal = ({ isOpen, onClose, model }: EditModelModalProps) => {
             onChange={(e) => setModelName(e.target.value)}
             placeholder="Enter model name"
             required
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           />
 
           {/* Dropdown for brand Selection */}
@@ -73,7 +73,7 @@ const EditModelModal = ({ isOpen, onClose, model }: EditModelModalProps) => {
             value={selectedBrandId}
             onChange={(e) => setSelectedBrandId(Number(e.target.value))}
             required
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           >
             <option className='text-sm' value="" disabled>--Select a Brand--</option>
             {isBrandsLoading ? (

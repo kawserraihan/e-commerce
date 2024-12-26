@@ -69,7 +69,7 @@ const EditCouponModal = ({ isOpen, onClose, coupon }: EditCouponModalProps) => {
             onChange={(e) => setCommission(e.target.value)}
             placeholder="Enter commission percentage"
             required
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           />
 
           {/* Minimum Amount Input */}
@@ -81,7 +81,7 @@ const EditCouponModal = ({ isOpen, onClose, coupon }: EditCouponModalProps) => {
             onChange={(e) => setMinimumAmount(e.target.value)}
             placeholder="Enter minimum amount"
             required
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           />
 
           {/* Expiry Date Input */}
@@ -91,7 +91,7 @@ const EditCouponModal = ({ isOpen, onClose, coupon }: EditCouponModalProps) => {
             type="date"
             value={expiryDate ? new Date(expiryDate).toISOString().split('T')[0] : ''}
             onChange={(e) => setExpiryDate(e.target.value)}
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           />
 
           {/* Active Checkbox */}

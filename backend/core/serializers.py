@@ -57,3 +57,34 @@ class SizeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Size
         fields = ['id', 'size_name', 'is_active', 'created_at', 'modified_at', 'categoryid', 'category_name', 'subcategoryid', 'subcategory_name', 'childcategoryid', 'childcategory_name']
+
+
+#----------------------------------------------------XXXXXX----------------------------------------------------
+#----------------------------------------------------Public----------------------------------------------------
+
+
+class CategoryPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+        read_only_fields =['category_name', 'is_active', 'sort', 'home_view', 'created_at', 'modified_at']
+       
+
+class SubcategoryPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategory
+        fields = '__all__'
+        read_only_fields = ['categoryid', 'subcategory_name', 'is_active', 'created_at', 'modified_at']
+
+class ColorPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Color
+        fields = '__all__'
+        read_only_fields = ['color_name', 'is_active', 'created_at', 'modified_at']
+
+class BrandPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Brand
+        fields = '__all__'
+        read_only_fields = ['brandid', 'model_name', 'is_active', 'created_at', 'modified_at']
+

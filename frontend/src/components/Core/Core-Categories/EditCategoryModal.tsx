@@ -54,7 +54,7 @@ const EditCategoryModal = ({ isOpen, onClose, category }: EditCategoryModalProps
             onChange={(e) => setCategoryName(e.target.value)}
             placeholder="Enter category name"
             required
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           />
 
           {/* Active Checkbox */}

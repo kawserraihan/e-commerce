@@ -4,3 +4,6 @@ export { default as LoginForm } from './LoginForm';
 // export { default as PasswordResetConfirmForm } from './PasswordResetConfirmForm';
 // export { default as PasswordResetForm } from './PasswordResetForm';
 export { default as RegisterForm } from './RegisterForm';
+export { default as RegisterSellerForm} from './RegisterSellerForm';
+export { default as SellerProfileForm} from './SellerProfile';
+export { default as RegisterDealerForm} from './RegisterDealerForm';

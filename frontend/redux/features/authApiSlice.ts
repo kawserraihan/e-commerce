@@ -4,79 +4,80 @@ import { setAuth } from './authSlice';
 // import { CategoryType } from '@/types/categories';
 
 interface User {
+  id: number | null | undefined;
 	first_name: string;
 	last_name: string;
 	email: string;
 }
 
 interface Category {
-  
-	id: number; 
+
+	id: number;
 	category_name: string;
 	is_active: boolean;        // Add the active status field
-  	created_at: string;        // Add the created timestamp
-  	modified_at: string;
+	created_at: string;        // Add the created timestamp
+	modified_at: string;
 }
 
 interface Brand {
-	id: number; 
+	id: number;
 	brand_name: string;
 	is_active: boolean;        // Add the active status field
-  	created_at: string;        // Add the created timestamp
-  	modified_at: string;
+	created_at: string;        // Add the created timestamp
+	modified_at: string;
 }
 
 interface Model {
-	id: number; 
+	id: number;
 	model_name: string;
 	brandid: number;
 	is_active: boolean;        // Add the active status field
-  	created_at: string;        // Add the created timestamp
-  	modified_at: string;
+	created_at: string;        // Add the created timestamp
+	modified_at: string;
 }
 
 interface Color {
-	id: number; 
+	id: number;
 	color_name: string;
 	is_active: boolean;        // Add the active status field
-  	created_at: string;        // Add the created timestamp
-  	modified_at: string;
+	created_at: string;        // Add the created timestamp
+	modified_at: string;
 }
 
-interface Subcategory{
-	id: number; 
+interface Subcategory {
+	id: number;
 	categoryid: number;
 	category_name: string;
 	subcategory_name: string;
 	is_active: boolean;        // Add the active status field
-  	created_at: string;        // Add the created timestamp
-  	modified_at: string;
+	created_at: string;        // Add the created timestamp
+	modified_at: string;
 }
 
-interface Childcategory{
-	id: number; 
+interface Childcategory {
+	id: number;
 	categoryid: number;
 	subcategoryid: number;
 	category_name: string;
 	subcategory_name: string;
 	childcategory_name: string;
 	is_active: boolean;        // Add the active status field
-  	created_at: string;        // Add the created timestamp
-  	modified_at: string;
+	created_at: string;        // Add the created timestamp
+	modified_at: string;
 }
 
-interface Size{
-	id: number; 
+interface Size {
+	id: number;
 	categoryid: number;
 	subcategoryid: number;
-    childcategoryid: number;
+	childcategoryid: number;
 	category_name: string;
 	subcategory_name: string;
 	childcategory_name: string;
-    size_name: string;
+	size_name: string;
 	is_active: boolean;        // Add the active status field
-    created_at: string;        // Add the created timestamp
-    modified_at: string;
+	created_at: string;        // Add the created timestamp
+	modified_at: string;
 }
 
 interface SocialAuthArgs {
@@ -102,7 +103,7 @@ interface Product {
 	slug: string;
 	is_active: boolean;
 	created_at: string;        // Add the created timestamp
-    modified_at: string;
+	modified_at: string;
 	category: number;
 	category_name: string;
 	sub_category: number;
@@ -152,8 +153,8 @@ interface UserOrder {
 	amount_paid: number;
 	total_amount: number;
 	delivery_status: string;
-	created_at: string; 
- 	items: OrderItem[];
+	created_at: string;
+	items: OrderItem[];
 }
 
 // Incentives - Coupon
@@ -161,12 +162,12 @@ interface UserOrder {
 interface Coupon {
 	id: number;
 	coupon: number;
-    commision: number;
-    minumum_amount: number;
-    is_active : boolean;
-    created_at : string;
-    expiry_at : string | null;
-    modified_at : string;
+	commision: number;
+	minumum_amount: number;
+	is_active: boolean;
+	created_at: string;
+	expiry_at: string | null;
+	modified_at: string;
 
 }
 
@@ -181,21 +182,21 @@ interface Menu {
 	sort_order: number;
 	parent?: number | null; // Parent menu ID
 	submenus?: Menu[]; // Nested submenus
-  }
-  
+}
+
 interface Role {
 	id: number;
 	name: string;
-  }
+}
 
-  interface MenuTag {
+interface MenuTag {
 	type: 'Menu';
 	id: number;
-  }
+}
 
 
 const authApiSlice = apiSlice.injectEndpoints({
-	
+
 	endpoints: builder => ({
 		retrieveUser: builder.query<User, void>({
 			query: () => '/users/me/',
@@ -224,20 +225,20 @@ const authApiSlice = apiSlice.injectEndpoints({
 			async onQueryStarted(arg, { dispatch, queryFulfilled }) {
 				try {
 					const { data } = await queryFulfilled;
-		
+
 					// Assuming data contains both access and refresh tokens
 					const { access, refresh } = data;
-		
+
 					// Save tokens in localStorage
 					localStorage.setItem('access', access);
 					localStorage.setItem('refresh', refresh);
-		
+
 					console.log('Access token saved:', access);
 					console.log('Refresh token saved:', refresh);
-		
+
 					// Dispatch to update your auth state with tokens
 					dispatch(setAuth({ accessToken: access, refreshToken: refresh }));
-		
+
 					// Optionally, you might want to navigate to a protected route after login
 					// For example: dispatch(push('/dashboard'));
 				} catch (error) {
@@ -260,18 +261,51 @@ const authApiSlice = apiSlice.injectEndpoints({
 				body: { first_name, last_name, email, password, re_password },
 			}),
 		}),
+
 		verify: builder.mutation({
 			query: () => ({
 				url: '/jwt/verify/',
 				method: 'POST',
 			}),
 		}),
+		// Send OTP Request Mutation
+		sendOtp: builder.mutation({
+			query: (email) => ({
+				url: '/register/otp/',
+				method: 'POST',
+				body: { email },
+			}),
+		}),
+
+		// Verify OTP Request Mutation
+		verifyOtp: builder.mutation({
+			query: ({ email, otp_id, otp_code }) => ({
+				url: '/register/verify/',
+				method: 'POST',
+				body: { email, otp_id, otp_code },
+			}),
+		}),
+
 		logout: builder.mutation({
 			query: () => ({
 				url: '/logout/',
 				method: 'POST',
 			}),
 		}),
+
+		getUsers: builder.query<{
+			count: number;
+			next: string | null;
+			previous: string | null;
+			results: User[];
+		}, { page: number; page_size: number }>({
+			query: ({ page, page_size }) => `/all/users/?page=${page}&page_size=${page_size}`,
+		}),
+
+		getUserById: builder.query<User, number>({
+			query: (id) => `users/${id}/`,
+		}),
+
 		activation: builder.mutation({
 			query: ({ uid, token }) => ({
 				url: '/users/activation/',
@@ -279,6 +313,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 				body: { uid, token },
 			}),
 		}),
+
 		resetPassword: builder.mutation({
 			query: email => ({
 				url: '/users/reset_password/',
@@ -286,6 +321,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 				body: { email },
 			}),
 		}),
+
 		resetPasswordConfirm: builder.mutation({
 			query: ({ uid, token, new_password, re_new_password }) => ({
 				url: '/users/reset_password_confirm/',
@@ -295,46 +331,78 @@ const authApiSlice = apiSlice.injectEndpoints({
 		}),
 
 
-// --------------------- Categories --------------------------
+		// -------------------------User Role Implement during signup only-------------------------
+
+		updateUserRole: builder.mutation({
+			query: ({ user_id, role_id }) => ({
+				url: `/setrole/`,  // Replace with the actual endpoint to update user roles
+				method: 'POST',
+				body: { user_id, role_id },  // The role you want to assign
+			}),
+		}),
+
+
+		// ----------------------- Seller Profile Registration --------------------
+
+		createSellerProfile: builder.mutation({
+			query: (formData) => ({
+				url: '/sellers/', // Replace with your API endpoint
+				method: 'POST',
+				body: formData, // Send the seller profile form data
+			}),
+		}),
+
+		// ----------------------- Seller Profile Registration --------------------
+
+		createDealerProfile: builder.mutation({
+			query: (formData) => ({
+				url: '/dealers/', // Replace with your API endpoint
+				method: 'POST',
+				body: formData, // Send the seller profile form data
+			}),
+		}),
+
+
+		// --------------------- Categories --------------------------
 		getCategories: builder.query<{
 			count: number;
 			next: string | null;
 			previous: string | null;
 			results: Category[];
-		  }, { page: number; page_size: number }>({
+		}, { page: number; page_size: number }>({
 			query: ({ page, page_size }) => `/categories/?page=${page}&page_size=${page_size}`,
-		  }),
+		}),
 
-			getCategoryById: builder.query<Category, number>({
-				query: (id) => `categories/${id}/`, // Adjust the endpoint according to your API
-			  }),
-		
+		getCategoryById: builder.query<Category, number>({
+			query: (id) => `categories/${id}/`, // Adjust the endpoint according to your API
+		}),
+
 		addCategory: builder.mutation<Category, Partial<Category>>({
-		query: (category) => ({
-			url: '/categories/',
-			method: 'POST',
-			body: category,
+			query: (category) => ({
+				url: '/categories/',
+				method: 'POST',
+				body: category,
+			}),
 		}),
-		}),
-		updateCategory: builder.mutation<Category,Partial<Category>>({
-		query: (category) => ({
-			url: `/categories/${category.id}/`,
-			method: 'PUT',
-			body: category
-		}),
+		updateCategory: builder.mutation<Category, Partial<Category>>({
+			query: (category) => ({
+				url: `/categories/${category.id}/`,
+				method: 'PUT',
+				body: category
+			}),
 		}),
 		deleteCategory: builder.mutation<{ success: boolean; id: number }, number>({
-		query: (id) => ({
-			url: `/categories/${id}/`,
-			method: 'DELETE',
+			query: (id) => ({
+				url: `/categories/${id}/`,
+				method: 'DELETE',
+			}),
 		}),
-		}),
-
-		
-// --------------------- END Categories --------------------------
 
 
-// --------------------- Brand --------------------------
+		// --------------------- END Categories --------------------------
+
+
+		// --------------------- Brand --------------------------
 
 		getBrands: builder.query<{
 			count: number;
@@ -345,9 +413,9 @@ const authApiSlice = apiSlice.injectEndpoints({
 			query: ({ page, page_size }) => `/brands/?page=${page}&page_size=${page_size}`,
 		}),
 
-			getBrandById: builder.query<Brand, number>({
-				query: (id) => `brands/${id}/`, // Adjust the endpoint according to your API
-			}),
+		getBrandById: builder.query<Brand, number>({
+			query: (id) => `brands/${id}/`, // Adjust the endpoint according to your API
+		}),
 
 		addBrand: builder.mutation<Brand, Partial<Brand>>({
 			query: (brand) => ({
@@ -355,67 +423,67 @@ const authApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: brand,
 			}),
-			}),
+		}),
 
-		updateBrand: builder.mutation<Brand,Partial<Brand>>({
+		updateBrand: builder.mutation<Brand, Partial<Brand>>({
 			query: (brand) => ({
 				url: `/brands/${brand.id}/`,
 				method: 'PUT',
 				body: brand
 			}),
-			}),
+		}),
 
 		deleteBrand: builder.mutation<{ success: boolean; id: number }, number>({
 			query: (id) => ({
 				url: `/brands/${id}/`,
 				method: 'DELETE',
 			}),
+		}),
+
+		// --------------------- END Brand --------------------------
+
+		// --------------------- Model --------------------------
+
+		getModels: builder.query<{
+			count: number;
+			next: string | null;
+			previous: string | null;
+			results: Model[];
+		}, { page: number; page_size: number }>({
+			query: ({ page, page_size }) => `/models/?page=${page}&page_size=${page_size}`,
+		}),
+
+		getModelById: builder.query<Model, number>({
+			query: (id) => `models/${id}/`, // Adjust the endpoint according to your API
+		}),
+
+		addModel: builder.mutation<Model, Partial<Model>>({
+			query: (model) => ({
+				url: '/models/',
+				method: 'POST',
+				body: model,
 			}),
+		}),
 
-// --------------------- END Brand --------------------------
-
-// --------------------- Model --------------------------
-
-			getModels: builder.query<{
-				count: number;
-				next: string | null;
-				previous: string | null;
-				results: Model[];
-			}, { page: number; page_size: number }>({
-				query: ({ page, page_size }) => `/models/?page=${page}&page_size=${page_size}`,
+		updateModel: builder.mutation<Model, Partial<Model>>({
+			query: (model) => ({
+				url: `/models/${model.id}/`,
+				method: 'PUT',
+				body: model
 			}),
+		}),
 
-				getModelById: builder.query<Model, number>({
-					query: (id) => `models/${id}/`, // Adjust the endpoint according to your API
-				}),
-
-			addModel: builder.mutation<Model, Partial<Model>>({
-				query: (model) => ({
-					url: '/models/',
-					method: 'POST',
-					body: model,
-				}),
-				}),
-
-			updateModel: builder.mutation<Model,Partial<Model>>({
-				query: (model) => ({
-					url: `/models/${model.id}/`,
-					method: 'PUT',
-					body: model
-				}),
-				}),
-
-			deleteModel: builder.mutation<{ success: boolean; id: number }, number>({
-				query: (id) => ({
-					url: `/models/${id}/`,
-					method: 'DELETE',
-				}),
+		deleteModel: builder.mutation<{ success: boolean; id: number }, number>({
+			query: (id) => ({
+				url: `/models/${id}/`,
+				method: 'DELETE',
 			}),
+		}),
 
-// --------------------- END Model --------------------------
+		// --------------------- END Model --------------------------
 
 
-// --------------------- Colors Start --------------------------
+		// --------------------- Colors Start --------------------------
 
 		getColors: builder.query<{
 			count: number;
@@ -426,9 +494,9 @@ const authApiSlice = apiSlice.injectEndpoints({
 			query: ({ page, page_size }) => `/colors/?page=${page}&page_size=${page_size}`,
 		}),
 
-			getColorById: builder.query<Color, number>({
-				query: (id) => `colors/${id}/`, // Adjust the endpoint according to your API
-			}),
+		getColorById: builder.query<Color, number>({
+			query: (id) => `colors/${id}/`, // Adjust the endpoint according to your API
+		}),
 
 		addColor: builder.mutation<Color, Partial<Color>>({
 			query: (color) => ({
@@ -436,28 +504,28 @@ const authApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: color,
 			}),
-			}),
+		}),
 
-		updateColor: builder.mutation<Color,Partial<Color>>({
+		updateColor: builder.mutation<Color, Partial<Color>>({
 			query: (color) => ({
 				url: `/colors/${color.id}/`,
 				method: 'PUT',
 				body: color
 			}),
-			}),
+		}),
 
 		deleteColor: builder.mutation<{ success: boolean; id: number }, number>({
 			query: (id) => ({
 				url: `/colors/${id}/`,
 				method: 'DELETE',
 			}),
-			}),
+		}),
 
 
 
-// --------------------- Colors End ------------------------
+		// --------------------- Colors End ------------------------
 
-// -------------------- Subcategory Start ------------------------
+		// -------------------- Subcategory Start ------------------------
 
 		getSubcategories: builder.query<{
 			count: number;
@@ -468,9 +536,9 @@ const authApiSlice = apiSlice.injectEndpoints({
 			query: ({ page, page_size }) => `/subcategories/?page=${page}&page_size=${page_size}`,
 		}),
 
-			getSubcategoryById: builder.query<Subcategory, number>({
-				query: (id) => `subcategories/${id}/`, // Adjust the endpoint according to your API
-			}),
+		getSubcategoryById: builder.query<Subcategory, number>({
+			query: (id) => `subcategories/${id}/`, // Adjust the endpoint according to your API
+		}),
 
 		addSubcategory: builder.mutation<Subcategory, Partial<Subcategory>>({
 			query: (subcategory) => ({
@@ -478,33 +546,33 @@ const authApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: subcategory,
 			}),
-			}),
+		}),
 
-		updateSubcategory: builder.mutation<Subcategory,Partial<Subcategory>>({
+		updateSubcategory: builder.mutation<Subcategory, Partial<Subcategory>>({
 			query: (subcategory) => ({
 				url: `/subcategories/${subcategory.id}/`,
 				method: 'PUT',
 				body: subcategory
 			}),
-			}),
+		}),
 
 		deleteSubcategory: builder.mutation<{ success: boolean; id: number }, number>({
 			query: (id) => ({
 				url: `/subcategories/${id}/`,
 				method: 'DELETE',
 			}),
-			}),
+		}),
 
 
-// -------------------- Subcategory End ------------------------
+		// -------------------- Subcategory End ------------------------
 
-// -----------------Fetch subcategories by category-------------------------
+		// -----------------Fetch subcategories by category-------------------------
 
 		getSubcategoriesByCategory: builder.query<any[], number>({
 			query: (categoryId) => `/subcategories/by-category/${categoryId}/`,
-		  }),
+		}),
 
-// -------------------- Childcategory Start ---------------------------
+		// -------------------- Childcategory Start ---------------------------
 
 		getChildcategories: builder.query<{
 			count: number;
@@ -515,9 +583,9 @@ const authApiSlice = apiSlice.injectEndpoints({
 			query: ({ page, page_size }) => `/childcategories/?page=${page}&page_size=${page_size}`,
 		}),
 
-			getChildcategoryById: builder.query<Childcategory, number>({
-				query: (id) => `childcategories/${id}/`, // Adjust the endpoint according to your API
-			}),
+		getChildcategoryById: builder.query<Childcategory, number>({
+			query: (id) => `childcategories/${id}/`, // Adjust the endpoint according to your API
+		}),
 
 		addChildcategory: builder.mutation<Childcategory, Partial<Childcategory>>({
 			query: (childcategory) => ({
@@ -525,33 +593,33 @@ const authApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: childcategory,
 			}),
-			}),
+		}),
 
-		updateChildcategory: builder.mutation<Childcategory,Partial<Childcategory>>({
+		updateChildcategory: builder.mutation<Childcategory, Partial<Childcategory>>({
 			query: (childcategory) => ({
 				url: `/childcategories/${childcategory.id}/`,
 				method: 'PUT',
 				body: childcategory
 			}),
-			}),
+		}),
 
 		deleteChildcategory: builder.mutation<{ success: boolean; id: number }, number>({
 			query: (id) => ({
 				url: `/childcategories/${id}/`,
 				method: 'DELETE',
 			}),
-			}),
+		}),
 
 
-//------------------------ Childcategory End ------------------------
+		//------------------------ Childcategory End ------------------------
 
-// -----------------Fetch Childcategory by category & subcategory-------------------------
+		// -----------------Fetch Childcategory by category & subcategory-------------------------
 
 		getChildcategoryByCategorySubcategory: builder.query<any[], { categoryid: number, subcategoryid: number }>({
 			query: ({ categoryid, subcategoryid }) => `childcategories/by-category/by-subcategory/${categoryid}/${subcategoryid}/`,
 		}),
 
-// ------------------------ Size -----------------------------------
+		// ------------------------ Size -----------------------------------
 
 		getSizes: builder.query<{
 			count: number;
@@ -562,9 +630,9 @@ const authApiSlice = apiSlice.injectEndpoints({
 			query: ({ page, page_size }) => `/sizes/?page=${page}&page_size=${page_size}`,
 		}),
 
-			getSizeById: builder.query<Size, number>({
-				query: (id) => `sizes/${id}/`, // Adjust the endpoint according to your API
-			}),
+		getSizeById: builder.query<Size, number>({
+			query: (id) => `sizes/${id}/`, // Adjust the endpoint according to your API
+		}),
 
 		addSize: builder.mutation<Size, Partial<Size>>({
 			query: (size) => ({
@@ -572,7 +640,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: size,
 			}),
-			}),
+		}),
 
 		updateSize: builder.mutation<Size, Partial<Size>>({
 			query: (size) => ({
@@ -580,19 +648,19 @@ const authApiSlice = apiSlice.injectEndpoints({
 				method: 'PUT',
 				body: size
 			}),
-			}),
+		}),
 
 		deleteSize: builder.mutation<{ success: boolean; id: number }, number>({
 			query: (id) => ({
 				url: `/sizes/${id}/`,
 				method: 'DELETE',
 			}),
-			}),
+		}),
 
 
-// ----------------------------- Size End -----------------------------------
+		// ----------------------------- Size End -----------------------------------
 
-// ------------------------ Products -----------------------------------
+		// ------------------------ Products -----------------------------------
 
 		getProducts: builder.query<{
 			count: number;
@@ -603,9 +671,9 @@ const authApiSlice = apiSlice.injectEndpoints({
 			query: ({ page, page_size }) => `/products/?page=${page}&page_size=${page_size}`,
 		}),
 
-			getProductById: builder.query<Product, number>({
-				query: (id) => `products/${id}/`, // Adjust the endpoint according to your API
-			}),
+		getProductById: builder.query<Product, number>({
+			query: (id) => `products/${id}/`, // Adjust the endpoint according to your API
+		}),
 
 		addProduct: builder.mutation<Product, FormData>({
 			query: (formData) => ({
@@ -613,97 +681,97 @@ const authApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: formData,
 			}),
-			}),
+		}),
 
-			updateProduct: builder.mutation<Product, { id: number; formData: FormData }>({
-				query: ({ id, formData }) => ({
-				  url: `/products/${id}/`,
-				  method: 'PUT',
-				  body: formData,
-				}),
-			  }),
+		updateProduct: builder.mutation<Product, { id: number; formData: FormData }>({
+			query: ({ id, formData }) => ({
+				url: `/products/${id}/`,
+				method: 'PUT',
+				body: formData,
+			}),
+		}),
 
 		deleteProduct: builder.mutation<{ success: boolean; id: number }, number>({
 			query: (id) => ({
 				url: `/products/${id}/`,
 				method: 'DELETE',
 			}),
+		}),
+
+
+		// ----------------------------- Product End -----------------------------------
+
+
+
+		// ---------------------ProductImage-related endpoints-----------------------------
+
+		// Fetch images for a product
+		getProductImages: builder.query<ProductImage[], number>({
+			query: (productId) => `product-images/product/${productId}/`,
+		}),
+
+		// Add a new image to a product
+		addProductImage: builder.mutation<ProductImage, FormData>({
+			query: (formData) => ({
+				url: '/product-images/',
+				method: 'POST',
+				body: formData,
 			}),
-
-
-// ----------------------------- Product End -----------------------------------
-
-
-
-// ---------------------ProductImage-related endpoints-----------------------------
-
-    // Fetch images for a product
-    getProductImages: builder.query<ProductImage[], number>({
-		query: (productId) => `product-images/product/${productId}/`,
-	  }),
-  
-	  // Add a new image to a product
-	  addProductImage: builder.mutation<ProductImage, FormData>({
-		query: (formData) => ({
-		  url: '/product-images/',
-		  method: 'POST',
-		  body: formData,
 		}),
-	  }),
-  
-	  // Delete a product image
-	  deleteProductImage: builder.mutation<{ success: boolean }, number>({
-		query: (imageId) => ({
-		  url: `/product-images/${imageId}/`,
-		  method: 'DELETE',
+
+		// Delete a product image
+		deleteProductImage: builder.mutation<{ success: boolean }, number>({
+			query: (imageId) => ({
+				url: `/product-images/${imageId}/`,
+				method: 'DELETE',
+			}),
 		}),
-	  }),
 
-	  // -------------------------- END Product Images ----------------------------------
+		// -------------------------- END Product Images ----------------------------------
 
-	  // ------------------------------- Stock Update -----------------------------------
+		// ------------------------------- Stock Update -----------------------------------
 
-	  updateProductStock: builder.mutation<{ new_stock_quantity: number }, { id: number; quantity: number }>({
-		query: ({ id, quantity }) => ({
-		  url: `/products/${id}/update-stock/`,
-		  method: 'PATCH',
-		  body: { quantity }, // Send as JSON, not FormData
+		updateProductStock: builder.mutation<{ new_stock_quantity: number }, { id: number; quantity: number }>({
+			query: ({ id, quantity }) => ({
+				url: `/products/${id}/update-stock/`,
+				method: 'PATCH',
+				body: { quantity }, // Send as JSON, not FormData
+			}),
 		}),
-	}),
 
-	 // ------------------------------- Stock End -----------------------------------
+		// ------------------------------- Stock End -----------------------------------
 
-	// ------------------------------- Order Products -----------------------------------
+		// ------------------------------- Order Products -----------------------------------
 
-	getOrders: builder.query<{
-		count: number;
-		next: string | null;
-		previous: string | null;
-		results: UserOrder[];
-	}, { page: number; page_size: number }>({
-		query: ({ page, page_size }) => `/orders/?page=${page}&page_size=${page_size}`,
-	}),
-
-	getOrderById: builder.query<UserOrder, number>({
-		query: (id) => `orders/${id}/`, // Adjust the endpoint according to your API
-	}),
-
-	addOrder: builder.mutation<UserOrder, Partial<UserOrder>>({
-		query: (orderData) => ({
-		  url: '/orders/',
-		  method: 'POST',
-		  body: orderData,
+		getOrders: builder.query<{
+			count: number;
+			next: string | null;
+			previous: string | null;
+			results: UserOrder[];
+		}, { page: number; page_size: number }>({
+			query: ({ page, page_size }) => `/orders/?page=${page}&page_size=${page_size}`,
 		}),
-	  }),
+
+		getOrderById: builder.query<UserOrder, number>({
+			query: (id) => `orders/${id}/`, // Adjust the endpoint according to your API
+		}),
+
+		addOrder: builder.mutation<UserOrder, Partial<UserOrder>>({
+			query: (orderData) => ({
+				url: '/orders/',
+				method: 'POST',
+				body: orderData,
+			}),
+		}),
 
 
-	  //---------------------------END Orders-------------------------
+		//---------------------------END Orders-------------------------
 
 
-	  // --------------------------------------Incentives----------------------------------
+		// --------------------------------------Incentives----------------------------------
 
 
-	  // --------------------- Coupons --------------------------
+		// --------------------- Coupons --------------------------
 
 		getCoupons: builder.query<{
 			count: number;
@@ -714,9 +782,9 @@ const authApiSlice = apiSlice.injectEndpoints({
 			query: ({ page, page_size }) => `/coupons/?page=${page}&page_size=${page_size}`,
 		}),
 
-			getCouponById: builder.query<Coupon, number>({
-				query: (id) => `coupons/${id}/`, // Adjust the endpoint according to your API
-			}),
+		getCouponById: builder.query<Coupon, number>({
+			query: (id) => `coupons/${id}/`, // Adjust the endpoint according to your API
+		}),
 
 		addCoupon: builder.mutation<Coupon, Partial<Coupon>>({
 			query: (coupon) => ({
@@ -724,41 +792,37 @@ const authApiSlice = apiSlice.injectEndpoints({
 				method: 'POST',
 				body: coupon,
 			}),
-			}),
+		}),
 
-		updateCoupon: builder.mutation<Coupon,Partial<Coupon>>({
+		updateCoupon: builder.mutation<Coupon, Partial<Coupon>>({
 			query: (coupon) => ({
 				url: `/coupons/${coupon.id}/`,
 				method: 'PUT',
 				body: coupon
 			}),
-			}),
+		}),
 
 		deleteCoupon: builder.mutation<{ success: boolean; id: number }, number>({
 			query: (id) => ({
 				url: `/coupons/${id}/`,
 				method: 'DELETE',
 			}),
-			}),
+		}),
 
-// --------------------- END Coupon --------------------------
+		// --------------------- END Coupon --------------------------
 
 		getMenu: builder.query<Menu[], void>({
 			query: () => '/user-menu/', // Assuming your backend has an endpoint to retrieve all menus
 		}),
 
-
-
-
-
-
-
 	}),
-	
+
 });
 
 export const {
 	useRetrieveUserQuery,
+	useGetUsersQuery,
+	useGetUserByIdQuery,
 	useSocialAuthenticateMutation,
 	useLoginMutation,
 	useRegisterMutation,
@@ -768,10 +832,32 @@ export const {
 	useResetPasswordMutation,
 	useResetPasswordConfirmMutation,
 
+
+	// User Role Update 
+
+	useUpdateUserRoleMutation,
+
+
+	// Seller Profile Query
+
+
+	useCreateSellerProfileMutation,
+
+	// Dealer Profile Query
+
+
+	useCreateDealerProfileMutation,
+
+
+	// OTP Queries
+
+	useSendOtpMutation,
+	useVerifyOtpMutation,
+
 	//Categories Queries
 
 	useGetCategoriesQuery,
-	useGetCategoryByIdQuery, 
+	useGetCategoryByIdQuery,
 	useAddCategoryMutation,
 	useUpdateCategoryMutation,
 	useDeleteCategoryMutation,
@@ -779,7 +865,7 @@ export const {
 	//Brands Queries
 
 	useGetBrandsQuery,
-	useGetBrandByIdQuery, 
+	useGetBrandByIdQuery,
 	useAddBrandMutation,
 	useUpdateBrandMutation,
 	useDeleteBrandMutation,
@@ -787,7 +873,7 @@ export const {
 	//Models Queries
 
 	useGetModelsQuery,
-	useGetModelByIdQuery, 
+	useGetModelByIdQuery,
 	useAddModelMutation,
 	useUpdateModelMutation,
 	useDeleteModelMutation,
@@ -795,7 +881,7 @@ export const {
 	//Colors Queries
 
 	useGetColorsQuery,
-	useGetColorByIdQuery, 
+	useGetColorByIdQuery,
 	useAddColorMutation,
 	useUpdateColorMutation,
 	useDeleteColorMutation,
@@ -803,7 +889,7 @@ export const {
 	//Subcategories Queries
 
 	useGetSubcategoriesQuery,
-	useGetSubcategoryByIdQuery, 
+	useGetSubcategoryByIdQuery,
 	useAddSubcategoryMutation,
 	useUpdateSubcategoryMutation,
 	useDeleteSubcategoryMutation,
@@ -815,7 +901,7 @@ export const {
 	// Childcategory queries
 
 	useGetChildcategoriesQuery,
-	useGetChildcategoryByIdQuery, 
+	useGetChildcategoryByIdQuery,
 	useAddChildcategoryMutation,
 	useUpdateChildcategoryMutation,
 	useDeleteChildcategoryMutation,
@@ -827,7 +913,7 @@ export const {
 	// Sizes queries
 
 	useGetSizesQuery,
-	useGetSizeByIdQuery, 
+	useGetSizeByIdQuery,
 	useAddSizeMutation,
 	useUpdateSizeMutation,
 	useDeleteSizeMutation,
@@ -835,7 +921,7 @@ export const {
 	// Product queries
 
 	useGetProductsQuery,
-	useGetProductByIdQuery, 
+	useGetProductByIdQuery,
 	useAddProductMutation,
 	useUpdateProductMutation,
 	useDeleteProductMutation,
@@ -859,14 +945,14 @@ export const {
 	// Coupond Queries
 
 	useGetCouponsQuery,
-	useGetCouponByIdQuery, 
+	useGetCouponByIdQuery,
 	useAddCouponMutation,
 	useUpdateCouponMutation,
 	useDeleteCouponMutation,
 
 	// Menu Permission Queries
 
-	useGetMenuQuery 
+	useGetMenuQuery
 
 
 } = authApiSlice;

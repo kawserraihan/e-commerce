@@ -11,6 +11,8 @@ urlpatterns = [
     path('api/', include('core.urls')),
     path('api/', include('products.urls')),
     path('api/', include('incentives.urls')),
+    path('api/', include('site_settings.urls')),
+    # path('api/', include('payment_gateway.urls')),
 ]
 
 if settings.DEBUG:

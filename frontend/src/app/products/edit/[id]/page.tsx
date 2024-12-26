@@ -13,19 +13,14 @@ export const metadata: Metadata = {
 
 const ProductPage = () => {
 
-    return (
-
+  return (
     <DefaultLayout>
-
-    <Breadcrumb pageName="Add Products"/>
-
-    <div className="flex flex-col gap-10">
-        <EditProductPage/>
+      <Breadcrumb pageName="Add Products" />
+      <div className="flex flex-col gap-10">
+        <EditProductPage />
       </div>
-
-    
     </DefaultLayout>
-    )
+  )
 };
 
 export default ProductPage;

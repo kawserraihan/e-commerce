@@ -58,7 +58,7 @@ const AddSubcategoryModal = ({ isOpen, onClose }: AddSubcategoryModalProps) => {
             onChange={(e) => setSubcategoryName(e.target.value)}
             placeholder="Enter Subcategory name"
             required
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           />
 
           {/* Dropdown for Category Selection */}
@@ -68,7 +68,7 @@ const AddSubcategoryModal = ({ isOpen, onClose }: AddSubcategoryModalProps) => {
             value={selectedCategoryId ?? ''}
             onChange={(e) => setSelectedCategoryId(Number(e.target.value))}
             required
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           >
             <option className='text-sm' value="" disabled>--Select a Category--</option>
             {isCategoriesLoading ? (

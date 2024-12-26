@@ -147,7 +147,7 @@ const Stocks = () => {
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark text-center xl:pl-1">
                   <input
                     type="number"
-                    className="border border-gray-300 rounded-md p-2 text-center w-20"
+                    className="border border-[#B1C7E5] rounded-md p-2 text-center w-20"
                     value={stockValues[item.id] ?? item.quantity}
                     onChange={(e) =>
                       handleStockChange(item.id, parseInt(e.target.value, 10))

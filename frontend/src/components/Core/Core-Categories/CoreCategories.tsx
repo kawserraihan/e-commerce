@@ -200,8 +200,6 @@ const CategoriesComponent = () => {
         )}
       </div>
 
-
-
       {/* Add Categories Modal */}
       <AddCategoryModal isOpen={isModalOpen} onClose={closeModal} />
 

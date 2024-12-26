@@ -58,7 +58,7 @@ const AddModelModal = ({ isOpen, onClose }: AddModelModalProps) => {
             onChange={(e) => setModelName(e.target.value)}
             placeholder="Enter Model name"
             required
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           />
 
           {/* Dropdown for Brand Selection */}
@@ -68,7 +68,7 @@ const AddModelModal = ({ isOpen, onClose }: AddModelModalProps) => {
             value={selectedBrandId ?? ''}
             onChange={(e) => setSelectedBrandId(Number(e.target.value))}
             required
-            className="border border-gray-300 rounded-md p-2"
+            className="border border-[#B1C7E5] rounded-md p-2"
           >
             <option className='text-sm' value="" disabled>--Select a Brand--</option>
             {isBrandsLoading ? (

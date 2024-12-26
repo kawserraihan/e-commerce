@@ -14,10 +14,10 @@ export const metadata: Metadata = {
 
 const ProductPage = ({ params }: { params: { id: string } }) => {
   return (
-  
+
     <DefaultLayout>
-  <OrderView/>
-  </DefaultLayout>
+      <OrderView />
+    </DefaultLayout>
 
   );
 };
