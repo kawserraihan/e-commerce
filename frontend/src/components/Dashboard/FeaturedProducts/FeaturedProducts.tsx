@@ -1,156 +1,191 @@
-import React from 'react';
+"use client";
+import React, { useState } from "react";
+import Image from 'next/image';
 
 
-const products = [
-  {
-    name: "Organic Orange Juice",
-    price: "$4.99",
-    oldPrice: "$6.99",
-    image: "/images/deals.jpg",
-    tag: "Hot",
-  },
-  {
-    name: "All Natural Chicken Noodles",
-    price: "$5.25",
-    oldPrice: "$7.00",
-    image: "/images/deals.jpg",
-    tag: "New",
-  },
-  {
-    name: "Angie's Boomchickapop",
-    price: "$3.99",
-    oldPrice: "$5.50",
-    image: "/images/deals.jpg",
-    tag: "Sale",
-  },
-  {
-    name: "Farmer's Crispy Chips",
-    price: "$2.99",
-    oldPrice: "$4.00",
-    image: "/images/deals.jpg",
-    tag: null,
-  },
-  // Add more products as needed
-];
+export default function PopularProductsSection() {
+  const categories = ["All", "Milks & Dairies", "Coffees & Teas", "Pet Foods", "Meats", "Vegetables", "Fruits"];
+  const [activeCategory, setActiveCategory] = useState("All");
 
-interface Props {
-  children: React.ReactNode;
-}
+  const products = [
+    {
+      id: 1,
+      category: "Milks & Dairies",
+      title: "Seeds of Change Organic Quinoa",
+      description: "By NestFood",
+      price: "$28.85",
+      oldPrice: "$32.8",
+      image: "https://ecstasybd.com/all-images/product/Product-Image-1732346028.jpg",
+    },
+    {
+      id: 2,
+      category: "Coffees & Teas",
+      title: "All Natural Italian-Style Chicken Meatballs",
+      description: "By Stouffer",
+      price: "$52.85",
+      oldPrice: "$55.8",
+      image: "https://ecstasybd.com/all-images/product/Product-Image-1704865295.jpg",
+    },
+    {
+      id: 3,
+      category: "Pet Foods",
+      title: "Angie's Boomchickapop Kettle Corn",
+      description: "By StarKist",
+      price: "$48.85",
+      oldPrice: "$52.8",
+      image: "https://ecstasybd.com/all-images/product/Product-Image-1733988001.jpg",
+    },
+    {
+      id: 4,
+      category: "Meats",
+      title: "Foster Farms Takeout Classic Wings",
+      description: "By NestFood",
+      price: "$17.85",
+      oldPrice: "$19.8",
+      image: "https://ecstasybd.com/all-images/product/Product-Image-1731834099.jpg",
+    },
+    {
+      id: 5,
+      category: "Vegetables",
+      title: "Blue Diamond Almonds",
+      description: "By NestFood",
+      price: "$23.85",
+      oldPrice: "$25.8",
+      image: "https://ecstasybd.com/all-images/product/Product-Image-1731841484.jpg",
+    },
+    {
+      id: 6,
+      category: "Fruits",
+      title: "Chobani Vanilla Greek Yogurt",
+      description: "By NestFood",
+      price: "$54.85",
+      oldPrice: "$55.8",
+      image: "https://ecstasybd.com/all-images/product/Product-Image-1715947856.jpg",
+    },
+    {
+      id: 7,
+      category: "Meats",
+      title: "Canada Dry Ginger Ale",
+      description: "By NestFood",
+      price: "$32.85",
+      oldPrice: "$33.8",
+      image: "https://ecstasybd.com/all-images/product/Product-Image-1725000373.jpg",
+    },
+    {
+      id: 8,
+      category: "Coffees & Teas",
+      title: "Encore Stuffed Alaskan Salmon",
+      description: "By NestFood",
+      price: "$35.85",
+      oldPrice: "$37.8",
+      image: "https://ecstasybd.com/all-images/product/Product-Image-1652012223.jpg",
+    },
+    {
+      id: 9,
+      category: "Vegetables",
+      title: "Gorton's Beer Battered Fillets",
+      description: "By Old El Paso",
+      price: "$23.85",
+      oldPrice: "$25.8",
+      image: "https://ecstasybd.com/all-images/product/Product-Image-1713934674.jpg",
+    },
+  ];
 
-export default function PopularProducts() {
+  const filteredProducts = activeCategory === "All" ? products : products.filter(product => product.category === activeCategory);
+
   return (
-    <section
-      style={{
-        padding: "2rem", // Section padding
-        backgroundColor: "#FFFFFF", // Background color
-      }}
-    >
-      {/* Section Title */}
-      <h2
-        style={{
-          fontSize: "1.75rem", // Title font size
-          fontWeight: "700", // Bold text
-          textAlign: "left", // Align left
-          marginBottom: "1rem", // Space below title
-        }}
-      >
-        Popular Products
-      </h2>
+    <div className="px-6 py-4  ml-2 mr-2">
+      {/* Header and Categories */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-black ml-5">Products</h2>
+        <div className="flex gap-4 text-sm mr-3">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={`${
+                activeCategory === category
+                  ? "text-green-500 border-b-2 border-green-500"
+                  : "text-gray-500"
+              } font-medium px-2 pb-1 hover:text-green-500 transition`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {/* Products Grid */}
-      <div
-        style={{
-          display: "grid", // Grid layout
-          gridTemplateColumns: "repeat(4, 1fr)", // Four columns
-          gap: "1rem", // Space between items
-        }}
-      >
-        {products.map((product, index) => (
-          <div
-            key={index}
-            style={{
-              border: "1px solid #E5E7EB", // Light border
-              borderRadius: "0.5rem", // Rounded corners
-              padding: "1rem", // Padding inside the card
-              backgroundColor: "#FFFFFF", // White background
-              boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Subtle shadow
-              textAlign: "center", // Center content
-            }}
+
+{/* Products Grid */}
+      <div className="grid grid-cols-5 gap-3 ml-3 mr-3">
+        {filteredProducts.map((product) => (
+          <a 
+            href={`/product_details/`}
+            key={product.id}
+            className="block border border-gray rounded-lg p-4 shadow-md hover:shadow-lg transition relative group bg-white no-underline"
           >
-            {/* Product Tag */}
-            {product.tag && (
-              <span
-                style={{
-                  display: "inline-block",
-                  backgroundColor:
-                    product.tag === "Hot"
-                      ? "#F87171" // Red for "Hot"
-                      : product.tag === "New"
-                      ? "#3B82F6" // Blue for "New"
-                      : "#10B981", // Green for "Sale"
-                  color: "#FFFFFF", // White text
-                  fontSize: "0.75rem", // Small font size
-                  fontWeight: "600", // Semi-bold
-                  padding: "0.25rem 0.5rem", // Padding inside tag
-                  borderRadius: "0.25rem", // Rounded tag
-                  position: "absolute", // Position above card
-                  top: "1rem",
-                  left: "1rem",
-                }}
-              >
-                {product.tag}
-              </span>
-            )}
-
-            {/* Product Image */}
-            <img
-              src={product.image}
-              alt={product.name}
-              style={{
-                width: "100%", // Full width
-                height: "150px", // Fixed height
-                objectFit: "cover", // Maintain aspect ratio
-                borderRadius: "0.25rem", // Slightly rounded edges
-                marginBottom: "1rem", // Space below image
-              }}
-            />
-
-            {/* Product Name */}
-            <h3
-              style={{
-                fontSize: "1rem", // Slightly larger than body text
-                fontWeight: "600", // Semi-bold
-                marginBottom: "0.5rem", // Space below title
-              }}
-            >
-              {product.name}
-            </h3>
-
-            {/* Product Prices */}
-            <p
-              style={{
-                fontSize: "0.875rem", // Small font size
-                color: "#10B981", // Green color for current price
-                fontWeight: "700", // Bold text
-                marginBottom: "0.25rem", // Space below price
-              }}
-            >
-              {product.price}
+            {/* Image Container */}
+            <div className="w-full h-[200px] flex items-center justify-center bg-gray-50 rounded-lg border border-gray shadow mb-4">
+              <Image 
+                src={product.image} 
+                alt={product.title} 
+                className="max-w-[170px] h-[200px] object-contain"
+              />
+            </div>
+            {/* Rest of the product card content remains the same */}
+            <p style={{ fontSize: "12px"}} className="text-gray-500 mb-1 truncate">
+              {product.category}
             </p>
-            {product.oldPrice && (
-              <p
-                style={{
-                  fontSize: "0.75rem", // Smaller font for old price
-                  color: "#9CA3AF", // Gray text
-                  textDecoration: "line-through", // Strikethrough
-                }}
+            <h3 style={{ fontSize: "15px"}} className="text-base font-medium mb-1 text-gray-800 line-clamp-2">
+              {product.title}
+            </h3>
+            <p className="text-xs text-gray-400 mb-2 truncate">
+              {product.description}
+            </p>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-green-500 font-bold text-sm">{product.price}</span>
+                <span className="text-gray-400 line-through text-xs">{product.oldPrice}</span>
+              </div>
+            </div>
+            <button 
+              style={{ fontSize: "12px"}}
+              className="absolute bottom-4 right-4 bg-green-500 text-white px-3 py-2 rounded-full hover:bg-green-600 transition flex items-center gap-2"
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                strokeWidth="1.5" 
+                stroke="currentColor" 
+                className="w-4 h-4"
               >
-                {product.oldPrice}
-              </p>
-            )}
-          </div>
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.6 8M7 13h10l4-8H5.4m-2.4 0l1.6 8m-1.6-8h16.4m-1.6 8L17 21m-10-8L5 21m10 0h4"
+                />
+              </svg>
+              Add
+            </button>
+          </a>
         ))}
       </div>
-    </section>
+
+      {/* View All Button */}
+      {activeCategory === "All" && (
+        <div className="mt-6 text-center">
+          <a
+            href="/product_list"
+            className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition cursor-pointer inline-block text-center"
+          >
+            View All
+          </a>
+        </div>
+      )}
+    </div>
   );
 }

@@ -14,7 +14,7 @@ from .views import (
     OTPRegistrationView, 
     OTPVerificationView,
     UserRoleViewSet,
-    UserRolesByUserID
+    UserRolesByUserID,
 )
 from rest_framework.routers import DefaultRouter
 

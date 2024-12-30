@@ -9,7 +9,7 @@ from rest_framework.response import Response
 
 # Public Imports
 
-from .serializers import CategoryPublicSerializer, SubcategoryPublicSerializer, ColorPublicSerializer, BrandPublicSerializer
+from .serializers import CategoryPublicSerializer, SubcategoryPublicSerializer, ColorPublicSerializer, BrandPublicSerializer, ChildcategoryPublicSerializer, SizePublicSerializer, ModelPublicSerializer
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -100,14 +100,32 @@ class SubCategoryPublicViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
 
+class ChildcategoryPublicViewSet(viewsets.ModelViewSet):
+    queryset = ChildCategory.objects.all()
+    serializer_class = ChildcategoryPublicSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+
 class ColorPublicViewSet(viewsets.ModelViewSet):
     queryset = Color.objects.all()
     serializer_class = ColorPublicSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
 
+class SizePublicViewSet(viewsets.ModelViewSet):
+    queryset = Size.objects.all()
+    serializer_class = SizePublicSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+
 class BrandPublicViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandPublicSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+
+class ModelPublicViewSet(viewsets.ModelViewSet):
+    queryset = Model.objects.all()
+    serializer_class = ModelPublicSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination

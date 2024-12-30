@@ -1,7 +1,8 @@
 from django.db import transaction
 from rest_framework import serializers
-from .models import Product, ProductImage, OrderItem, UserOrder, ProductVariant, WholesalePrice
+from .models import Product, ProductImage, OrderItem, UserOrder, ProductVariant, WholesalePrice, CartItem, Cart
 from core.models import Category, SubCategory, ChildCategory, Brand, Model, Color, Size
+from users.models import SellerProfile, DealerProfile
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -28,6 +29,8 @@ class ProductSerializer(serializers.ModelSerializer):
     brand_name = serializers.CharField(source='brand.brand_name', read_only=True)
     model_name = serializers.CharField(source='model.model_name', read_only=True)
     quantity = serializers.IntegerField(source='stock_quantity',  allow_null=True, required=False)
+
+    # Additonal Parts
     
     additionalImages = ProductImageSerializer(many=True, read_only=True, source='images')
     wholesale_prices = WholesalePriceSerializer(many=True, read_only=True, source='wholesaleproduct')
@@ -37,7 +40,8 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id',  # Automatically generated field
+            'id',  
+            'user',
             'product_name',
             'product_type',
             'product_description',
@@ -56,29 +60,31 @@ class ProductSerializer(serializers.ModelSerializer):
             'model_name',
             'price',
             'discount',
-            'slug',  # Auto-generated, read-only field
+            'slug', 
             'guarantee',
             'warranty',
             'additionalImages',
             'is_active',
-            'created_at',  # Automatically generated field
-            'modified_at',  # Automatically generated field
+            'created_at', 
+            'modified_at',  
             'wholesale_prices',
             'product_variants',
+        
         ]
         read_only_fields = ['id', 'slug', 'created_at', 'modified_at']
 
     def create(self, validated_data):
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
-            validated_data['user'] = request.user  # Automatically associate the user
+            validated_data['user'] = request.user
         product_name = validated_data.get('product_name')
         product_code = validated_data.get('product_code')
 
-        # Generate slug by combining product_name and product_code, replacing spaces with hyphens
+        #------------Auto Slug Store--------------
+
         validated_data['slug'] = f"{product_name}-{product_code}".replace(" ", "-").lower()
 
-        # Replace spaces with underscores in product_code
+   
         validated_data['product_code'] = product_code.replace(" ", "_")
 
         return super().create(validated_data)
@@ -88,13 +94,15 @@ class ProductSerializer(serializers.ModelSerializer):
             product_name = validated_data.get('product_name', instance.product_name)
             product_code = validated_data.get('product_code', instance.product_code)
 
-            # Regenerate slug with updated product_name and product_code
+       
             instance.slug = f"{product_name}-{product_code}".replace(" ", "-").lower()
 
-            # Replace spaces with underscores in product_code
             instance.product_code = product_code.replace(" ", "_")
 
         return super().update(instance, validated_data)
+    
+
+#------------------------------------Order Item-------------------------------------
 
 
 
@@ -136,7 +144,6 @@ class UserOrderSerializer(serializers.ModelSerializer):
                 if product.stock_quantity < quantity:
                     raise serializers.ValidationError(f"Not enough stock for {product.product_name}")
             
-            # Deduct stock and calculate total
             product.stock_quantity -= quantity
             product.save()
             order_item = OrderItem.objects.create(order=order, product=product, quantity=quantity, price=price)
@@ -146,11 +153,34 @@ class UserOrderSerializer(serializers.ModelSerializer):
         order.save()
         return order
     
+#---------------------------------------Order End---------------------------------
+    
+
+#-------------------------------------------------CART---------------------------------------------
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product', 'quantity', 'subtotal']
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+    total_price = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Cart
+        fields = ['id', 'items', 'total_price']
+
+#------------------------------------------------------X-------------------------------------------------
+    
 
 
 
-#----------------------------------------------------------------xxxxxxxx--------------------------------------------------------
-#----------------------------------------------------------------Publc----------------------------------------------------------
+#----------------------------------------------------------------Private END--------------------------------------------------------
+
+
+#----------------------------------------------------------------Publc Start ----------------------------------------------------------
 
 class ProductPublicSerializer(serializers.ModelSerializer):
 
@@ -245,4 +275,60 @@ class ProductImagePublicSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ['id', 'image', 'alt_text', 'product']
         read_only_fields = ['id', 'image', 'alt_text', 'product']
+
+
+
+#--------------------------------------------------Store--------------------------------
+
+
+class SellerStoreSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id')
+    
+    class Meta:
+        model = SellerProfile
+        fields = ['user_id', 'store_name', 'store_email', 'status']
+
+class DealerStoreSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id')
+    
+    class Meta:
+        model = DealerProfile
+        fields = ['user_id', 'business_name', 'business_email', 'status']
+
+class StoreProfileSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    name = serializers.CharField()
+    type = serializers.CharField()
+    email = serializers.EmailField()
+    status = serializers.CharField()
+
+
+#-----------------------------------------Store Product---------------------------------------
+
+
+class ProductByStoreSerializer(serializers.ModelSerializer):
+
+    brand_name = serializers.CharField(source='brand.name', read_only=True, allow_null=True)
+    model_name = serializers.CharField(source='model.name', read_only=True, allow_null=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            'id', 
+            'product_name', 
+            'product_type', 
+            'product_description', 
+            'product_code', 
+            'product_image', 
+            'category', 
+            'sub_category', 
+            'child_category', 
+            'brand_name', 
+            'model_name', 
+            'price', 
+            'discount', 
+            'slug', 
+            'stock_quantity', 
+            'is_active'
+        ]
 

@@ -76,6 +76,18 @@ class SubcategoryPublicSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['categoryid', 'subcategory_name', 'is_active', 'created_at', 'modified_at']
 
+class ChildcategoryPublicSerializer(serializers.ModelSerializer):
+
+    # Use category_name as a read-only field from the related Category model
+    category_name = serializers.CharField(source='categoryid.category_name', read_only=True)
+    # Use subcategory_name as a read-only field from the related SubCategory model
+    subcategory_name = serializers.CharField(source='subcategoryid.subcategory_name', read_only=True)
+
+    class Meta:
+        model = ChildCategory
+        fields = ['id', 'childcategory_name', 'is_active', 'created_at', 'modified_at', 'categoryid', 'category_name', 'subcategoryid', 'subcategory_name']
+        read_only_fields = ['id', 'childcategory_name', 'is_active', 'created_at', 'modified_at', 'categoryid', 'category_name', 'subcategoryid', 'subcategory_name']
+
 class ColorPublicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Color
@@ -87,4 +99,22 @@ class BrandPublicSerializer(serializers.ModelSerializer):
         model = Brand
         fields = '__all__'
         read_only_fields = ['brandid', 'model_name', 'is_active', 'created_at', 'modified_at']
+
+class ModelPublicSerializer(serializers.ModelSerializer):
+
+    brand_name = serializers.CharField(source='brandid.brand_name', read_only=True)
+
+    class Meta:
+        model = Model
+        fields = ['id', 'model_name', 'brand_name', 'brandid', 'is_active', 'created_at', 'modified_at']
+        read_only_fields =  ['id', 'model_name', 'brand_name', 'brandid', 'is_active', 'created_at', 'modified_at']
+
+
+class SizePublicSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Size
+        fields = ['id', 'size_name', 'is_active', 'created_at', 'modified_at']
+        read_only_fields = ['id', 'size_name', 'is_active', 'created_at', 'modified_at']
 

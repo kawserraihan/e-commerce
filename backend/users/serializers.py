@@ -72,3 +72,9 @@ class DealerProfileSerializer(serializers.ModelSerializer):
             'id', 'user', 'nid_no', 'nid_front_image', 'nid_back_image', 'trade_license',
             'trade_license_image', 'business_name', 'business_logo', 'business_email', 'business_phone', 'status'
         ]
+
+
+
+
+
+

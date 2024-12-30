@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 import random
 import string
+from products.models import Cart
 # import logging
 
 # logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ class UserAccountManager(BaseUserManager):
         try:
             user.set_password(password)
             user.save(using=self._db)
+            Cart.objects.create(user=user)
             # logger.info(f"User created successfully: {email}")
             return user
         except Exception as e:

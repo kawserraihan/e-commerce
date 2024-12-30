@@ -1,21 +1,31 @@
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ProductViewSet, ProductImageViewSet, UserOrderViewSet, ProductStockUpdateView, ProductVariantViewSet, WholesalePriceViewSet, WholesalePricePublicViewSet
 
 #------Public Imports For Products-----
 
-from .views import ProductPublicViewSet, ProductVariantPublicViewSet, ProductImagePublicViewSet
+from .views import ProductViewSet, ProductImageViewSet, UserOrderViewSet, ProductStockUpdateView, ProductVariantViewSet, WholesalePriceViewSet, CartViewSet
+
+#------Public Imports For Products-----
+
+from .views import ProductPublicViewSet, ProductVariantPublicViewSet, ProductImagePublicViewSet, WholesalePricePublicViewSet, StoreProfileView, StoreProductView
 
 
 router = DefaultRouter()
+
+#-------------------------------------Private Routes--------------------------------
+
 router.register(r'products', ProductViewSet, basename='product')
 router.register(r'product-images', ProductImageViewSet, basename='product-image')
 router.register(r'orders', UserOrderViewSet, basename='userorder')
 router.register(r'product-variants', ProductVariantViewSet, basename='product-variant')
 router.register(r'wholesale-prices', WholesalePriceViewSet, basename='wholesale-price')
+router.register(r'carts', CartViewSet, basename='cart')
 
-#---------------------------Public--------------------------------
+
+#---------------------------Public Routes--------------------------------
+
+
 
 router.register(r'productspub', ProductPublicViewSet, basename='productpub')
 router.register(r'wholesale-public', WholesalePricePublicViewSet, basename='wholesalepub')
@@ -26,6 +36,9 @@ router.register(r'additional-images', ProductImagePublicViewSet, basename='addit
 urlpatterns = [
     path('', include(router.urls)),
     path('products/<int:pk>/update-stock/', ProductStockUpdateView.as_view(), name='product-update-stock'),
+    path('stores/', StoreProfileView.as_view()),
+    path('stores/<int:user_id>/', StoreProfileView.as_view()),
+    path('stores/<int:user_id>/products/', StoreProductView.as_view(), name='store-products'),
 
 ]
 

@@ -1,21 +1,29 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Product, ProductImage, UserOrder, ProductVariant, WholesalePrice
-from .serializers import ProductSerializer, ProductImageSerializer, ProductVariantSerializer, WholesalePriceSerializer, UserOrderSerializer
+from .models import Product, ProductImage, UserOrder, ProductVariant, WholesalePrice, Cart, CartItem
+from users.models import SellerProfile, DealerProfile
+
+from .serializers import ProductSerializer, ProductImageSerializer, ProductVariantSerializer, WholesalePriceSerializer, UserOrderSerializer, CartSerializer, CartItemSerializer
+
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from users.authentication import CustomJwtAuthentication
+
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 
-from rest_framework.exceptions import ValidationError  # Import ValidationError
+from rest_framework.exceptions import ValidationError  
 
-#----------------------------------------
-from .serializers import ProductVariantPublicSerializer, ProductPublicSerializer, WholesalePricePublicSerializer, ProductImagePublicSerializer
+#----------------------------------------Imports For Public Use--------------------------------
+
+from .serializers import ProductVariantPublicSerializer, ProductPublicSerializer, WholesalePricePublicSerializer, ProductImagePublicSerializer, StoreProfileSerializer, ProductByStoreSerializer
+
 
 import logging
 
@@ -27,7 +35,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     authentication_classes = [CustomJwtAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = PageNumberPagination
-    parser_classes = (MultiPartParser, FormParser, JSONParser)  # To handle file uploads
+    parser_classes = (MultiPartParser, FormParser, JSONParser) 
 
 
 class ProductVariantViewSet(ModelViewSet):
@@ -123,34 +131,34 @@ class UserOrderViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
 
     def perform_create(self, serializer):
-        print("perform_create called")  # Debug print statement
+        print("perform_create called")  # Debug
         if not self.request.user.is_authenticated:
             print("Error: User must be authenticated to create an order.")
             raise ValidationError("User must be authenticated.")
         
-        print(f"Attaching user {self.request.user} to the order.")  # Debug print statement
-        serializer.save(user=self.request.user)  # Attach the authenticated user to the order
+        print(f"Attaching user {self.request.user} to the order.")  # Debug
+        serializer.save(user=self.request.user)  
 
     def create(self, request, *args, **kwargs):
-        print("Received order creation request with data:", request.data)  # Debug print statement
+        print("Received order creation request with data:", request.data)  # Debug 
         serializer = self.get_serializer(data=request.data)
         
         if serializer.is_valid():
-            print("Data is valid, attempting to save order.")  # Debug print statement
+            print("Data is valid, attempting to save order.")  # Debug 
             self.perform_create(serializer)
-            print("Order created successfully.")  # Debug print statement
+            print("Order created successfully.")  # Debug 
 
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         else:
-            print("Order creation failed due to invalid data:", serializer.errors)  # Debug print statement
+            print("Order creation failed due to invalid data:", serializer.errors)  # Debug 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProductStockUpdateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def patch(self, request, pk):
-        # Log initial request data for debugging
+        # debugging
         logger.debug(f"Received patch request for product ID {pk} with data: {request.data}")
 
         try:
@@ -174,7 +182,6 @@ class ProductStockUpdateView(APIView):
             logger.error("Quantity cannot be negative")
             return Response({"error": "Quantity cannot be negative"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Set and save the new stock quantity
         product.stock_quantity = new_stock_quantity
         product.save()
         logger.debug(f"Updated product {product.id} stock quantity to {product.stock_quantity}")
@@ -183,9 +190,74 @@ class ProductStockUpdateView(APIView):
     
 
 
+#--------------------------------------CART----------------------------------
 
-#----------------------------------------------------------------xxxxxxxx--------------------------------------------------------
-#----------------------------------------------------------------Publc-----------------------------------------------------------
+
+class CartViewSet(viewsets.ModelViewSet):
+    serializer_class = CartSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = PageNumberPagination
+    lookup_field = 'user_id'
+
+    def get_queryset(self):
+        return Cart.objects.all()
+
+    @action(detail=True, methods=['POST'])
+    def items(self, request, user_id=None):
+        """Add item to cart"""
+        cart = get_object_or_404(Cart, user_id=user_id)
+        
+    
+        product_id = request.data.get('product_id')
+        quantity = request.data.get('quantity', 1)
+        
+        if not product_id:
+            return Response(
+                {"detail": "product_id is required"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+ 
+        product = get_object_or_404(Product, id=product_id)
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart,
+            product=product,
+            defaults={'quantity': quantity}
+        )
+        
+ 
+        if not created:
+            cart_item.quantity = quantity
+            cart_item.save()
+        
+        serializer = CartItemSerializer(cart_item)
+        return Response(
+            serializer.data, 
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['DELETE'])
+    def remove_item(self, request, user_id=None):
+        """Remove item from cart"""
+        cart = get_object_or_404(Cart, user_id=user_id)
+        item_id = request.query_params.get('item_id')
+        
+        if not item_id:
+            return Response(
+                {"detail": "item_id is required"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        cart_item = get_object_or_404(CartItem, cart=cart, id=item_id)
+        cart_item.delete()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+
+
+#----------------------------------------------------------------Private END--------------------------------------------------------
+
+#----------------------------------------------------------------Publc Start-----------------------------------------------------------
 
 
 class ProductPublicViewSet(viewsets.ModelViewSet):
@@ -195,9 +267,7 @@ class ProductPublicViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
 
 class WholesalePricePublicViewSet(ModelViewSet):
-    """
-    API for managing wholesale prices.
-    """
+
     queryset = WholesalePrice.objects.all()
     serializer_class = WholesalePricePublicSerializer
     permission_classes = [permissions.AllowAny]
@@ -213,9 +283,7 @@ class WholesalePricePublicViewSet(ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='(?P<product_id>[^/.]+)')
     def list_wholesale_price(self, request, product_id=None):
-        """
-        Custom action to retrieve prices for a specific product by product_id.
-        """
+
         prices = self.queryset.filter(product_id=product_id)
         page = self.paginate_queryset(prices)
         if page is not None:
@@ -226,9 +294,7 @@ class WholesalePricePublicViewSet(ModelViewSet):
         return Response(serializer.data)
 
 class ProductVariantPublicViewSet(ModelViewSet):
-    """
-    API for managing product variants.
-    """
+
     queryset = ProductVariant.objects.all()
     serializer_class = ProductVariantPublicSerializer
     permission_classes = [permissions.AllowAny]
@@ -244,9 +310,7 @@ class ProductVariantPublicViewSet(ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='(?P<product_id>[^/.]+)')
     def list_of_variants(self, request, product_id=None):
-        """
-        Custom action to retrieve variants for a specific product by product_id.
-        """
+
         variants = self.queryset.filter(product_id=product_id)
         page = self.paginate_queryset(variants)
         if page is not None:
@@ -270,9 +334,7 @@ class ProductImagePublicViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='(?P<product_id>[^/.]+)')
     def list_product_images(self, request, product_id=None):
-        """
-        Custom action to retrieve images for a specific product by product_id.
-        """
+
         images = self.queryset.filter(product_id=product_id)
         page = self.paginate_queryset(images)
         if page is not None:
@@ -281,6 +343,153 @@ class ProductImagePublicViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(images, many=True)
         return Response(serializer.data)
+    
+
+
+#-----------------------------------------------Store--------------------------------------------
+
+
+
+class StoreProfileView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+    def get(self, request):
+        try:
+      
+            seller_profiles = SellerProfile.objects.select_related('user').all()
+            dealer_profiles = DealerProfile.objects.select_related('user').all()
+
+        
+            combined_stores = []
+            
+            for seller in seller_profiles:
+                combined_stores.append({
+                    'user_id': seller.user.id,
+                    'name': seller.store_name,
+                    'type': 'seller',
+                    'email': seller.store_email,
+                    'status': seller.status
+                })
+            
+            for dealer in dealer_profiles:
+                combined_stores.append({
+                    'user_id': dealer.user.id,
+                    'name': dealer.business_name,
+                    'type': 'dealer',
+                    'email': dealer.business_email,
+                    'status': dealer.status
+                })
+
+          
+            if not combined_stores:
+                return Response({
+                    'message': 'No store profiles found',
+                    'stores': []
+                }, status=status.HTTP_404_NOT_FOUND)
+
+        
+            serializer = StoreProfileSerializer(combined_stores, many=True)
+            
+            return Response({
+                'message': 'Stores retrieved successfully',
+                'stores': serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+         
+            return Response({
+                'message': 'An error occurred while fetching store profiles',
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get_store_by_user_id(self, request, user_id):
+        try:
+         
+            try:
+                seller_profile = SellerProfile.objects.select_related('user').get(user_id=user_id)
+                store_data = {
+                    'user_id': seller_profile.user.id,
+                    'name': seller_profile.store_name,
+                    'type': 'seller',
+                    'email': seller_profile.store_email,
+                    'status': seller_profile.status
+                }
+                serializer = StoreProfileSerializer(store_data)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except SellerProfile.DoesNotExist:
+              
+                try:
+                    dealer_profile = DealerProfile.objects.select_related('user').get(user_id=user_id)
+                    store_data = {
+                        'user_id': dealer_profile.user.id,
+                        'name': dealer_profile.business_name,
+                        'type': 'dealer',
+                        'email': dealer_profile.business_email,
+                        'status': dealer_profile.status
+                    }
+                    serializer = StoreProfileSerializer(store_data)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                except DealerProfile.DoesNotExist:
+                    return Response({
+                        'message': f'No store profile found for user ID {user_id}'
+                    }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({
+                'message': 'An error occurred while fetching store profile',
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+#----------------------------------------Products By Store---------------------------
+        
+
+class StoreProductView(APIView):
+    permission_classes = [permissions.AllowAny]
+    pagination_class = PageNumberPagination
+
+    def get(self, request, user_id):
+        try:
+    
+            is_seller = SellerProfile.objects.filter(user_id=user_id).exists()
+            is_dealer = DealerProfile.objects.filter(user_id=user_id).exists()
+
+        
+            if not (is_seller or is_dealer):
+                return Response({
+                    'message': 'No store found for the given user ID',
+                    'products': []
+                }, status=status.HTTP_404_NOT_FOUND)
+
+       
+            products = Product.objects.filter(user_id=user_id).select_related(
+                'category', 'sub_category', 'child_category', 
+                'brand', 'model'
+            )
+
+            
+            if not products.exists():
+                return Response({
+                    'message': 'No products found for this store',
+                    'products': []
+                }, status=status.HTTP_404_NOT_FOUND)
+
+   
+            paginator = self.pagination_class()
+            paginated_products = paginator.paginate_queryset(products, request)
+
+            serializer = ProductByStoreSerializer(paginated_products, many=True)
+
+     
+            return paginator.get_paginated_response(serializer.data)
+
+        except Exception as e:
+            
+            return Response({
+                'message': 'An error occurred while fetching store products',
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
 

@@ -111,14 +111,14 @@ const Users = () => {
         {/* Pagination controls */}
 
       </div>
-      {isModalOpen && <AddUserModal isOpen={isModalOpen} onClose={closeModal} />}
+      {/* {isModalOpen && <AddUserModal isOpen={isModalOpen} onClose={closeModal} />}
       {isEditModalOpen && (
         <EditUserModal
           isOpen={isEditModalOpen}
           onClose={closeEditModal}
           user={selectedUser}
         />
-      )}
+      )} */}
 
     </DefaultLayout>
   )

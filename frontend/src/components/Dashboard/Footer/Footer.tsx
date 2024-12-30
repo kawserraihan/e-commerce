@@ -1,4 +1,6 @@
+"use client"
 import React from 'react';
+import Image from 'next/image';
 
 
 interface Props {
@@ -9,7 +11,7 @@ export default function Footer() {
   return (
     <footer
       style={{
-        backgroundColor: "#f9f9f9",
+        backgroundColor: "#ffffff",
         padding: "3rem 2rem",
         fontFamily: "Arial, sans-serif",
       }}
@@ -85,17 +87,17 @@ export default function Footer() {
           {
             icon: "🛒",
             title: "Best prices & offers",
-            description: "Orders $50 or more",
+            description: "Order Now",
           },
           {
             icon: "🚚",
-            title: "Free delivery",
+            title: "Home delivery",
             description: "24/7 amazing services",
           },
           {
             icon: "💸",
             title: "Great daily deal",
-            description: "When you sign up",
+            description: "Everyday Discounts",
           },
           {
             icon: "🛍️",
@@ -105,7 +107,7 @@ export default function Footer() {
           {
             icon: "🔄",
             title: "Easy returns",
-            description: "Within 30 days",
+            description: "Based On Products",
           },
         ].map((item, index) => (
           <div
@@ -144,121 +146,154 @@ export default function Footer() {
         ))}
       </div>
 
-      {/* Footer Links */}
+
+      {/* Footer Bottom */}
+      <div className="px-6 py-4 bg-white">
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
+          gridTemplateColumns: "repeat(4, 1fr)",
           gap: "2rem",
         }}
       >
-        {/* About Section */}
+        {/* MSmart Info Section */}
         <div>
-          <img
-            src="/images/logo.png"
-            alt="Nest Logo"
-            style={{ width: "120px", marginBottom: "1rem" }}
+          <Image
+            src="https://demoapi.anticbyte.com/media/banners/msmart.png"
+            alt="MSmart Logo"
+            style={{ width: "150px", marginBottom: "1rem" }}
           />
-          <p style={{ marginBottom: "1rem", color: "#6b7280" }}>
-            Awesome grocery store website template
-          </p>
           <address style={{ color: "#6b7280", fontSize: "0.875rem" }}>
-            <p>Address: 5171 W Campbell Ave, Kent, UT 53127 United States</p>
+            <p>+880 1877 716660</p>
             <p>
-              Email:{" "}
-              <a
-                href="mailto:email@example.com"
-                style={{ color: "#10b981", textDecoration: "none" }}
-              >
-                email@example.com
-              </a>
+              Email: <a href="mailto:info@msmart.shop" style={{ color: "#10b981", textDecoration: "none" }}>info@msmart.shop</a>
             </p>
-            <p>Phone: +91 (0) 123-456789</p>
-            <p>Hours: 10:00 - 18:00, Mon - Sat</p>
+            <p>বাড়ি # ৩১, রোড # ০৯, সেক্টর # ১৫, উত্তরা, ঢাকা-১২৩০</p>
           </address>
         </div>
 
-        {/* Dynamic Links Sections */}
-        {[
-          {
-            title: "Company",
-            links: [
-              "About Us",
-              "Delivery Information",
-              "Privacy Policy",
-              "Terms & Conditions",
-              "Contact Us",
-              "Careers",
-            ],
-          },
-          {
-            title: "Account",
-            links: [
-              "Sign In",
-              "View Cart",
-              "My Wishlist",
-              "Track My Order",
-              "Help Ticket",
-              "Shipping Details",
-            ],
-          },
-          {
-            title: "Corporate",
-            links: [
-              "Become a Vendor",
-              "Affiliate Program",
-              "Farm Business",
-              "Our Suppliers",
-              "Accessibility",
-              "Promotions",
-            ],
-          },
-          {
-            title: "Popular",
-            links: [
-              "Milk & Flavoured Milk",
-              "Butter and Margarine",
-              "Egg Substitutes",
-              "Marmalades",
-              "Sour Cream and Dips",
-              "Tea & Kombucha",
-            ],
-          },
-        ].map((section, index) => (
-          <div key={index}>
-            <h4
-              style={{
-                fontSize: "1.25rem",
-                fontWeight: "600",
-                marginBottom: "1rem",
-                color: "#111827",
-              }}
-            >
-              {section.title}
-            </h4>
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {section.links.map((link, i) => (
-                <li
-                  key={i}
+        {/* Earn With MSmart Section */}
+        <div>
+          <h4
+            style={{
+              fontSize: "1.25rem",
+              fontWeight: "600",
+              marginBottom: "1rem",
+              color: "#111827",
+            }}
+          >
+            Earn With MSmart
+          </h4>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {[
+              "Be a MSmart Seller",
+              "Be a MSmart Dealer",
+              "MSmart Affiliate Program",
+            ].map((item, index) => (
+              <li
+                key={index}
+                style={{
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <a
+                  href="#"
                   style={{
-                    marginBottom: "0.5rem",
+                    color: "#6b7280",
+                    textDecoration: "none",
+                    fontSize: "0.875rem",
                   }}
                 >
-                  <a
-                    href="#"
-                    style={{
-                      color: "#6b7280",
-                      textDecoration: "none",
-                      fontSize: "0.875rem",
-                    }}
-                  >
-                    {link}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+                  {item}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Our Policy/Customer Service Section */}
+        <div>
+          <h4
+            style={{
+              fontSize: "1.25rem",
+              fontWeight: "600",
+              marginBottom: "1rem",
+              color: "#111827",
+            }}
+          >
+            Our Policy/Customer Service
+          </h4>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {[
+              "About Us",
+              "Go to Contact Us/Write your Opinion",
+              "How To Order",
+              "Track Your Orders",
+              "Terms And Conditions",
+              "Privacy & Policy",
+              "Return & Return policy",
+              "FAQ",
+            ].map((item, index) => (
+              <li
+                key={index}
+                style={{
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <a
+                  href="#"
+                  style={{
+                    color: "#6b7280",
+                    textDecoration: "none",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  {item}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Contact Us/Help Center Section */}
+        <div>
+          <h4
+            style={{
+              fontSize: "1.25rem",
+              fontWeight: "600",
+              marginBottom: "1rem",
+              color: "#111827",
+            }}
+          >
+            Contact Us/Help Center
+          </h4>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {[
+              "Hotline",
+              "WhatsApp",
+              "Email",
+              "Head Office",
+            ].map((item, index) => (
+              <li
+                key={index}
+                style={{
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <a
+                  href="#"
+                  style={{
+                    color: "#6b7280",
+                    textDecoration: "none",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  {item}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {/* Footer Bottom */}
@@ -267,31 +302,16 @@ export default function Footer() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginTop: "3rem",
+          marginTop: "1rem",
           borderTop: "1px solid #e5e7eb",
-          paddingTop: "1.5rem",
+          paddingTop: "1rem",
         }}
       >
         <p style={{ fontSize: "0.875rem", color: "#6b7280" }}>
-          © 2022 Nest - HTML Ecommerce Template. All rights reserved.
+          © 2022 MSmart - All rights reserved.
         </p>
-        <div style={{ display: "flex", gap: "1rem" }}>
-          <a href="#">
-            <img
-              src="/images/appstore.png"
-              alt="App Store"
-              style={{ width: "120px" }}
-            />
-          </a>
-          <a href="#">
-            <img
-              src="/images/playstore.png"
-              alt="Play Store"
-              style={{ width: "120px" }}
-            />
-          </a>
-        </div>
       </div>
+    </div>
     </footer>
   );
 }

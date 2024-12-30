@@ -4,12 +4,12 @@ import React from 'react'
 import { toast } from 'react-toastify';
 import { useRegisterMutation } from '../../../../redux/features/authApiSlice';
 
-interface AddUserModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+// interface AddUserModalProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+// }
 
-const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
+const AddUserModal = () => {
   const [register, { isLoading: isRegistering }] = useRegisterMutation();
 
   const {
@@ -48,11 +48,11 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
       <div className="bg-white p-6 rounded-md shadow-md w-full max-w-md">
         <div className='flex justify-between items-center mb-4'>
           <h2 className="text-lg font-semibold ">Add New User</h2>
-          <button onClick={onClose} className=" text-blue-500 hover:underline">
+          {/* <button onClick={onClose} className=" text-blue-500 hover:underline">
             Close
-          </button>
+          </button> */}
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {/* <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label htmlFor="productCode" className="text-sm font-medium">First Name</label>
           <input
             type="text"
@@ -109,9 +109,9 @@ const AddUserModal = ({ isOpen, onClose }: AddUserModalProps) => {
           //  disabled={isLoading}
           >
             Add new User
-            {/* {isLoading ? 'Adding...' : 'Add Product'} */}
+         
           </button>
-        </form>
+        </form> */}
 
       </div>
     </div>

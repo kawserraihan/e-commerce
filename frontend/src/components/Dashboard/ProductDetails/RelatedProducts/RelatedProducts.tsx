@@ -1,5 +1,7 @@
 
+"use client"
 import React from "react";
+import Image from 'next/image';
 
 interface Props {
   children: React.ReactNode;
@@ -101,7 +103,7 @@ export default function RelatedProducts() {
             </span>
 
             {/* Product Image */}
-            <img
+            <Image
               src={product.image}
               alt={product.name}
               style={{

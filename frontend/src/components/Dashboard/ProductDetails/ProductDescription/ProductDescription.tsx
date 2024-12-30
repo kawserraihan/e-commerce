@@ -1,4 +1,5 @@
 
+"use client"
 import React, { useState } from "react";
 
 interface Props {
@@ -113,7 +114,7 @@ export default function ProductDescription() {
       </div>
 
       {/* Tab Content */}
-      <div>{tabContent[activeTab]}</div>
+      <div>{tabContent[activeTab as keyof typeof tabContent]}</div>
     </div>
   );
 }

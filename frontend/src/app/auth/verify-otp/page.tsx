@@ -1,11 +1,12 @@
+// pages/auth/verify-otp.tsx
 import React from "react";
-import VerifyOtpPage from "@/components/forms/Verify-OTP";
+import dynamic from 'next/dynamic';
 import "react-toastify/dist/ReactToastify.css";
+// import VerifyOtpPage from "@/components/forms/Verify-OTP";
 
-export const metadata = {
-  title: "Next.js OTP Verification Page | MS Mart",
-  description: "Next.js OTP Verification Page | MS Mart",
-};
+const VerifyOtpPage = dynamic(() => import('@/components/forms/Verify-OTP'), {
+  ssr: false
+});
 
 const Verify: React.FC = () => {
   return (
@@ -18,9 +19,7 @@ const Verify: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             Enter the 6-digit code sent to your email to verify your account.
           </p>
-          <div className="mt-6">
-            <VerifyOtpPage />
-          </div>
+          <VerifyOtpPage />
         </div>
       </div>
     </div>

@@ -3,9 +3,11 @@ from core.models import Category, SubCategory, ChildCategory, Brand, Model, Colo
 from backend.settings import AUTH_USER_MODEL
 from django.core.exceptions import ValidationError
 
-# Products Model
+# Calling Auth From Users
 
 User = AUTH_USER_MODEL
+
+# Products
 
 class Product(models.Model):
     PRODUCT_TYPE_CHOICES = [
@@ -34,6 +36,7 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 
     def __str__(self):
         return self.product_name
@@ -137,3 +140,32 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.quantity} x {self.product.product_name}"
 
+
+
+
+
+#-------------------------------------------CART---------------------------------------------
+
+
+class Cart(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='cart')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def total_price(self):
+        return sum(item.subtotal for item in self.items.all())
+
+    def __str__(self):
+        return f"Cart {self.id} - Total: ${self.total_price():.2f}"
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+
+    @property
+    def subtotal(self):
+        return self.product.price * self.quantity
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name} - ${self.subtotal:.2f}"

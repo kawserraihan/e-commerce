@@ -1,25 +1,16 @@
-
+"use client";
 import React, { useEffect, useState } from "react";
-
-interface Props {
-  children: React.ReactNode;
-}
 
 export default function Hero() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Background colors for the hero section
-  const backgrounds = [
-    "#F0FDF4", // Light green
-    "#E0F7FA", // Light blue
-    "#FFF7E6", // Light orange
-    "#FDE2E4", // Light pink
+  // Image paths for the slider
+  const images = [
+    "https://demoapi.anticbyte.com/media/banners/slider_1.jpg",
+    "https://demoapi.anticbyte.com/media/banners/SLIDER-2.jpg"
   ];
 
-  // Image paths for the slider
-  const images = ["/images/deals.jpg", "/images/deals2.jpg"];
-
-  // Cycle through the backgrounds and images every 5 seconds
+  // Cycle through the images every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -27,115 +18,74 @@ export default function Hero() {
     return () => clearInterval(interval); // Cleanup on unmount
   }, [images.length]);
 
+  // Function to handle manual image switching
+  const handlePrevious = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+
   return (
     <section
       style={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: backgrounds[currentIndex], // Dynamically set background
-        transition: "background-color 1s ease-in-out", // Smooth transition effect
+        backgroundImage: `url(${images[currentIndex]})`, // Background image
+        backgroundSize: "cover", // Cover the entire section
+        backgroundPosition: "center", // Center the image
+        borderRadius: "1rem", // Rounded corners
         padding: "2rem",
-        borderRadius: "0.5rem",
-        margin: "1rem",
+        margin: "1rem auto", // Centered section
         position: "relative",
+        height: "400px", // Reduced height
+        width: "93%", // Slightly reduced width evenly
+        marginTop: "2rem",
       }}
     >
-      {/* Left Content */}
-      <div
+
+
+      {/* Navigation Buttons */}
+      <button
+        onClick={handlePrevious}
         style={{
-          flex: 1,
-          textAlign: "left",
-          alignSelf: "flex-start",
+          position: "absolute",
+          left: "1rem",
+          top: "50%",
+          transform: "translateY(-50%)",
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          color: "#fff",
+          border: "none",
+          borderRadius: "50%",
+          width: "2rem",
+          height: "2rem",
+          cursor: "pointer",
         }}
       >
-        {/* Title */}
-        <h1
-          style={{
-            fontSize: "2rem",
-            fontWeight: "bold",
-            color: "#065F46",
-            marginBottom: "1rem",
-            marginLeft: "0",
-          }}
-        >
-          Best Accessories <br /> Big Discount
-        </h1>
+        ‹
+      </button>
 
-        {/* Description */}
-        <p
-          style={{
-            fontSize: "1.125rem",
-            color: "#065F46",
-            marginBottom: "1.5rem",
-            marginLeft: "0",
-          }}
-        >
-          Save up to 50% off on your first order
-        </p>
-
-        {/* Input Field and Button */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginLeft: "0",
-          }}
-        >
-          {/* Input Field */}
-          <input
-            type="email"
-            placeholder="Your email address"
-            style={{
-              padding: "0.75rem",
-              border: "1px solid #D1D5DB",
-              borderRadius: "2rem 0 0 2rem",
-              flex: "1",
-              outline: "none",
-              fontSize: "1rem",
-              maxWidth: "250px",
-            }}
-          />
-
-          {/* Button */}
-          <button
-            style={{
-              padding: "0.75rem 1.5rem",
-              backgroundColor: "#10B981",
-              color: "#FFFFFF",
-              fontWeight: "bold",
-              border: "none",
-              borderRadius: "0 2rem 2rem 0",
-              cursor: "pointer",
-            }}
-          >
-            Subscribe
-          </button>
-        </div>
-      </div>
-
-      {/* Right Image Slider */}
-      <div
+      <button
+        onClick={handleNext}
         style={{
-          flex: 1,
-          textAlign: "right",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
+          position: "absolute",
+          right: "1rem",
+          top: "50%",
+          transform: "translateY(-50%)",
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          color: "#fff",
+          border: "none",
+          borderRadius: "50%",
+          width: "2rem",
+          height: "2rem",
+          cursor: "pointer",
         }}
       >
-        <img
-          src={images[currentIndex]} // Dynamically set the image
-          alt={`Hero Banner ${currentIndex + 1}`}
-          style={{
-            maxWidth: "100%",
-            height: "300px",
-            borderRadius: "0.375rem",
-            transition: "opacity 1s ease-in-out", // Smooth fade effect
-          }}
-        />
-      </div>
+        ›
+      </button>
+
     </section>
   );
 }

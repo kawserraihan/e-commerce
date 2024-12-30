@@ -11,7 +11,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView
 )
 from .models import Menu, Permission, UserRole, Role, UserAccount, SellerProfile, DealerProfile, OTP
-from .serializers import MenuSerializer, RoleSerializer, UserAccountSerializer, UserRoleSerializer, SellerProfileSerializer, DealerProfileSerializer, UserRoleForRouteSerializer
+from .serializers import MenuSerializer, RoleSerializer, UserAccountSerializer, UserRoleSerializer, SellerProfileSerializer, DealerProfileSerializer
 from users.authentication import CustomJwtAuthentication
 from django.http import Http404
 from rest_framework.exceptions import PermissionDenied
@@ -32,8 +32,8 @@ User = UserAccount
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def get(self, request, *args, **kwargs):
-
         return Response({"message": "This endpoint expects a POST request."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
 
@@ -41,26 +41,55 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             access_token = response.data.get('access')
             refresh_token = response.data.get('refresh')
 
-            response.set_cookie(
-                'access',
-                access_token,
-                max_age=settings.AUTH_COOKIE_ACCESS_MAX_AGE,
-                path = settings.AUTH_COOKIE_PATH,
-                secure = settings.AUTH_COOKIE_SECURE,
-                httponly = settings.AUTH_COOKIE_HTTP_ONLY,
-                samesite = settings.AUTH_COOKIE_SAMESITE)
-            
-            response.set_cookie(
-                'refresh',
-                refresh_token,
-                max_age=settings.AUTH_COOKIE_REFRESH_MAX_AGE,
-                path = settings.AUTH_COOKIE_PATH,
-                secure = settings.AUTH_COOKIE_SECURE,
-                httponly = settings.AUTH_COOKIE_HTTP_ONLY,
-                samesite = settings.AUTH_COOKIE_SAMESITE
-            )
-        
+            # Get the authenticated user
+            user = self.get_user(request.data.get('email'))
+            if user:
+                # Fetch user roles with id and name
+                roles = UserRole.objects.filter(user=user).select_related('role')
+                role_data = [{"id": role.role.id, "name": role.role.name} for role in roles]
+
+                # Flatten user data into the response
+                response.data.update({
+                    "id": user.id,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "phone": user.phone,
+                    "roles": role_data,
+                })
+
+                # Set cookies for tokens
+                response.set_cookie(
+                    'access',
+                    access_token,
+                    max_age=settings.AUTH_COOKIE_ACCESS_MAX_AGE,
+                    path=settings.AUTH_COOKIE_PATH,
+                    secure=settings.AUTH_COOKIE_SECURE,
+                    httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+                    samesite=settings.AUTH_COOKIE_SAMESITE,
+                )
+                response.set_cookie(
+                    'refresh',
+                    refresh_token,
+                    max_age=settings.AUTH_COOKIE_REFRESH_MAX_AGE,
+                    path=settings.AUTH_COOKIE_PATH,
+                    secure=settings.AUTH_COOKIE_SECURE,
+                    httponly=settings.AUTH_COOKIE_HTTP_ONLY,
+                    samesite=settings.AUTH_COOKIE_SAMESITE,
+                )
+
         return response
+
+    def get_user(self, email):
+        """Fetch the user object based on email."""
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        try:
+            return User.objects.get(email=email)
+        except User.DoesNotExist:
+            return None
+
+
     
 
 class CustomTokenRefreshView(TokenRefreshView):
@@ -550,3 +579,8 @@ class OTPVerificationView(APIView):
             return Response({"message": "User verified successfully."}, status=status.HTTP_200_OK)
         
         return Response({"detail": "Invalid OTP code."}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+
+
