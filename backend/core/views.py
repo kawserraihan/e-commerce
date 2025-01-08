@@ -93,39 +93,46 @@ class CategoryPublicViewSet(viewsets.ModelViewSet):
     serializer_class = CategoryPublicSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
+    authentication_classes = []
 
 class SubCategoryPublicViewSet(viewsets.ModelViewSet):
     queryset = SubCategory.objects.all()
     serializer_class = SubcategoryPublicSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
+    authentication_classes = []
 
 class ChildcategoryPublicViewSet(viewsets.ModelViewSet):
     queryset = ChildCategory.objects.all()
     serializer_class = ChildcategoryPublicSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
+    authentication_classes = []
 
 class ColorPublicViewSet(viewsets.ModelViewSet):
     queryset = Color.objects.all()
     serializer_class = ColorPublicSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
+    authentication_classes = []
 
 class SizePublicViewSet(viewsets.ModelViewSet):
     queryset = Size.objects.all()
     serializer_class = SizePublicSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
+    authentication_classes = []
 
 class BrandPublicViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandPublicSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
+    authentication_classes = []
 
 class ModelPublicViewSet(viewsets.ModelViewSet):
     queryset = Model.objects.all()
     serializer_class = ModelPublicSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
+    authentication_classes = []

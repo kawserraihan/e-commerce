@@ -49,6 +49,8 @@ const ViewProduct = ({ params }: { params: { id: string } }) => {
               <Image
                 src={images[currentImageIndex]}
                 alt={product?.product_name}
+                width={170} // Replace with the desired width
+                height={200} // Replace with the desired height
                 className="w-full max-w-md object-cover rounded-lg shadow-lg"
               />
             )}

@@ -30,7 +30,8 @@ export default function useLogin() {
 
 		login({ email, password })
 			.unwrap()
-			.then(({ access, refresh }) => {
+			.then(({ access, refresh,email }) => {
+				console.log(email);
 				// Save tokens in localStorage
 				localStorage.setItem('access', access);
 				localStorage.setItem('refresh', refresh);

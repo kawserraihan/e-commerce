@@ -5,6 +5,8 @@ import { useRegisterMutation, useUpdateUserRoleMutation } from '../../../redux/f
 import { Form } from '@/components/forms';
 import { useRouter } from 'next/navigation';
 import { useRegister } from '@/hooks';
+import Cookies from "js-cookie";
+import { getUserFromCookie } from '@/hooks/getLoginUser';
 
 export default function RegisterSellerForm() {
   const [register, { isLoading: isRegistering }] = useRegisterMutation();
@@ -12,7 +14,6 @@ export default function RegisterSellerForm() {
   const router = useRouter();
   const [isChecked, setIsChecked] = useState(false);
 
-  // Destructuring the values from useRegister hook
   const {
     first_name,
     last_name,
@@ -21,8 +22,6 @@ export default function RegisterSellerForm() {
     re_password,
     onChange,
   } = useRegister();
-
-  console.log("Email from useRegister:", email);
 
   // Handle checkbox change
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,11 +34,10 @@ export default function RegisterSellerForm() {
     if (isRegistering) return;
 
     try {
-      // Step 1: Register the user with the correct payload
       const simplifiedPayload = {
         first_name,
         last_name,
-        email,  // Use the email directly as a string
+        email, 
         password,
         re_password,
       };
@@ -54,18 +52,26 @@ export default function RegisterSellerForm() {
         console.error("Registration failed: Missing user ID in response");
         return;
       }
-
       const user_id = registerResponse.id;
       console.log("User ID: ", user_id);
 
       // Step 2: Immediately assign the role after registration
       const role_id = 3;  // Replace with the role you want to assign
-      console.log("Assigning Role: ", { user_id, role_id }); 
+      console.log("Assigning Role: ", { user_id, role_id });
 
+      const userObject = {
+        id: user_id,
+        email: registerResponse.email,
+        role_id,
+        first_name: registerResponse.first_name,
+        last_name: registerResponse.last_name,
+      };
       // Send the role update mutation
       await updateUserRole({ user_id, role_id }).unwrap();
       console.log('User role updated');
-
+      Cookies.set("user", JSON.stringify(userObject), {
+        expires: 7,
+      });
       // Step 3: Redirect to the seller profile page after successful registration
       router.push(`/auth/seller/seller-profile?user=${user_id}`);
     } catch (error) {
@@ -88,7 +94,7 @@ export default function RegisterSellerForm() {
         isLoading={isRegistering}
         btnText="Sign up"
         onChange={onChange}
-        onSubmit={handleFormSubmit}  
+        onSubmit={handleFormSubmit}
         disabled={!isChecked}
       />
 
@@ -101,7 +107,7 @@ export default function RegisterSellerForm() {
             checked={isChecked}
             onChange={handleCheckboxChange}
           />
-           <span className='ms-2'> I agree to the <a href="#" style={{ color: "#007bff" }}>Terms and Conditions</a></span>
+          <span className='ms-2'> I agree to the <a href="#" style={{ color: "#007bff" }}>Terms and Conditions</a></span>
         </label>
       </div>
     </>

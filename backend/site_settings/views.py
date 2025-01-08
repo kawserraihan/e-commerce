@@ -9,3 +9,4 @@ class BannerViewSet(viewsets.ModelViewSet):
     serializer_class = BannerSerializer
     permission_classes = [permissions.AllowAny]  # Read-only for unauthenticated users
     parser_classes = (MultiPartParser, FormParser)  # To handle file uploads
+    authentication_classes = []

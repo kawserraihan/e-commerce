@@ -18,6 +18,8 @@ export default function Page() {
 					className='mx-auto h-10 w-auto'
 					src='https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600'
 					alt='Full Auth'
+					width={170} // Replace with the desired width
+					height={200} // Replace with the desired height
 				/>
 				<h2 className='mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900'>
 					Sign up for your account

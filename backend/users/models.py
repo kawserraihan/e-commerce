@@ -1,25 +1,32 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
+
+from .sms_utils import send_sms # Import Utils for sending sms
+
 from django.core.mail import send_mail
 from django.conf import settings
 import random
 import string
 from products.models import Cart
+
+import requests
+
 # import logging
 
 # logger = logging.getLogger(__name__)
 
 
 class UserAccountManager(BaseUserManager):
-    def create_user(self, email, password=None, **kwargs):
+    def create_user(self, email, phone, password=None, **kwargs):
+        if not phone:
+            raise ValueError("Users must have a phone number")
         if not email:
-            # logger.error("Failed to create user: Email is required.")
             raise ValueError("Users must have an email address")
         
         email = self.normalize_email(email).lower()
 
-        user = self.model(email=email, **kwargs)
+        user = self.model(email=email, phone=phone, **kwargs)
 
         try:
             user.set_password(password)
@@ -61,10 +68,10 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
     objects = UserAccountManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone']
 
     def __str__(self):
-        return self.email
+        return f"{self.phone} ({self.email})"
 
 
 
@@ -154,8 +161,99 @@ class DealerProfile(models.Model):
 
 #-------------------------------------- OTP ---------------------------------------------
 
+# class OTP(models.Model):
+#     email = models.EmailField()
+#     otp_code = models.CharField(max_length=6)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     expired_at = models.DateTimeField()
+
+#     def is_expired(self):
+#         return timezone.now() > self.expired_at
+
+#     @classmethod
+#     def generate_otp(cls, email):
+#         otp_code = ''.join(random.choices(string.digits, k=6))
+#         expired_at = timezone.now() + timezone.timedelta(minutes=5)  # OTP expires in 5 minutes
+#         otp = cls.objects.create(email=email, otp_code=otp_code, expired_at=expired_at)
+
+#         return otp
+
+#     @classmethod
+#     def send_otp(cls, email):
+#         otp = cls.generate_otp(email)
+#         # Send OTP email
+#         subject = "Your OTP Code For MS Mart Registration"
+#         message = f"Your OTP code is {otp.otp_code}. It will expire in 5 minutes."
+#         from_email = settings.DEFAULT_FROM_EMAIL
+#         send_mail(subject, message, from_email, [email])
+#         return otp
+
 class OTP(models.Model):
     email = models.EmailField()
+    otp_code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expired_at = models.DateTimeField()
+
+    def is_expired(self):
+        """
+        Checks if the OTP has expired.
+        """
+        return timezone.now() > self.expired_at
+
+    @classmethod
+    def generate_otp(cls, email):
+        """
+        Generates a new OTP code and sets the expiration time to 5 minutes from now.
+        """
+        otp_code = ''.join(random.choices(string.digits, k=6))
+        expired_at = timezone.now() + timezone.timedelta(minutes=5)
+        otp = cls.objects.create(email=email, otp_code=otp_code, expired_at=expired_at)
+        return otp
+
+    @classmethod
+    def send_otp(cls, email):
+        """
+        Generates an OTP and sends it to the user's email using Brevo API.
+        """
+        otp = cls.generate_otp(email)  # No need to pass 'cls' explicitly
+
+        # Send OTP email via Brevo API
+        api_url = "https://api.brevo.com/v3/smtp/email"
+        api_key = settings.BREVO_API_KEY
+        print(api_key)
+
+        headers = {
+            "Content-Type": "application/json",
+            "api-key": api_key,
+        }
+
+        payload = {
+            "sender": {"email": "anticbyte@gmail.com"},
+            "to": [{"email": email}],
+            "replyTo": {"email": "anticbyte@gmail.com", "name": "Kawser Raihan"},
+            "subject": "Your OTP Code For MS Mart Registration",
+            "textContent": f"Your OTP code is {otp.otp_code}. It will expire in 5 minutes.",
+            "htmlContent": f"<strong>Your OTP code is {otp.otp_code}</strong>. It will expire in 5 minutes.",
+        }
+
+        print(payload)
+        try:
+            response = requests.post(api_url, json=payload, headers=headers)
+            response.raise_for_status()  # Raise an error if the request fails
+            print(f"Brevo API Response: {response.text}")  # Print the full response from Brevo
+            return otp
+
+        except requests.exceptions.RequestException as e:
+            # Log the error (could be logged to a file or monitoring service)
+            print(f"Error sending OTP email: {e}")
+            if response:
+                print(f"Response Status Code: {response.status_code}")
+                print(f"Response Body: {response.text}")
+            raise ValueError(f"Failed to send OTP email: {e}")
+
+
+class OTP_SMS(models.Model):
+    phone_number = models.CharField(max_length=15)
     otp_code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     expired_at = models.DateTimeField()
@@ -164,19 +262,15 @@ class OTP(models.Model):
         return timezone.now() > self.expired_at
 
     @classmethod
-    def generate_otp(cls, email):
+    def generate_otp(cls, phone_number):
         otp_code = ''.join(random.choices(string.digits, k=6))
         expired_at = timezone.now() + timezone.timedelta(minutes=5)  # OTP expires in 5 minutes
-        otp = cls.objects.create(email=email, otp_code=otp_code, expired_at=expired_at)
+        otp = cls.objects.create(phone_number=phone_number, otp_code=otp_code, expired_at=expired_at)
         return otp
 
     @classmethod
-    def send_otp(cls, email):
-        otp = cls.generate_otp(email)
-        # Send OTP email
-        subject = "Your OTP Code For MS Mart Registration"
+    def send_otp(cls, phone_number):
+        otp = cls.generate_otp(phone_number)
         message = f"Your OTP code is {otp.otp_code}. It will expire in 5 minutes."
-        from_email = settings.DEFAULT_FROM_EMAIL
-        send_mail(subject, message, from_email, [email])
+        send_sms(phone_number, message)
         return otp
-

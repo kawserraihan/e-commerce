@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import Image from 'next/image';
+import { useGetStoresQuery } from "../../../../redux/features/storeApiSlice";
+import Image from "next/image";
 
 export default function HomePageSection() {
   const [visibleIndex, setVisibleIndex] = useState(0);
@@ -26,6 +27,7 @@ export default function HomePageSection() {
   const handlePrevious = () => {
     setVisibleIndex((prev) => (prev - 1 + categories.length) % categories.length);
   };
+  const { data, isLoading, isError } = useGetStoresQuery({ page: 1, page_size: 10 });
 
   return (
     <div style={{ padding: "2rem", position: "relative", marginLeft: "1.5rem", marginRight: "1.5rem" }}>
@@ -69,12 +71,12 @@ export default function HomePageSection() {
             transition: "transform 0.5s ease-in-out",
             transform: `translateX(-${visibleIndex * 100}%)`,
             gap: "1rem",
-            
+
           }}
         >
-          {categories.map((category, index) => (
+          {data?.stores?.map((category: { user_id: any; color: any; name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined; items: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined; }, index: React.Key | null | undefined) => (
             <a
-              href={category.link}
+              href={`/store/${category.user_id}`}
               key={index}
               style={{
                 flex: "0 0 150px",
@@ -118,9 +120,11 @@ export default function HomePageSection() {
                 }}
               >
                 <Image
-                  src={category.image}
-                  alt={category.name}
+                  src='https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg'
+                  alt=''
                   style={{ maxWidth: "50px", maxHeight: "50px" }}
+                  width={170}
+                  height={200}
                 />
               </div>
               <h3 style={{ fontSize: "0.875rem", fontWeight: "bold", marginTop: "0.5rem" }}>{category.name}</h3>

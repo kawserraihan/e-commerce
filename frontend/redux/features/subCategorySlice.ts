@@ -5,8 +5,8 @@ interface Subcategory {
     categoryid: number;
     category_name: string;
     subcategory_name: string;
-    is_active: boolean;        // Add the active status field
-    created_at: string;        // Add the created timestamp
+    is_active: boolean;
+    created_at: string;
     modified_at: string;
 }
 
@@ -51,8 +51,8 @@ const subCategorySlice = apiSlice.injectEndpoints({
         // -------------------- Subcategory End ------------------------
 
         getSubcategoriesByCategory: builder.query<any[], number>({
-			query: (categoryId) => `/subcategories/by-category/${categoryId}/`,
-		}),
+            query: (categoryId) => `/subcategories/by-category/${categoryId}/`,
+        }),
 
     }),
 

@@ -10,7 +10,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView
 )
-from .models import Menu, Permission, UserRole, Role, UserAccount, SellerProfile, DealerProfile, OTP
+from .models import Menu, Permission, UserRole, Role, UserAccount, SellerProfile, DealerProfile, OTP, OTP_SMS
 from .serializers import MenuSerializer, RoleSerializer, UserAccountSerializer, UserRoleSerializer, SellerProfileSerializer, DealerProfileSerializer
 from users.authentication import CustomJwtAuthentication
 from django.http import Http404
@@ -282,6 +282,7 @@ class UserRoleViewSet(viewsets.ModelViewSet):
     queryset = UserRole.objects.all()
     serializer_class = UserRoleSerializer
     permission_classes = [permissions.IsAuthenticated]  # Default to authenticated access
+    authentication_classes = []
 
     def get_permissions(self):
         """
@@ -493,6 +494,9 @@ class UserProfileDetailAPI(APIView):
         return Response(updated_data, status=status.HTTP_200_OK)
     
 
+
+
+
 #------------------------------ OTP Registration ------------------------
 
 class OTPRegistrationView(APIView):
@@ -500,38 +504,186 @@ class OTPRegistrationView(APIView):
     View to handle sending OTP for email verification.
     """
     permission_classes = [permissions.AllowAny]
-    def post(self, request, *args, **kwargs):
-        email_data = request.data.get('email')  # Get the email dictionary
+    authentication_classes = []
 
-        # Extract the email string from the dictionary
-        if isinstance(email_data, dict):
-            email = email_data.get('email', '')  # Safely access the email inside the dictionary
-        else:
-            email = email_data  # Default to an empty string if email is not a dictionary or is missing
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+
+        if not email:
+            return Response({"detail": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         print(f"Received email for OTP registration: {email}")
-        
-        # Check if user is blocked
+
+        # Check if the user exists
         user = User.objects.filter(email=email).first()
 
-        if user and user.is_blocked:
-            return Response({"detail": "Account is temporarily blocked. Please try again later."}, status=status.HTTP_403_FORBIDDEN)
-        
-        # Check if user exists and is verified
-        if user and user.is_verified:
-            return Response({"detail": "Account already verified."}, status=status.HTTP_400_BAD_REQUEST)
+        if user:
+            # Check if the account is blocked
+            if user.is_blocked:
+                return Response(
+                    {"detail": "Account is temporarily blocked. Please try again later."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
 
-        # Create new user if they don't exist
-        if not user:
-            user = User.objects.create(email=email, **request.data)
-        
-        # Send OTP if user is not verified
+            # Check if the account is already verified
+            if user.is_verified:
+                return Response(
+                    {"detail": "Account already verified."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            # Create a new user if they don't exist
+            user_data = request.data.copy()  # Create a mutable copy of request data
+            user_data.pop('email', None)  # Remove the 'email' key to avoid duplication
+            user = User.objects.create(email=email, **user_data)
+
+        # Send OTP if the user is not verified
         if not user.is_verified:
-            otp = OTP.send_otp(email)
-            print(f"OTP sent for email: {email}, OTP ID: {otp.id}")
-            return Response({"message": "OTP sent successfully.", "otp_id": otp.id, "email": email}, status=status.HTTP_200_OK)
-        
+            try:
+                otp = OTP.send_otp(email=email)  # Correctly pass email to send_otp
+                request.session['otp_id'] = otp.id
+                request.session['email'] = email
+
+                print(f"OTP sent for email: {email}, OTP ID: {otp.id}")
+                return Response(
+                    {"message": "OTP sent successfully.", "otp_id": otp.id, "email": email},
+                    status=status.HTTP_200_OK
+                )
+            except Exception as e:
+                print(f"Error sending OTP: {e}")
+                return Response(
+                    {"detail": f"Failed to send OTP: {e}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
         return Response({"detail": "Account already verified."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# class OTPRegistrationView(APIView):
+#     """
+#     View to handle sending OTP for email verification.
+#     """
+#     permission_classes = [permissions.AllowAny]
+#     authentication_classes = []
+#     def post(self, request, *args, **kwargs):
+#         email_data = request.data.get('email')  # Get the email dictionary
+
+#         # Extract the email string from the dictionary
+#         if isinstance(email_data, dict):
+#             email = email_data.get('email', '')  # Safely access the email inside the dictionary
+#         else:
+#             email = email_data  # Default to an empty string if email is not a dictionary or is missing
+
+#         print(f"Received email for OTP registration: {email}")
+        
+#         # Check if user is blocked
+#         user = User.objects.filter(email=email).first()
+
+#         if user and user.is_blocked:
+#             return Response({"detail": "Account is temporarily blocked. Please try again later."}, status=status.HTTP_403_FORBIDDEN)
+        
+#         # Check if user exists and is verified
+#         if user and user.is_verified:
+#             return Response({"detail": "Account already verified."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # Create new user if they don't exist
+#         if not user:
+#             user = User.objects.create(email=email, **request.data)
+        
+#         # Send OTP if user is not verified
+#         if not user.is_verified:
+#             otp = OTP.send_otp(email)
+
+#             request.session['otp_id'] = otp.id
+#             request.session['email'] = email
+
+#             print(f"OTP sent for email: {email}, OTP ID: {otp.id}")
+#             return Response({"message": "OTP sent successfully.", "otp_id": otp.id, "email": email}, status=status.HTTP_200_OK)
+        
+#         return Response({"detail": "Account already verified."}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+# class OTPRegistrationViewSMS(APIView):
+#     permission_classes = [permissions.AllowAny]
+#     authentication_classes = []
+
+#     def post(self, request, *args, **kwargs):
+#         phone = request.data.get('phone')
+
+#         user = User.objects.filter(phone=phone).first()
+
+#         if user and user.is_blocked:
+#             return Response({"detail": "Account is temporarily blocked. Please try again later."}, status=status.HTTP_403_FORBIDDEN)
+
+#         if user and user.is_verified:
+#             return Response({"detail": "Account already verified."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         if not user:
+#             user = User.objects.create(phone=phone, **request.data)
+
+#         if not user.is_verified:
+#             otp = OTP_SMS.send_otp(phone)
+#             request.session['otp_id'] = otp.id
+#             request.session['phone'] = phone
+#             return Response({"message": "OTP sent successfully.", "otp_id": otp.id, "phone": phone}, status=status.HTTP_200_OK)
+
+#         return Response({"detail": "Account already verified."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# class OTPVerificationViewSMS(APIView):
+#     """
+#     View to verify OTP and complete registration.
+#     """
+#     permission_classes = [permissions.AllowAny]
+#     authentication_classes = []
+#     def post(self, request, *args, **kwargs):
+        
+#         otp_code = request.data.get('otp_code')
+
+#         # Retrieve OTP ID and email from session
+#         otp_id = request.session.get('otp_id')
+#         email = request.session.get('email')
+#         phone = request.session.get('phone')
+
+
+#         # Check if user is blocked
+#         user = User.objects.filter(email=email).first()
+#         if user and user.is_blocked:
+#             return Response({"detail": "Account is temporarily blocked. Please try again later."}, status=status.HTTP_403_FORBIDDEN)
+
+#         # Find the OTP record and check if it is expired
+#         otp = OTP_SMS.objects.filter(id=otp_id, phone=phone).first()
+#         if not otp:
+#             return Response({"detail": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         if otp.is_expired():
+#             # OTP expired, handle attempts
+#             if user:
+#                 user.otp_attempts += 1
+#                 user.save()
+
+#                 # Block user if they exceeded max resend attempts
+#                 if user.otp_attempts > settings.OTP_ATTEMPTS:
+#                     user.is_blocked = True
+#                     user.save()
+#                     return Response({"detail": "Too many failed attempts. Account is blocked for 1 hour."}, status=status.HTTP_403_FORBIDDEN)
+
+#             return Response({"detail": "OTP expired. Please request a new one."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # If OTP matches
+#         if otp.otp_code == otp_code:
+#             user.is_verified = True
+#             user.is_active = True
+#             user.is_blocked = False  # Reset blocked status if verification is successful
+#             user.otp_attempts = 0  # Reset attempts
+#             user.save()
+
+#             return Response({"message": "User verified successfully."}, status=status.HTTP_200_OK)
+        
+#         return Response({"detail": "Invalid OTP code."}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class OTPVerificationView(APIView):
@@ -539,10 +691,16 @@ class OTPVerificationView(APIView):
     View to verify OTP and complete registration.
     """
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
     def post(self, request, *args, **kwargs):
-        email = request.data.get('email')
-        otp_id = request.data.get('otp_id')
+        
         otp_code = request.data.get('otp_code')
+
+        # Retrieve OTP ID and email from session
+        otp_id = request.session.get('otp_id')
+        email = request.session.get('email')
+        # phone = request.session.get('phone')
+
 
         # Check if user is blocked
         user = User.objects.filter(email=email).first()

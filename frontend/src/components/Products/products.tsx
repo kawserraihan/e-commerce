@@ -64,6 +64,7 @@ const ProductsComponent = () => {
     const matchesSearch = product.product_name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
+  
   const displayedProducts = filteredProducts?.slice((page - 1) * pageSize, page * pageSize);
 
   const totalPages = Math.ceil((data?.count || 0) / pageSize);
@@ -177,24 +178,6 @@ const ProductsComponent = () => {
           </tbody>
         </table>
 
-        {/* Pagination controls */}
-        {/* <div className="flex justify-end items-center mt-4 mb-4 mr-12 space-x-2">
-          <button
-            onClick={() => setPage((prevPage) => Math.max(prevPage - 1, 1))}
-            disabled={!data?.previous}
-            className={`px-4 py-2 text-center rounded-md border text-sm font-medium ${!data?.previous ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white'
-              }`}>
-            Previous
-          </button> 
-          <button
-            onClick={() => setPage((prevPage) => (data?.next ? prevPage + 1 : prevPage))}
-            disabled={!data?.next}
-            className={`px-4 py-2 text-center rounded-md border text-sm font-medium ${!data?.next ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white'
-              }`}
-          >
-            Next
-          </button>
-        </div> */}
         {/* Pagination controls */}
         <div className="flex justify-center items-center mt-4 space-x-2">
           <button

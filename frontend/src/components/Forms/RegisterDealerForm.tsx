@@ -5,7 +5,7 @@ import { useRegisterMutation, useUpdateUserRoleMutation } from '../../../redux/f
 import { Form } from '@/components/forms';
 import { useRouter } from 'next/navigation';
 import { useRegister } from '@/hooks';
-import Link from 'next/link';
+import Cookies from 'js-cookie';
 
 export default function RegisterDealerForm() {
   const [register, { isLoading: isRegistering }] = useRegisterMutation();
@@ -13,8 +13,6 @@ export default function RegisterDealerForm() {
   const router = useRouter();
 
   const [isChecked, setIsChecked] = useState(false);
-
-  // Destructuring the values from useRegister hook
   const {
     first_name,
     last_name,
@@ -32,8 +30,52 @@ export default function RegisterDealerForm() {
   };
 
   // Handle form submission
+  // const handleFormSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (isRegistering) return;
+
+  //   try {
+  //     // Step 1: Register the user with the correct payload
+  //     const simplifiedPayload = {
+  //       first_name,
+  //       last_name,
+  //       email,  // Use the email directly as a string
+  //       password,
+  //       re_password,
+  //     };
+
+  //     // Register the user
+  //     const registerResponse = await register(simplifiedPayload).unwrap();
+  //     console.log('Registration successful:', registerResponse);
+
+  //     // Check if registerResponse contains expected data
+  //     if (!registerResponse || !registerResponse.id) {
+  //       console.error("Registration failed: Missing user ID in response");
+  //       return;
+  //     }
+
+  //     const user_id = registerResponse.id;
+  //     console.log("User ID: ", user_id);
+
+  //     // Step 2: Immediately assign the role after registration
+  //     const role_id = 3;  // Replace with the role you want to assign
+  //     console.log("Assigning Role: ", { user_id, role_id }); 
+
+  //     // Send the role update mutation
+  //     await updateUserRole({ user_id, role_id }).unwrap();
+  //     console.log('User role updated');
+
+  //     // Step 3: Redirect to the seller profile page after successful registration
+  //     router.push(`/auth/seller/seller-profile?user=${user_id}`);
+  //   } catch (error) {
+  //     console.error("Error registering or updating role:", error);
+  //   }
+  // };
+  
+  
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (isRegistering) return;
 
     try {
@@ -41,7 +83,7 @@ export default function RegisterDealerForm() {
       const simplifiedPayload = {
         first_name,
         last_name,
-        email,  // Use the email directly as a string
+        email, // Use the email directly as a string
         password,
         re_password,
       };
@@ -50,7 +92,7 @@ export default function RegisterDealerForm() {
       const registerResponse = await register(simplifiedPayload).unwrap();
       console.log('Registration successful:', registerResponse);
 
-      // Check if registerResponse contains expected data
+      // Ensure the registration response contains the required data
       if (!registerResponse || !registerResponse.id) {
         console.error("Registration failed: Missing user ID in response");
         return;
@@ -60,19 +102,33 @@ export default function RegisterDealerForm() {
       console.log("User ID: ", user_id);
 
       // Step 2: Immediately assign the role after registration
-      const role_id = 3;  // Replace with the role you want to assign
-      console.log("Assigning Role: ", { user_id, role_id }); 
+      const role_id = 3; // Replace with the role you want to assign
+      console.log("Assigning Role: ", { user_id, role_id });
 
       // Send the role update mutation
       await updateUserRole({ user_id, role_id }).unwrap();
       console.log('User role updated');
 
-      // Step 3: Redirect to the seller profile page after successful registration
+      // Step 3: Save user information in a cookie
+      const userObject = {
+        id: user_id,
+        email: registerResponse.email,
+        first_name: registerResponse.first_name,
+        last_name: registerResponse.last_name,
+        role_id,
+      };
+      Cookies.set("user", JSON.stringify(userObject), {
+        expires: 7, // Set cookie expiration to 7 days
+      });
+      console.log('User information saved in cookie:', userObject);
+
+      // Step 4: Redirect to the seller profile page
       router.push(`/auth/seller/seller-profile?user=${user_id}`);
     } catch (error) {
       console.error("Error registering or updating role:", error);
     }
   };
+
 
   const config = [
     { labelText: 'First name', labelId: 'first_name', type: 'text', value: first_name, required: true },
@@ -89,7 +145,7 @@ export default function RegisterDealerForm() {
         isLoading={isRegistering}
         btnText="Sign up"
         onChange={onChange}
-        onSubmit={handleFormSubmit}  
+        onSubmit={handleFormSubmit}
         disabled={!isChecked}
       />
 
@@ -102,7 +158,7 @@ export default function RegisterDealerForm() {
             checked={isChecked}
             onChange={handleCheckboxChange}
           />
-           <span className='ms-2'> I agree to the <a href="#" style={{ color: "#007bff" }}>Terms and Conditions</a></span>
+          <span className='ms-2'> I agree to the <a href="#" style={{ color: "#007bff" }}>Terms and Conditions</a></span>
         </label>
       </div>
     </>

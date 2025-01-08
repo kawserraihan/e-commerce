@@ -2,12 +2,14 @@ import { list } from 'postcss';
 import { apiSlice } from '../services/apiSlice';
 import { setAuth } from './authSlice';
 // import { CategoryType } from '@/types/categories';
+import Cookies from 'js-cookie';
 
 interface User {
-  id: number | null | undefined;
+	id: number | null | undefined;
 	first_name: string;
 	last_name: string;
 	email: string;
+	phone: string;
 }
 
 interface Category {
@@ -225,7 +227,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 			async onQueryStarted(arg, { dispatch, queryFulfilled }) {
 				try {
 					const { data } = await queryFulfilled;
-
+					console.log(data, "data from auth api slice ");
 					// Assuming data contains both access and refresh tokens
 					const { access, refresh } = data;
 
@@ -239,6 +241,22 @@ const authApiSlice = apiSlice.injectEndpoints({
 					// Dispatch to update your auth state with tokens
 					dispatch(setAuth({ accessToken: access, refreshToken: refresh }));
 
+
+					const role_id = data.roles && data.roles.length > 0 ? data.roles[0].id : null;
+					const userPayload = {
+						id: data.id, // Assuming `id` is included in the login response
+						email: data.email,
+						phone: data.phone,
+						first_name: data.first_name,
+						last_name: data.last_name,
+						roles: data.roles, // Include roles if needed
+						role_id, // Add extracted role ID
+					};
+
+					Cookies.set('user', JSON.stringify(userPayload), {
+						expires: 7, // Set cookie expiration to 7 days
+					});
+
 					// Optionally, you might want to navigate to a protected route after login
 					// For example: dispatch(push('/dashboard'));
 				} catch (error) {
@@ -248,17 +266,21 @@ const authApiSlice = apiSlice.injectEndpoints({
 				}
 			},
 		}),
+
+
+
 		register: builder.mutation({
 			query: ({
 				first_name,
 				last_name,
 				email,
+				phone,
 				password,
 				re_password,
 			}) => ({
 				url: '/users/',
 				method: 'POST',
-				body: { first_name, last_name, email, password, re_password },
+				body: { first_name, last_name, email, phone, password, re_password },
 			}),
 		}),
 
@@ -270,19 +292,19 @@ const authApiSlice = apiSlice.injectEndpoints({
 		}),
 		// Send OTP Request Mutation
 		sendOtp: builder.mutation({
-			query: (email) => ({
+			query: (phone) => ({
 				url: '/register/otp/',
 				method: 'POST',
-				body: { email },
+				body: { phone },
 			}),
 		}),
 
 		// Verify OTP Request Mutation
 		verifyOtp: builder.mutation({
-			query: ({ email, otp_id, otp_code }) => ({
+			query: ({ phone, otp_id, otp_code }) => ({
 				url: '/register/verify/',
 				method: 'POST',
-				body: { email, otp_id, otp_code },
+				body: { phone, otp_id, otp_code },
 			}),
 		}),
 
@@ -370,7 +392,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 			previous: string | null;
 			results: Category[];
 		}, { page: number; page_size: number }>({
-			query: ({ page, page_size }) => `/categories/?page=${page}&page_size=${page_size}`,
+			query: ({ page, page_size }) => `/categoriespub/?page=${page}&page_size=${page_size}`,
 		}),
 
 		getCategoryById: builder.query<Category, number>({
@@ -410,7 +432,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 			previous: string | null;
 			results: Brand[];
 		}, { page: number; page_size: number }>({
-			query: ({ page, page_size }) => `/brands/?page=${page}&page_size=${page_size}`,
+			query: ({ page, page_size }) => `/brandspub/?page=${page}&page_size=${page_size}`,
 		}),
 
 		getBrandById: builder.query<Brand, number>({
@@ -450,7 +472,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 			previous: string | null;
 			results: Model[];
 		}, { page: number; page_size: number }>({
-			query: ({ page, page_size }) => `/models/?page=${page}&page_size=${page_size}`,
+			query: ({ page, page_size }) => `/modelspub/?page=${page}&page_size=${page_size}`,
 		}),
 
 		getModelById: builder.query<Model, number>({
@@ -491,7 +513,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 			previous: string | null;
 			results: Color[];
 		}, { page: number; page_size: number }>({
-			query: ({ page, page_size }) => `/colors/?page=${page}&page_size=${page_size}`,
+			query: ({ page, page_size }) => `/colorspub/?page=${page}&page_size=${page_size}`,
 		}),
 
 		getColorById: builder.query<Color, number>({
@@ -580,7 +602,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 			previous: string | null;
 			results: Childcategory[];
 		}, { page: number; page_size: number }>({
-			query: ({ page, page_size }) => `/childcategories/?page=${page}&page_size=${page_size}`,
+			query: ({ page, page_size }) => `/childcategoriespub/?page=${page}&page_size=${page_size}`,
 		}),
 
 		getChildcategoryById: builder.query<Childcategory, number>({
@@ -627,7 +649,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 			previous: string | null;
 			results: Size[];
 		}, { page: number; page_size: number }>({
-			query: ({ page, page_size }) => `/sizes/?page=${page}&page_size=${page_size}`,
+			query: ({ page, page_size }) => `/sizespub/?page=${page}&page_size=${page_size}`,
 		}),
 
 		getSizeById: builder.query<Size, number>({
@@ -668,11 +690,11 @@ const authApiSlice = apiSlice.injectEndpoints({
 			previous: string | null;
 			results: Product[];
 		}, { page: number; page_size: number }>({
-			query: ({ page, page_size }) => `/products/?page=${page}&page_size=${page_size}`,
+			query: ({ page, page_size }) => `/productspub/?page=${page}&page_size=${page_size}`,
 		}),
 
 		getProductById: builder.query<Product, number>({
-			query: (id) => `products/${id}/`, // Adjust the endpoint according to your API
+			query: (id) => `productspub/${id}/`, // Adjust the endpoint according to your API
 		}),
 
 		addProduct: builder.mutation<Product, FormData>({
@@ -700,6 +722,27 @@ const authApiSlice = apiSlice.injectEndpoints({
 
 
 		// ----------------------------- Product End -----------------------------------
+		// ----------------------------- Product variants -----------------------------------
+		addProductVariants: builder.mutation({
+			query: (formData) => ({
+				url: '/product-variants/',
+				method: 'POST',
+				body: formData,
+			}),
+		}),
+
+		// ----------------------------- Product variants -----------------------------------
+		// ----------------------------- Product wholesale price-----------------------------------
+		addProductWholesale: builder.mutation({
+			query: (formData) => ({
+				url: '/wholesale-prices/',
+				method: 'POST',
+				body: formData,
+			}),
+		}),
+
+
+		// ----------------------------- Product wholesale price-----------------------------------
 
 
 
@@ -935,6 +978,12 @@ export const {
 	//Update Product Stock
 
 	useUpdateProductStockMutation,
+
+	//product variants
+	useAddProductVariantsMutation,
+	//product wholesale
+	useAddProductWholesaleMutation,
+
 
 	// Orders Queries
 

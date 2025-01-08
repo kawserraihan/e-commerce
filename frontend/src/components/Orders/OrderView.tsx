@@ -98,6 +98,8 @@ const OrdersView = () => {
                       src={item.product_image ?? '/media/products/invalid-product.png'} 
                       alt={item.product_name} 
                       className="w-10 h-10 mb-2" 
+                      width={170} // Replace with the desired width
+                      height={200} // Replace with the desired height
                     />
                     <span className="text-sm">{item.product_name}</span>
                   </div>

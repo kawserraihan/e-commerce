@@ -183,13 +183,31 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "users.UserAccount"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# Looking to send emails in production? Check out our Email API/SMTP product!
-EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
-EMAIL_HOST_USER = '012d6578d30b50'
-EMAIL_HOST_PASSWORD = '24963d0ee3b73c'
-EMAIL_PORT = '2525'
-OTP_ATTEMPTS= 5
+#------------------- EMAIL SENT SYSTEM ---------------------------
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# # Looking to send emails in production? Check out our Email API/SMTP product!
+# EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+# EMAIL_HOST_USER = '012d6578d30b50'
+# EMAIL_HOST_PASSWORD = '24963d0ee3b73c'
+# EMAIL_PORT = '2525'
+# OTP_ATTEMPTS= 5
+
+
+BREVO_API_KEY = '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'
+
+# SMTP Configuration for Brevo
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp-relay.brevo.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "830949001@smtp-brevo.com"
+EMAIL_HOST_PASSWORD = "1CPYJhL4s8yv0Vxm"
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = "830949001@smtp-brevo.com"  # Set a default 'from' email address
+
+# ----------------------Phone OTP System --------------------------
+
+SMSMODE_ACCESS_TOKEN = 'NqFfiH8IszC99nVdtWKtUfLJ1fZ1lzoR'
 
 
 

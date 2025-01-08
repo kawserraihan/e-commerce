@@ -15,11 +15,12 @@ export default function useRegister() {
     first_name: "",
     last_name: "",
     email: "",
+    phone: "",
     password: "",
     re_password: "",
   });
 
-  const { first_name, last_name, email, password, re_password } = formData;
+  const { first_name, last_name, email, phone, password, re_password } = formData;
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -30,7 +31,7 @@ export default function useRegister() {
     event.preventDefault();
 
     try {
-      await register({ first_name, last_name, email, password, re_password }).unwrap();
+      await register({ first_name, last_name, email, phone, password, re_password }).unwrap();
       toast.success("Registration successful");
       router.push("/auth/login");
       
@@ -48,6 +49,7 @@ export default function useRegister() {
     first_name,
     last_name,
     email,
+    phone,
     password,
     re_password,
     isLoading,

@@ -235,22 +235,34 @@ class CartViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
         )
 
-    @action(detail=True, methods=['DELETE'])
-    def remove_item(self, request, user_id=None):
-        """Remove item from cart"""
+    @action(detail=True, methods=['DELETE'], url_path='remove_item/(?P<item_id>\d+)')
+    def remove_item(self, request, user_id=None, item_id=None):
+        """Remove item from cart using item_id directly from the URL"""
         cart = get_object_or_404(Cart, user_id=user_id)
-        item_id = request.query_params.get('item_id')
-        
-        if not item_id:
-            return Response(
-                {"detail": "item_id is required"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            
         cart_item = get_object_or_404(CartItem, cart=cart, id=item_id)
         cart_item.delete()
         
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=True, methods=['PATCH'], url_path='update-item')
+    def update_item_quantity(self, request, user_id=None):
+        """Update quantity of a cart item"""
+        cart = get_object_or_404(Cart, user_id=user_id)
+        item_id = request.data.get('item_id')
+        quantity = request.data.get('quantity')
+
+        if not item_id or quantity is None:
+            return Response(
+                {"detail": "item_id and quantity are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        cart_item = get_object_or_404(CartItem, cart=cart, id=item_id)
+        cart_item.quantity = quantity
+        cart_item.save()
+
+        serializer = CartItemSerializer(cart_item)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 
 
@@ -265,12 +277,14 @@ class ProductPublicViewSet(viewsets.ModelViewSet):
     serializer_class = ProductPublicSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
+    authentication_classes = []
 
 class WholesalePricePublicViewSet(ModelViewSet):
 
     queryset = WholesalePrice.objects.all()
     serializer_class = WholesalePricePublicSerializer
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
@@ -298,6 +312,7 @@ class ProductVariantPublicViewSet(ModelViewSet):
     queryset = ProductVariant.objects.all()
     serializer_class = ProductVariantPublicSerializer
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
@@ -326,10 +341,10 @@ class ProductVariantPublicViewSet(ModelViewSet):
 class ProductImagePublicViewSet(viewsets.ModelViewSet):
     queryset = ProductImage.objects.all()
     serializer_class = ProductImagePublicSerializer
-    authentication_classes = [CustomJwtAuthentication]
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
     parser_classes = (MultiPartParser, FormParser)
+    authentication_classes = []
     
 
     @action(detail=False, methods=['get'], url_path='(?P<product_id>[^/.]+)')
@@ -354,6 +369,7 @@ class StoreProfileView(APIView):
 
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
+    authentication_classes = []
     def get(self, request):
         try:
       
@@ -448,6 +464,7 @@ class StoreProfileView(APIView):
 class StoreProductView(APIView):
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
+    authentication_classes = []
 
     def get(self, request, user_id):
         try:

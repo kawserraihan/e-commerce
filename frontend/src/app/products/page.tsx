@@ -2,6 +2,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import ProductsComponent from "@/components/Products/products";
 import { Metadata } from "next";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import ProtectedPage from "@/components/ProtectedPage";
 
 export const metadata: Metadata = {
   title: "MS Mart - Products",
@@ -11,12 +12,14 @@ export const metadata: Metadata = {
 
 const Product = () => {
   return (
-    <DefaultLayout>
-      <Breadcrumb pageName="Products"/>
-      <div className="flex flex-col gap-10">
-        <ProductsComponent/>
-      </div>
-    </DefaultLayout>
+    <ProtectedPage>
+      <DefaultLayout>
+        <Breadcrumb pageName="Products" />
+        <div className="flex flex-col gap-10">
+          <ProductsComponent />
+        </div>
+      </DefaultLayout>
+    </ProtectedPage>
   );
 };
 

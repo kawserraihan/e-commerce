@@ -8,7 +8,6 @@ import EditUser from './edit/[id]/page';
 import EditUserModal from './edit/[id]/page';
 
 const Users = () => {
-
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
 
@@ -17,7 +16,7 @@ const Users = () => {
   console.log(users, "user data");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-  const [selectedUser, setSelectedUser] = useState(null); // Store selected user data for editing
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const openModal = () => {
     setIsModalOpen(true);

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     "Product Single view",
 };
 
-const InvoicePage = () => {
+const ProductListPage = () => {
   return (
 
 
@@ -25,4 +25,4 @@ const InvoicePage = () => {
   );
 };
 
-export default InvoicePage;
+export default ProductListPage;

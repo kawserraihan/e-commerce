@@ -34,12 +34,7 @@ export default function RootLayout({
       <body suppressHydrationWarning={true}>
         <CustomProvider> {/* Use CustomProvider here */}
           <div className="dark:bg-boxdark-2 dark:text-bodydark">
-         
-
             {children}
-            
-            
-          
           </div>
           <ToastContainer />
         </CustomProvider>

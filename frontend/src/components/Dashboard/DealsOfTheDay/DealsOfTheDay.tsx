@@ -75,6 +75,8 @@ export default function DealsOfTheDaySection() {
                 src={deal.image}
                 alt={deal.title}
                 className="max-w-[200px] h-[200px] object-contain"
+                width={170} // Replace with the desired width
+                height={200} // Replace with the desired height
               />
             </div>
 

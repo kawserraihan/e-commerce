@@ -51,6 +51,8 @@ export default function CartSection() {
                       src={product.image}
                       alt={product.name}
                       className="w-12 h-12 object-cover rounded"
+                      width={170} // Replace with the desired width
+                      height={200} // Replace with the desired height
                     />
                     <span className="text-sm">{product.name}</span>
                   </td>

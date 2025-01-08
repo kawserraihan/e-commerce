@@ -20,7 +20,7 @@ interface Props {
 	btnText: string;
 	onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 	onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-	disabled?: boolean;  // Add the disabled prop for the submit button
+	disabled?: boolean;
 }
 
 export default function Form({
@@ -29,7 +29,7 @@ export default function Form({
 	btnText,
 	onChange,
 	onSubmit,
-	disabled = false,  // Default to false if not passed
+	disabled = false, 
 }: Props) {
 	return (
 		<form className='space-y-3 focus-visible:outline-secondary ' onSubmit={onSubmit}>

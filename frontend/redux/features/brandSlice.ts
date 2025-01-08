@@ -2,15 +2,13 @@ import { apiSlice } from '../services/apiSlice';
 interface Brand {
 	id: number;
 	brand_name: string;
-	is_active: boolean;        // Add the active status field
-	created_at: string;        // Add the created timestamp
+	is_active: boolean;      
+	created_at: string;     
 	modified_at: string;
 }
 
-
 const brandApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
-        // --------------------- Brand --------------------------
         getBrands: builder.query<{
             count: number;
             next: string | null;
@@ -21,7 +19,7 @@ const brandApiSlice = apiSlice.injectEndpoints({
         }),
 
         getBrandById: builder.query<Brand, number>({
-            query: (id) => `brands/${id}/`, // Adjust the endpoint according to your API
+            query: (id) => `brands/${id}/`, 
         }),
 
         addBrand: builder.mutation<Brand, Partial<Brand>>({
@@ -46,11 +44,7 @@ const brandApiSlice = apiSlice.injectEndpoints({
                 method: 'DELETE',
             }),
         }),
-
-        // --------------------- END Brand --------------------------
-
     }),
-
 });
 
 export const {

@@ -185,6 +185,8 @@ const AddProductPage = () => {
           src={URL.createObjectURL(image)}
           alt={`Additional image ${index + 1}`}
           className="w-32 h-32 object-cover rounded"
+          width={32} // Replace with the desired width
+          height={32} // Replace with the desired height
         />
       ))}
     </div>

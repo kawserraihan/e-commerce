@@ -4,6 +4,7 @@ import SidebarDropdown from "@/components/Sidebar/SidebarDropdown";
 import { usePathname } from "next/navigation";
 
 const SidebarItem = ({ item, pageName, setPageName }: any) => {
+
   const handleClick = () => {
     const updatedPageName =
       pageName !== item.label.toLowerCase() ? item.label.toLowerCase() : "";
@@ -34,9 +35,8 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
           {item.label}
           {item.children && (
             <svg
-              className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
-                pageName === item.label.toLowerCase() && 'false'
-              }`}
+              className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${pageName === item.label.toLowerCase() && 'false'
+                }`}
               width="20"
               height="20"
               viewBox="0 0 20 20"
@@ -55,10 +55,8 @@ const SidebarItem = ({ item, pageName, setPageName }: any) => {
 
         {item.children && (
           <div
-            className={`translate transform overflow-hidden ${
-              pageName !== item.label.toLowerCase() && 'hidden'
-            }`}
-          >
+            className={`translate transform overflow-hidden ${pageName !== item.label.toLowerCase() && 'hidden'
+              }`}>
             <SidebarDropdown item={item.children} />
           </div>
         )}

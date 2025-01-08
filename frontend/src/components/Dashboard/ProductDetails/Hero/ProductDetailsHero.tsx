@@ -1,9 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import Image from 'next/image';
+import { useGetProductByIdQuery } from "../../../../../redux/features/authApiSlice";
 
-export default function SingleProductView() {
-  // Product images array with main image and different thumbnails
+export default function SingleProductView({ id }) {
+  console.log(id, "iddididi");
+
   const productImages = [
     "https://ecstasybd.com/all-images/product/Product-Image-1732346028.jpg",
     "https://www.msmart.shop/assets/admin/img/products/9008759899.8.jpg",
@@ -13,6 +15,17 @@ export default function SingleProductView() {
 
   // State to track current main image
   const [mainImage, setMainImage] = useState(productImages[0]);
+  const { data: product, isLoading: isProductLoading, isError: isProductError } = useGetProductByIdQuery(id, {
+    skip: isNaN(id),
+  });
+  console.log(product, "product get by id ");
+
+  const additionalImages = product?.additionalImages instanceof FileList
+    ? Array.from(product.additionalImages).map((file) => URL.createObjectURL(file))
+    : product?.additionalImages;
+
+  const imageSources = additionalImages || productImages;
+
 
   return (
     <div className="px-12 py-6 bg-white ml-1">
@@ -20,7 +33,6 @@ export default function SingleProductView() {
       <nav className="text-sm text-gray-500 mb-4 ml-5">
         Home / Categories / <span className="text-green-500 font-bold">Products</span>
       </nav>
-
       {/* Product Details Section */}
       <div className="grid grid-cols-12 gap-8 mb-12 ml-7">
         {/* Product Images */}
@@ -28,25 +40,28 @@ export default function SingleProductView() {
           {/* Fixed size container for main image */}
           <div className="w-full h-[400px] flex items-center justify-center bg-gray-50 rounded-lg border border-gray shadow mb-4">
             <Image
-              src={mainImage}
+              src={product?.product_image}
               alt="Product"
               className="max-w-full max-h-full object-contain p-4"
+              width={170}
+              height={200}
             />
           </div>
           {/* Thumbnails */}
           <div className="grid grid-cols-4">
-            {productImages.map((src, index) => (
+            {imageSources.map((src, index) => (
               <button
                 key={index}
                 onClick={() => setMainImage(src)}
-                className={`w-25 h-30 rounded-lg border border-gray shadow overflow-hidden ${
-                  mainImage === src ? 'border-green-500 border-2' : 'border-gray-200'
-                }`}
+                className={`w-25 h-30 rounded-lg border border-gray shadow overflow-hidden ${mainImage === src ? 'border-green-500 border-2' : 'border-gray-200'
+                  }`}
               >
                 <Image
                   src={src}
                   alt={`Thumbnail ${index + 1}`}
                   className="w-full h-full object-cover"
+                  width={170}
+                  height={200}
                 />
               </button>
             ))}
@@ -110,7 +125,7 @@ export default function SingleProductView() {
           <ul className="text-sm text-gray-600 space-y-4">
             <li className="flex justify-between items-center bg-white p-3 rounded shadow">
               <span className="flex items-center gap-2">
- 
+
                 Milk & Dairies
               </span>
               <span className="text-green-500 font-bold">5</span>

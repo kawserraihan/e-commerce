@@ -162,6 +162,8 @@ export default function Footer() {
             src="https://demoapi.anticbyte.com/media/banners/msmart.png"
             alt="MSmart Logo"
             style={{ width: "150px", marginBottom: "1rem" }}
+            width={170} // Replace with the desired width
+            height={200} // Replace with the desired height
           />
           <address style={{ color: "#6b7280", fontSize: "0.875rem" }}>
             <p>+880 1877 716660</p>

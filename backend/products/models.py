@@ -46,6 +46,7 @@ class ProductVariant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
     color = models.ForeignKey(Color, on_delete=models.SET_NULL, null=True, blank=True)
     size = models.ForeignKey(Size, on_delete=models.SET_NULL, null=True, blank=True)
+    variantImage = models.FileField(upload_to='productsVariants/', null=True, blank=True, default=None)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     stock_quantity = models.IntegerField(default=0)
@@ -120,11 +121,11 @@ class OrderItem(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)  # Price at the time of order
 
     def save(self, *args, **kwargs):
-        if self._state.adding:
-            if self.quantity > self.product.stock_quantity:
-                raise ValidationError(f"Not enough stock for {self.product.product_name}")
-            self.product.stock_quantity -= self.quantity
-            self.product.save()
+        # if self._state.adding:
+        #     if self.quantity > self.product.stock_quantity:
+        #         raise ValidationError(f"Not enough stock for {self.product.product_name}")
+        #     self.product.stock_quantity -= self.quantity
+        self.product.save()
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -133,9 +134,12 @@ class OrderItem(models.Model):
         self.product.save()
         super().delete(*args, **kwargs)
 
+  
     @property
     def total_price(self):
-        return self.quantity * self.price  # Total cost for this item
+        # Calculate the total price considering any discounts
+        discount = self.product.discount if self.product.discount else 0
+        return self.quantity * (self.price - discount)
 
     def __str__(self):
         return f"{self.quantity} x {self.product.product_name}"

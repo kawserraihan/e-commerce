@@ -113,11 +113,15 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product', 'product_name', 'product_image', 'quantity', 'price', 'total_price']
+        fields = ['id', 'product', 'product_name', 'product_image', 'quantity', 'total_price']
+        read_only_fields = ['total_price', 'price', 'product_name', 'product_image']
+
+    def get_total_price(self, obj):
+        return obj.quantity * (obj.product.price - (obj.product.discount if obj.product.discount else 0))
     
 class UserOrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
-    total_amount = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    total_amount = serializers.SerializerMethodField()
     user_name = serializers.SerializerMethodField()
     user_phone = serializers.CharField(source='user.phone', read_only=True)
 
@@ -127,30 +131,36 @@ class UserOrderSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'user', 'user_phone', 'total_amount', 'created_at']
 
     def get_user_name(self, obj):
-        # Combine first and last names
         return f"{obj.user.first_name} {obj.user.last_name}".strip()
+
+    def get_total_amount(self, obj):
+        total = 0
+        for item in obj.items.all():
+            total += item.total_price
+        return total
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         order = UserOrder.objects.create(**validated_data)
 
-        total_amount = 0
         with transaction.atomic():
             for item_data in items_data:
-                product = item_data['product']
+                product = Product.objects.get(id=item_data['product'].id)
                 quantity = item_data['quantity']
-                price = item_data['price']
 
                 if product.stock_quantity < quantity:
-                    raise serializers.ValidationError(f"Not enough stock for {product.product_name}")
-            
-            product.stock_quantity -= quantity
-            product.save()
-            order_item = OrderItem.objects.create(order=order, product=product, quantity=quantity, price=price)
-            total_amount += order_item.total_price
-        
-        order.total_amount = total_amount
-        order.save()
+                    raise serializers.ValidationError(f"Not enough stock for {product.id} - {product.stock_quantity} - {quantity}")
+
+                product.stock_quantity -= quantity
+                product.save()
+
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    quantity=quantity,
+                    price=product.price - (product.discount if product.discount else 0)
+                )
+
         return order
     
 #---------------------------------------Order End---------------------------------
@@ -267,8 +277,8 @@ class WholesalePricePublicSerializer(serializers.ModelSerializer):
 class ProductVariantPublicSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductVariant
-        fields = ['product', 'color', 'size', 'price', 'discount', 'stock_quantity']
-        read_only_fields = ['product', 'color', 'size', 'price', 'discount', 'stock_quantity']
+        fields = ['product', 'color', 'size', 'price', 'discount', 'stock_quantity', 'variantImage' ]
+        read_only_fields = ['product', 'color', 'size', 'price', 'discount', 'stock_quantity', 'variantImage']
 
 class ProductImagePublicSerializer(serializers.ModelSerializer):
     class Meta:

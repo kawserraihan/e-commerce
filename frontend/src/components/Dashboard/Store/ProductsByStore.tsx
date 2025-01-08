@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client"
 import React, { useState } from 'react';
 import Image from 'next/image';
@@ -16,7 +17,7 @@ interface Category {
   count: number;
 }
 
-const ProductList: React.FC = () => {
+const ProductList: React.FC = ({ data }) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const productsPerPage: number = 15;
@@ -181,12 +182,12 @@ const ProductList: React.FC = () => {
                 <h2 className="text-lg font-medium text-gray-700 mb-4">Category</h2>
                 <div className="space-y-2">
                   {categories.map((category) => (
-                    <div 
-                      key={category.name} 
+                    <div
+                      key={category.name}
                       onClick={() => setSelectedCategory(category.name)}
                       className={`flex items-center justify-between cursor-pointer p-2 rounded-lg transition-all duration-300 
-                        ${selectedCategory === category.name 
-                          ? 'bg-green-50 text-green-600' 
+                        ${selectedCategory === category.name
+                          ? 'bg-green-50 text-green-600'
                           : 'hover:bg-gray-300 hover:shadow-sm text-gray-600'}`}
                     >
                       <span className="text-sm">{category.name}</span>
@@ -204,18 +205,18 @@ const ProductList: React.FC = () => {
           <div className="col-span-9">
             {/* Products Grid */}
             <div className="grid grid-cols-5 gap-4">
-              {currentProducts.map((product) => (
-                <div 
-                  key={product.id} 
+              {data?.map((product: { id: React.Key | null | undefined; product_image: string | undefined; name: string | undefined; product_name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined; price: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined; originalPrice: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined; }) => (
+                <div
+                  key={product.id}
                   className="bg-white border border-gray rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow"
-                    style={{ height: '100%' }} // Ensures that all cards have the same height
+                  style={{ height: '100%' }} // Ensures that all cards have the same height
                 >
-
-                  <Image
-                    src={product.image}
+                  <img
+                    src={product.product_image}
                     alt={product.name}
+                    width={170} // Replace with the desired width
+                    height={200} // Replace with the desired height
                     style={{
-        
                       backgroundColor: "#fff",
                       display: "flex",
                       alignItems: "center",
@@ -226,9 +227,8 @@ const ProductList: React.FC = () => {
                       objectFit: "cover", // Ensures the image covers the area without distorting ratio
                       marginBottom: "1rem"
                     }}
-                  
                   />
-                  <h3 className="font-medium text-sm text-gray-800 mb-2">{product.name}</h3>
+                  <h3 className="font-medium text-sm text-gray-800 mb-2">{product.product_name}</h3>
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-green-600 font-bold text-sm">${product.price}</span>
@@ -250,11 +250,10 @@ const ProductList: React.FC = () => {
                 <button
                   onClick={() => paginate(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded ${
-                    currentPage === 1 
+                  className={`px-4 py-2 rounded ${currentPage === 1
                       ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                       : 'bg-green-500 text-white hover:bg-green-600'
-                  }`}
+                    }`}
                 >
                   Previous
                 </button>
@@ -262,11 +261,10 @@ const ProductList: React.FC = () => {
                   <button
                     key={index + 1}
                     onClick={() => paginate(index + 1)}
-                    className={`px-4 py-2 rounded ${
-                      currentPage === index + 1
+                    className={`px-4 py-2 rounded ${currentPage === index + 1
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-200 hover:bg-gray-300'
-                    }`}
+                      }`}
                   >
                     {index + 1}
                   </button>
@@ -274,11 +272,10 @@ const ProductList: React.FC = () => {
                 <button
                   onClick={() => paginate(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className={`px-4 py-2 rounded ${
-                    currentPage === totalPages
+                  className={`px-4 py-2 rounded ${currentPage === totalPages
                       ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                       : 'bg-green-500 text-white hover:bg-green-600'
-                  }`}
+                    }`}
                 >
                   Next
                 </button>
