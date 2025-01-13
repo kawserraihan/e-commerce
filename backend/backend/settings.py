@@ -50,7 +50,9 @@ INSTALLED_APPS = [
     'core',
     'products',
     'incentives',
-    'site_settings'
+    'site_settings',
+    'payment_gateway',
+
 ]
 
 MIDDLEWARE = [
@@ -205,9 +207,28 @@ EMAIL_HOST_PASSWORD = "1CPYJhL4s8yv0Vxm"
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "830949001@smtp-brevo.com"  # Set a default 'from' email address
 
-# ----------------------Phone OTP System --------------------------
+# ----------------------Phone DEMO OTP TOKEN --------------------------
 
-SMSMODE_ACCESS_TOKEN = 'NqFfiH8IszC99nVdtWKtUfLJ1fZ1lzoR'
+# SMS_API_TOKEN = '1234567890123456789'
+
+# ----------------------Phone Live OTP TOKEN --------------------------
+
+SMS_API_TOKEN = '118332345081736444708a0b31e394e3ec137ab6fbf38c547538a'
+
+
+# Bkash Settings
+BKASH_USERNAME = "01770618567"
+BKASH_PASSWORD = "D7DaC<*E*eG"
+BKASH_APP_KEY = "0vWQuCRGiUX7EPVjQDr0EUAYtc"
+BKASH_APP_SECRET = "jcUNPBgbcqEDedNKdvE4G1cAK7D3hCjmJccNPZZBq96QIxxwAMEx"
+
+# Bkash URLs
+BKASH_GRANT_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/token/grant"
+BKASH_REFRESH_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/token/refresh"
+BKASH_CREATE_PAYMENT_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/create"
+BKASH_EXECUTE_PAYMENT_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/execute"
+BKASH_CALLBACK_URL = "https://msmart-production.vercel.app/cart"
+
 
 
 
@@ -226,3 +247,18 @@ SMSMODE_ACCESS_TOKEN = 'NqFfiH8IszC99nVdtWKtUfLJ1fZ1lzoR'
 #         },
 #     },
 # }
+
+
+# Q_CLUSTER = {
+#     "name": "Django-Q",
+#     "workers": 4,
+#     "recycle": 500,
+#     "timeout": 60,
+#     "compress": True,
+#     "save_limit": 250,
+#     "queue_limit": 50,
+#     "cpu_affinity": 1,
+#     "label": "Django-Q",
+#     "django_orm": "default",  # Use Django ORM as the broker
+# }
+

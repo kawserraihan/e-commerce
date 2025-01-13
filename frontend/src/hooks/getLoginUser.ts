@@ -15,4 +15,4 @@ export const getUserFromCookie = () => {
     return null;
   }
 };
-
+  

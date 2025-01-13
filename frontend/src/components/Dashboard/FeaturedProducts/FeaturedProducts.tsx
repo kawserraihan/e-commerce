@@ -1,7 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import React, { useState } from "react";
-import { useGetCategoriesQuery, useGetProductsQuery } from "../../../../redux/features/authApiSlice";
+import { useAddProductToCartMutation, useGetCategoriesQuery, useGetProductsQuery } from "../../../../redux/features/authApiSlice";
+import Link from "next/link";
+import { getUserFromCookie } from "@/hooks/getLoginUser";
+import { toast } from "react-toastify";
 
 export default function PopularProductsSection() {
   const { data: categories, isLoading: isCategoriesLoading, error: categoriesError } = useGetCategoriesQuery({ page: 1, page_size: 100 });
@@ -22,6 +25,97 @@ export default function PopularProductsSection() {
         (product) =>
           product.category_name.toLowerCase() === activeCategory.toLowerCase()
       );
+
+  const [addProductToCart, { isLoading, isError, isSuccess }] = useAddProductToCartMutation();
+  const [addedProducts, setAddedProducts] = useState([]);
+
+  const setSessionStorageWithExpiry = (key, value, ttl) => {
+    const now = new Date();
+    const item = {
+      value,
+      expiry: now.getTime() + ttl,
+    };
+    sessionStorage.setItem(key, JSON.stringify(item));
+  };
+
+  // Function to get session storage with expiration
+  const getSessionStorageWithExpiry = (key) => {
+    const itemStr = sessionStorage.getItem(key);
+    if (!itemStr) return null;
+
+    const item = JSON.parse(itemStr);
+    const now = new Date();
+
+    if (now.getTime() > item.expiry) {
+      sessionStorage.removeItem(key);
+      return null;
+    }
+
+    return item.value;
+  };
+
+  // const handleAddToCart = async (id: undefined) => {
+  //   try {
+  //     const response = await addProductToCart({
+  //       userId: 49,
+  //       productId: id,
+  //       quantity: 2,
+  //     }).unwrap();
+
+  //     console.log('Product added to cart:', response);
+  //     // alert('Product successfully added to cart!');
+  //   } catch (error) {
+  //     console.error('Error adding product to cart:', error);
+  //     // alert('Failed to add product to cart. Please try again.');
+  //   }
+  // };
+
+  const handleAddToCart = async (id) => {
+    try {
+      const user = getUserFromCookie();
+
+      if (user && user.id) {
+        const existingCart = getSessionStorageWithExpiry("cart") || [];
+        const productExists = existingCart.some(
+          (product) => product.productId === id
+        );
+
+        if (productExists) {
+          toast.info("Product is already added to the cart.");
+          return;
+        }
+        const response = await addProductToCart({
+          userId: user.id,
+          productId: id,
+          quantity: 1,
+        }).unwrap();
+
+        console.log("Product added to cart:", response);
+      } else {
+        const existingCart = getSessionStorageWithExpiry("cart") || [];
+        const productExists = existingCart.some(
+          (product) => product.productId === id
+        );
+
+        if (productExists) {
+          toast.info("Product is already added to the cart.");
+          return;
+        }
+
+        const newProduct = { productId: id, quantity: 2 };
+        existingCart.push(newProduct);
+
+        setSessionStorageWithExpiry("cart", existingCart, 3600 * 1000);
+        console.log("Product added to session storage:", newProduct);
+      }
+
+      setAddedProducts((prev) => [...new Set([...prev, id])]);
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+      toast.error("Failed to add product to cart.");
+    }
+  };
+
 
   return (
     <div className="px-6 py-4  ml-2 mr-2">
@@ -54,18 +148,20 @@ export default function PopularProductsSection() {
       {/* Products Grid */}
       <div className="grid grid-cols-5 gap-3 ml-3 mr-3">
         {filteredProducts?.map((product) => (
-          <a
-            href={`/product_details/${product?.id}`}
+          <div
             key={product.id}
             className="block border border-gray rounded-lg p-4 shadow-md hover:shadow-lg transition relative group bg-white no-underline">
             {/* Image Container */}
             <div className="w-full h-[200px] flex items-center justify-center bg-gray-50 rounded-lg border border-gray shadow mb-4">
-              <img
-                src={product.product_image}
-                alt={product.product_name}
-                className="max-w-[170px] h-[200px] object-contain"
-              />
+              <Link href={`/product_details/${product?.id}`}>
+                <img
+                  src={product.product_image}
+                  alt={product.product_name}
+                  className="max-w-[170px] h-[200px] object-contain"
+                />
+              </Link>
             </div>
+            {/* href={`/product_details/${product?.id}`} */}
             {/* Rest of the product card content remains the same */}
             <p style={{ fontSize: "12px" }} className="text-gray-500 mb-1 truncate">
               {product.category_name}
@@ -85,8 +181,15 @@ export default function PopularProductsSection() {
             <button
               style={{ fontSize: "12px" }}
               className="absolute bottom-4 right-4 bg-green-500 text-white px-3 py-2 rounded-full hover:bg-green-600 transition flex items-center gap-2"
-              onClick={(e) => {
-                e.preventDefault();
+              // onClick={(e) => {
+              //   e.preventDefault();
+              // }}
+              onClick={() => {
+                if (!addedProducts.includes(product.id)) {
+                  handleAddToCart(product.id);
+                } else {
+                  alert("Product is already in the cart.");
+                }
               }}
             >
               <svg
@@ -103,9 +206,10 @@ export default function PopularProductsSection() {
                   d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.6 8M7 13h10l4-8H5.4m-2.4 0l1.6 8m-1.6-8h16.4m-1.6 8L17 21m-10-8L5 21m10 0h4"
                 />
               </svg>
-              Add
+              {/* Add */}
+              {addedProducts.includes(product.id) ? "Added" : "Add"}
             </button>
-          </a>
+          </div>
         ))}
       </div>
 

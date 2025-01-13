@@ -1,17 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import Cookies from 'js-cookie'; // Ensure js-cookie is imported
+import { useLogoutMutation } from '../../../redux/features/authApiSlice'; // Replace with the correct path to your API slice
+import { useRouter } from 'next/navigation';
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [logout] = useLogoutMutation(); // Hook for the logout mutation
+  const [isClient, setIsClient] = useState(false); // Track client-side rendering
+  const router = isClient ? useRouter() : null; // Use useRouter only on the client
+
+  // Ensure this runs only on the client
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Retrieve user details from cookies
   const userCookie = Cookies.get('user');
   const user = userCookie ? JSON.parse(userCookie) : null;
   const userName = user ? `${user.first_name} ${user.last_name}` : 'Guest';
   const userRole = user && user.roles && user.roles.length > 0 ? user.roles[0].name : 'User';
+
+  const handleLogout = async () => {
+    try {
+      await logout({}).unwrap(); // Call the logout mutation with an empty object
+      Cookies.remove('user'); // Clear user cookies
+
+      // Redirect to login if on the client
+      if (router) {
+        router.push('/auth/login');
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -22,9 +46,9 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            {userName} {/* Dynamically display user name */}
+            {userName}
           </span>
-          <span className="block text-xs">{userRole} {/* Dynamically display user role */}</span>
+          <span className="block text-xs">{userRole}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
@@ -62,19 +86,19 @@ const DropdownUser = () => {
           <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-4 dark:border-strokedark">
             <li>
               <Link href="/profile" className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
-                {/* Icon and link can be left as is, or updated with appropriate user link */}
                 My Profile
               </Link>
             </li>
             <li>
               <Link href="/settings" className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
-                {/* Icon and link can be left as is, or updated with appropriate settings link */}
                 Account Settings
               </Link>
             </li>
           </ul>
-          <button className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
-            {/* Icon and button functionality can be left as is, or updated with appropriate logout mechanism */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+          >
             Log Out
           </button>
         </div>

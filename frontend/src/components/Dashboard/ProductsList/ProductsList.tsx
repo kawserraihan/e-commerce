@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import {
+  useAddProductToCartMutation,
   useGetCategoriesQuery,
   useGetProductsQuery,
 } from "../../../../redux/features/authApiSlice";
@@ -14,7 +15,7 @@ const ProductList: React.FC = () => {
   const { data: categories, isLoading: isCategoriesLoading } =
     useGetCategoriesQuery({ page: 1, page_size: 100 });
 
-  const { data, isLoading } = useGetProductsQuery({
+  const { data } = useGetProductsQuery({
     page: currentPage,
     page_size: 100,
   });
@@ -38,6 +39,24 @@ const ProductList: React.FC = () => {
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  const [addProductToCart, { isLoading }] = useAddProductToCartMutation();
+
+  const handleAddToCart = async (id) => {
+    try {
+      const response = await addProductToCart({
+        userId: 49,
+        productId: id,
+        quantity: 2,
+      }).unwrap();
+
+      console.log('Product added to cart:', response);
+      alert('Product successfully added to cart!');
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+      alert('Failed to add product to cart. Please try again.');
+    }
+  };
 
   return (
     <div className="w-full bg-white">
@@ -135,7 +154,7 @@ const ProductList: React.FC = () => {
                           ${product.price}
                         </span>
                       </div>
-                      <button className="bg-green-500 text-white px-3 py-1 rounded-full text-xs hover:bg-green-600 transition-colors">
+                      <button onClick={() => handleAddToCart(product.id)} className="bg-green-500 text-white px-3 py-1 rounded-full text-xs hover:bg-green-600 transition-colors">
                         Add
                       </button>
                     </div>

@@ -11,10 +11,22 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image', 'alt_text', 'product']
 
 class ProductVariantSerializer(serializers.ModelSerializer):
+    color_name = serializers.CharField(source='color.color_name', read_only=True)
+    size_name = serializers.CharField(source='size.size_name', read_only=True)
     class Meta:
         model = ProductVariant
-        fields = '__all__'
-
+        fields = [
+            'product', 
+            'color', 
+            'color_name', 
+            'size', 
+            'size_name', 
+            'price', 
+            'discount', 
+            'stock_quantity', 
+            'variantImage'
+        ]
+       
 class WholesalePriceSerializer(serializers.ModelSerializer):
     class Meta:
         model = WholesalePrice
@@ -191,6 +203,35 @@ class CartSerializer(serializers.ModelSerializer):
 
 
 #----------------------------------------------------------------Publc Start ----------------------------------------------------------
+class WholesalePricePublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WholesalePrice
+        fields = ['product', 'min_quantity', 'max_quantity', 'price_per_unit']
+        read_only_fields = ['product', 'min_quantity', 'max_quantity', 'price_per_unit']
+
+class ProductVariantPublicSerializer(serializers.ModelSerializer):
+    color_name = serializers.CharField(source='color.color_name', read_only=True)
+    size_name = serializers.CharField(source='size.size_name', read_only=True)
+    class Meta:
+        model = ProductVariant
+        fields = [
+            'product', 
+            'color', 
+            'color_name', 
+            'size', 
+            'size_name', 
+            'price', 
+            'discount', 
+            'stock_quantity', 
+            'variantImage'
+        ]
+        read_only_fields = fields
+
+class ProductImagePublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image', 'alt_text', 'product']
+        read_only_fields = ['id', 'image', 'alt_text', 'product']
 
 class ProductPublicSerializer(serializers.ModelSerializer):
 
@@ -201,9 +242,10 @@ class ProductPublicSerializer(serializers.ModelSerializer):
     model_name = serializers.CharField(source='model.model_name', read_only=True)
     quantity = serializers.IntegerField(source='stock_quantity',  allow_null=True, required=False)
     
-    additionalImages = ProductImageSerializer(many=True, read_only=True, source='images')
-    wholesale_prices = WholesalePriceSerializer(many=True, read_only=True, source='wholesaleproduct')
-    product_variants = ProductVariantSerializer(many=True, read_only=True, source='variants')
+    additionalImages = ProductImagePublicSerializer(many=True, read_only=True, source='images')
+    wholesale_prices = WholesalePricePublicSerializer(many=True, read_only=True, source='wholesaleproduct')
+    product_variants = ProductVariantPublicSerializer(many=True, read_only=True, source='variants')
+
 
 
     class Meta:
@@ -268,23 +310,6 @@ class ProductPublicSerializer(serializers.ModelSerializer):
             'product_variants',
             ]
 
-class WholesalePricePublicSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = WholesalePrice
-        fields = ['product', 'min_quantity', 'max_quantity', 'price_per_unit']
-        read_only_fields = ['product', 'min_quantity', 'max_quantity', 'price_per_unit']
-
-class ProductVariantPublicSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductVariant
-        fields = ['product', 'color', 'size', 'price', 'discount', 'stock_quantity', 'variantImage' ]
-        read_only_fields = ['product', 'color', 'size', 'price', 'discount', 'stock_quantity', 'variantImage']
-
-class ProductImagePublicSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ['id', 'image', 'alt_text', 'product']
-        read_only_fields = ['id', 'image', 'alt_text', 'product']
 
 
 

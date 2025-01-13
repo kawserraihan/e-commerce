@@ -17,18 +17,7 @@ export default function Footer() {
       }}
     >
       {/* Subscription Section */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          backgroundColor: "#e6f7e9",
-          padding: "2rem",
-          borderRadius: "0.5rem",
-          marginBottom: "2rem",
-        }}
-      >
+      <div className="flex flex-col md:flex-row justify-between items-center bg-green-100 p-8 rounded-md mb-8">
         <div>
           <h3
             style={{
@@ -75,14 +64,7 @@ export default function Footer() {
       </div>
 
       {/* Benefits Section */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-          gap: "1.5rem",
-          marginBottom: "3rem",
-        }}
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
         {[
           {
             icon: "🛒",

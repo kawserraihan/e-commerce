@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
 
-from .sms_utils import send_sms # Import Utils for sending sms
-
 from django.core.mail import send_mail
 from django.conf import settings
 import random
@@ -271,6 +269,29 @@ class OTP_SMS(models.Model):
     @classmethod
     def send_otp(cls, phone_number):
         otp = cls.generate_otp(phone_number)
-        message = f"Your OTP code is {otp.otp_code}. It will expire in 5 minutes."
-        send_sms(phone_number, message)
+        message = f"আপনার OTP কোডটি হচ্ছে {otp.otp_code}। কোডটি ৫ মিনিট পর অকার্যকর হয়ে যাবে।"
+        
+        # Prepare the SMS data payload
+        sms_data = {
+            "smsdata": [
+                {
+                    "to": phone_number,
+                    "message": message
+                }
+            ],
+            "token": settings.SMS_API_TOKEN  # Use the token from settings
+        }
+
+        # Send the SMS via the API
+        try:
+            response = requests.post(
+                url="https://api.bdbulksms.net/api.php",
+                json=sms_data
+            )
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            # Log the error or handle it appropriately
+            print(f"Failed to send SMS: {e}")
+            raise
+
         return otp

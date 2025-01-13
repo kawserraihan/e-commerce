@@ -295,7 +295,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 			query: (phone) => ({
 				url: '/register/otp/',
 				method: 'POST',
-				body: { phone },
+				body: phone,
 			}),
 		}),
 
@@ -517,7 +517,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 		}),
 
 		getColorById: builder.query<Color, number>({
-			query: (id) => `colors/${id}/`, // Adjust the endpoint according to your API
+			query: (id) => `colorspub/${id}/`, // Adjust the endpoint according to your API
 		}),
 
 		addColor: builder.mutation<Color, Partial<Color>>({
@@ -653,7 +653,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 		}),
 
 		getSizeById: builder.query<Size, number>({
-			query: (id) => `sizes/${id}/`, // Adjust the endpoint according to your API
+			query: (id) => `sizespub/${id}/`,
 		}),
 
 		addSize: builder.mutation<Size, Partial<Size>>({
@@ -741,6 +741,39 @@ const authApiSlice = apiSlice.injectEndpoints({
 			}),
 		}),
 
+
+		// ----------------------------- Product wholesale price-----------------------------------
+		// ----------------------------- add to cart-----------------------------------
+		addProductToCart: builder.mutation({
+			query: ({ userId, productId, quantity }) => ({
+				url: `/carts/${userId}/items/`,
+				method: 'POST',
+				body: {
+					product_id: productId,
+					quantity: quantity,
+				},
+			}),
+		}),
+
+		getCartsByUserId: builder.query({
+			query: (id) => `carts/${id}/`, // Adjust the endpoint according to your API
+		}),
+
+		updateCart: builder.mutation({
+			query: ({ id, formData }) => ({
+				url: `/carts/${id}/update-item/`,
+				method: 'PATCH',
+				body: formData,
+			}),
+		}),
+
+
+		deleteCart: builder.mutation({
+			query: ({ userId, itemId }) => ({
+				url: `/carts/${userId}/remove_item/${itemId}/`,
+				method: 'DELETE',
+			}),
+		}),
 
 		// ----------------------------- Product wholesale price-----------------------------------
 
@@ -924,7 +957,7 @@ export const {
 	//Colors Queries
 
 	useGetColorsQuery,
-	useGetColorByIdQuery,
+	useLazyGetColorByIdQuery,
 	useAddColorMutation,
 	useUpdateColorMutation,
 	useDeleteColorMutation,
@@ -968,6 +1001,12 @@ export const {
 	useAddProductMutation,
 	useUpdateProductMutation,
 	useDeleteProductMutation,
+
+	// cart mutation and qyery
+	useAddProductToCartMutation,
+	useGetCartsByUserIdQuery,
+	useUpdateCartMutation,
+	useDeleteCartMutation,
 
 	// Additional Product Images queries
 

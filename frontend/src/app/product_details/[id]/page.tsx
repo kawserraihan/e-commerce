@@ -15,7 +15,6 @@ import { useParams } from "next/navigation";
 
 const InvoicePage = () => {
   const { id } = useParams()
-  console.log(id);
 
   return (
     <div>

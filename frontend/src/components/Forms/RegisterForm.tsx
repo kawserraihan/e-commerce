@@ -114,7 +114,7 @@ const handleFormSubmit = async (e: React.FormEvent) => {
     });
     console.log('User information saved in cookie:', userObject);
 
-    console.log('Phone before sending OTP:', email);
+    console.log('Phone before sending OTP:', phone);
 
     // Step 2: Send OTP request after successful registration
     const otpPayload = { phone }; // Payload for OTP request

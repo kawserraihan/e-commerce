@@ -9,8 +9,7 @@ const ProductImageComponent = ({ additionalPreviews, previewImage, handleImageCh
             <div className="w-full mb-8 mx-auto p-6  rounded-md bg-white shadow-md">
                 <div
                     className="border-2 border-dashed border-[#B1C7E5] rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer"
-                    onClick={() => document.getElementById("productImage").click()}
-                >
+                    onClick={() => document.getElementById("productImage").click()}>
                     {previewImage ? (
                         <Image
                             width={48}

@@ -1,11 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from 'next/image';
-import { useGetProductByIdQuery } from "../../../../../redux/features/authApiSlice";
+import { useLazyGetColorByIdQuery, useGetProductByIdQuery } from "../../../../../redux/features/authApiSlice";
 
 export default function SingleProductView({ id }) {
   console.log(id, "iddididi");
-
   const productImages = [
     "https://ecstasybd.com/all-images/product/Product-Image-1732346028.jpg",
     "https://www.msmart.shop/assets/admin/img/products/9008759899.8.jpg",
@@ -18,13 +17,8 @@ export default function SingleProductView({ id }) {
   const { data: product, isLoading: isProductLoading, isError: isProductError } = useGetProductByIdQuery(id, {
     skip: isNaN(id),
   });
-  console.log(product, "product get by id ");
 
-  const additionalImages = product?.additionalImages instanceof FileList
-    ? Array.from(product.additionalImages).map((file) => URL.createObjectURL(file))
-    : product?.additionalImages;
-
-  const imageSources = additionalImages || productImages;
+  console.log(product);
 
 
   return (
@@ -49,7 +43,7 @@ export default function SingleProductView({ id }) {
           </div>
           {/* Thumbnails */}
           <div className="grid grid-cols-4">
-            {imageSources.map((src, index) => (
+            {product?.additionalImages.map((src, index) => (
               <button
                 key={index}
                 onClick={() => setMainImage(src)}
@@ -57,7 +51,7 @@ export default function SingleProductView({ id }) {
                   }`}
               >
                 <Image
-                  src={src}
+                  src={src.image}
                   alt={`Thumbnail ${index + 1}`}
                   className="w-full h-full object-cover"
                   width={170}
@@ -70,31 +64,45 @@ export default function SingleProductView({ id }) {
 
         {/* Product Info */}
         <div className="col-span-5">
-          <h1 className="text-2xl font-bold mb-4">Seeds of Change Organic Quinoa, Brown</h1>
-          <div className="text-green-500 font-bold text-3xl mb-2">$38</div>
+          <h1 className="text-2xl font-bold mb-4">{product?.product_name}</h1>
+          <div className="text-green-500 font-bold text-3xl mb-2">${product?.price}</div>
           <div className="text-sm text-gray-500 mb-6">Was $52</div>
           <p className="text-sm text-gray-600 mb-6">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Aliquam rem
-            officia.
+            {product?.product_description}
           </p>
 
           {/* Product Options */}
-          <div className="flex items-center mb-2">
-            <label className="text-sm text-gray-500 mr-4">Size:</label>
-            <select className="p-3 border rounded">
-              <option>Select</option>
-              <option>S</option>
-              <option>M</option>
-              <option>L</option>
-            </select>
-          </div>
-          <div className="flex items-center mb-6">
-            <label className="text-sm text-gray-500 mr-4">Color:</label>
-            <select className="p-3 border rounded">
-              <option>Red</option>
-              <option>Green</option>
-              <option>Blue</option>
-            </select>
+          <div className="flex gap-5 mb-5">
+            <div className="flex items-center mb-2 w-[200px]">
+              <label className="text-sm text-gray-500 mr-4">Size:</label>
+              {
+                product?.product_variants?.map((variants: { color: React.Key | null | undefined; }) => (
+                  <select key={variants?.size} className="p-3  w-full border rounded">
+                    <option value="">Select Size</option>
+                    <option value="">
+                      {
+                        variants?.size_name
+                      }
+                    </option>
+                  </select>
+                ))
+              }
+            </div>
+            <div className="flex items-center mb-6 w-[200px]">
+              <label className="text-sm text-gray-500 mr-4">Color:</label>
+              {
+                product?.product_variants?.map((variants: { color: React.Key | null | undefined; }) => (
+                  <select key={variants?.color} className="p-3  w-full border rounded">
+                    <option value="">Select Size</option>
+                    <option value="">
+                      {
+                        variants?.color_name
+                      }
+                    </option>
+                  </select>
+                ))
+              }
+            </div>
           </div>
 
           {/* Add to Cart */}
@@ -112,7 +120,7 @@ export default function SingleProductView({ id }) {
 
           {/* Product Meta */}
           <div className="mt-6 text-sm text-gray-600">
-            <p>Type: Organic</p>
+            <p>Type: {product?.product_type}</p>
             <p>SKU: XYZ-12345</p>
             <p>Tags: Organic, Brown, Quinoa</p>
             <p>Stock: 8 items in stock</p>

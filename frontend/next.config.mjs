@@ -4,7 +4,7 @@ const nextConfig = {
     // other settings can go here
 
     images: {
-      domains: ['demoapi.anticbyte.com'],
+      domains: ['demoapi.anticbyte.com', 'localhost'],
     },
   };
   

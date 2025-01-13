@@ -137,7 +137,11 @@ class UserOrderViewSet(viewsets.ModelViewSet):
             raise ValidationError("User must be authenticated.")
         
         print(f"Attaching user {self.request.user} to the order.")  # Debug
-        serializer.save(user=self.request.user)  
+        order = serializer.save(user=self.request.user)
+        # Calculate total_amount based on related order items
+        total_amount = sum(item.total_price for item in order.items.all())
+        order.total_amount = total_amount
+        order.save()  # Save the order with the updated total_amount
 
     def create(self, request, *args, **kwargs):
         print("Received order creation request with data:", request.data)  # Debug 

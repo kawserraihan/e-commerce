@@ -15,8 +15,13 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProductImageComponent from './ProductImageComponent';
 import ColorSize from './ColorSize';
+import Cookies from 'js-cookie';
 
 const AddProductPage = () => {
+  const userCookie = Cookies.get('user');
+  const user = JSON.parse(decodeURIComponent(userCookie));
+  let { role_id } = user;
+
   const [productName, setProductName] = useState<string>('');
   const [productType, setProductType] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
@@ -37,7 +42,7 @@ const AddProductPage = () => {
   const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
   const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
   const [fields, setFields] = useState([
-    { colorId: '', sizeId: '', price: '', discount: '', stockQuantity: '' }
+    { colorId: '', sizeId: '', price: '', discount: '', stockQuantity: '', variantImage: null | File },
   ]);
 
   // Additional states for multiple images
@@ -102,7 +107,9 @@ const AddProductPage = () => {
     formData.append('quantity', stockQuantity);
     formData.append('product_image', productImage);
     formData.append('price', productPrice.toString());
-    formData.append('is_active', isActive.toString());
+    if (role_id === 1) {
+      formData.append('is_active', isActive.toString());
+    }
     formData.append('category', selectedCategoryId.toString());
     formData.append('sub_category', selectedSubcategoryId.toString());
     formData.append('child_category', selectedChildcategoryId.toString());
@@ -127,6 +134,9 @@ const AddProductPage = () => {
           variantFormData.append('color', field.colorId);
           variantFormData.append('size', field.sizeId);
           variantFormData.append('price', field.price.toString());
+          if (field.variantImage) {
+            variantFormData.append('variantImage', field.variantImage);
+          }
           await addProductVariants(variantFormData).unwrap();
         }
       }
@@ -401,7 +411,8 @@ const AddProductPage = () => {
               )}
             </select>
             {/* Is Active Toggle */}
-            <div className="flex items-center">
+
+            {role_id === 1 && <div className="flex items-center">
               <label htmlFor="isActive" className="text-sm font-medium mr-3">Active</label>
               <input
                 id="isActive"
@@ -411,7 +422,11 @@ const AddProductPage = () => {
                 className="w-4 h-4"
                 style={{ backgroundColor: '#67c5c3' }}
               />
-            </div>
+            </div>}
+
+
+
+
             <button type="submit" className="text-md text-white px-4 py-2 font-bold rounded-full shadow hover:bg-opacity-90 focus:outline-none mr-3" style={{ backgroundColor: '#67c5c3' }} disabled={isLoading}>
               {isLoading ? 'Adding...' : 'Add Product'}
             </button>

@@ -11,9 +11,10 @@ from .views import (
     SellerProfileViewSet,
     DealerProfileViewSet,
     UserProfileDetailAPI,
-    OTPRegistrationView,
-    # OTPRegistrationViewSMS, 
-    OTPVerificationView,
+    # OTPRegistrationView,
+    OTPRegistrationViewSMS, 
+    OTPVerificationViewSMS,
+    # OTPVerificationView,
     UserRoleViewSet,
     UserRolesByUserID,
 )
@@ -37,8 +38,8 @@ urlpatterns = [
     path('jwt/refresh/', CustomTokenRefreshView.as_view()),
     path('jwt/verify/', CustomTokenVerifyView.as_view()),
     path('logout/', LogoutView.as_view()),
-    path('register/otp/', OTPRegistrationView.as_view(), name='otp_register'),
-    path('register/verify/', OTPVerificationView.as_view(), name='otp_verify'),
+    path('register/otp/', OTPRegistrationViewSMS.as_view(), name='otp_register'),
+    path('register/verify/', OTPVerificationViewSMS.as_view(), name='otp_verify'),
     path('users/<int:user_id>/roles/', UserRolesByUserID.as_view(), name='user-roles-by-id'),
 ]
 
