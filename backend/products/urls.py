@@ -10,6 +10,9 @@ from .views import ProductViewSet, ProductImageViewSet, UserOrderViewSet, Produc
 
 from .views import ProductPublicViewSet, ProductVariantPublicViewSet, ProductImagePublicViewSet, WholesalePricePublicViewSet, StoreProfileView, StoreProductView
 
+# ------Dashboards ------
+
+from .views import UserSummaryView, UserAnalyticsView, UserCartView
 
 router = DefaultRouter()
 
@@ -39,6 +42,9 @@ urlpatterns = [
     path('stores/', StoreProfileView.as_view()),
     path('stores/<int:user_id>/', StoreProfileView.as_view()),
     path('stores/<int:user_id>/products/', StoreProductView.as_view(), name='store-products'),
+    path('dashboard/user/summary/', UserSummaryView.as_view(), name='user-summary'),
+    path('dashboard/user/analytics/', UserAnalyticsView.as_view(), name='user-analytics'),
+    path('dashboard/user/cart/', UserCartView.as_view(), name='user-cart'),
 
 ]
 

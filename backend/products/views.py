@@ -14,11 +14,17 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db.models import Sum, Count
+from django.db.models.functions import TruncMonth
+from django.utils import timezone
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 
 from rest_framework.exceptions import ValidationError  
+
+from django.utils.timezone import now
+from datetime import timedelta
 
 #----------------------------------------Imports For Public Use--------------------------------
 
@@ -239,7 +245,7 @@ class CartViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
         )
 
-    @action(detail=True, methods=['DELETE'], url_path='remove_item/(?P<item_id>\d+)')
+    @action(detail=True, methods=['DELETE'], url_path=r'remove_item/(?P<item_id>\d+)')
     def remove_item(self, request, user_id=None, item_id=None):
         """Remove item from cart using item_id directly from the URL"""
         cart = get_object_or_404(Cart, user_id=user_id)
@@ -511,7 +517,106 @@ class StoreProductView(APIView):
                 'message': 'An error occurred while fetching store products',
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+        
 
+
+#---------------------------------- Dashboard -------------------------------
+
+
+
+class UserSummaryView(APIView):
+    authentication_classes = [CustomJwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # Total Purchased Products
+        total_products_purchased = UserOrder.objects.filter(user=user).aggregate(
+            total=Sum('items__quantity')
+        )['total'] or 0
+
+        # Total Amount Paid
+        total_amount_paid = UserOrder.objects.filter(user=user).aggregate(
+            total=Sum('amount_paid')
+        )['total'] or 0
+
+        # Total Due Amount
+        total_due = UserOrder.objects.filter(user=user).aggregate(
+            total_due=Sum('total_amount') - Sum('amount_paid')
+        )['total_due'] or 0
+
+        response_data = {
+            "total_products_ordered": total_products_purchased,
+            "total_amount_paid": total_amount_paid,
+            "total_due": total_due,
+        }
+
+        return Response(response_data)
+    
+class UserAnalyticsView(APIView):
+    authentication_classes = [CustomJwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        
+        # Get the start of the year 2025
+        start_of_2025 = timezone.datetime(2025, 1, 1)
+
+        # Generate a list of all months in 2025
+        all_months = [timezone.datetime(2025, month, 1) for month in range(1, 13)]
+        
+        # Fetch orders for the user from 2025 and aggregate by month
+        analytics = (
+            UserOrder.objects.filter(user=user, created_at__gte=start_of_2025)
+            .annotate(month=TruncMonth('created_at'))  # Group by month
+            .values('month')
+            .annotate(
+                products_purchased=Count('items'),  # Count products associated with the order
+                amount_spent=Sum('total_amount')  # Sum of the order amount
+            )
+            .order_by('month')  # Sort by month
+        )
+
+        # Create a dictionary of the analytics data, indexed by the month
+        analytics_dict = {order['month'].month: order for order in analytics}
+
+        # Prepare the final response data, ensuring every month is included
+        response_data = []
+        for month in all_months:
+            month_number = month.month
+            order_data = analytics_dict.get(month_number, {'products_purchased': 0, 'amount_spent': 0})
+            response_data.append({
+                "month": month_number,
+                "products_purchased": order_data['products_purchased'],
+                "amount_spent": float(order_data['amount_spent'] or 0)  # Ensure it's a float
+            })
+
+        return Response({"analytics": response_data})
+
+class UserCartView(APIView):
+    authentication_classes = [CustomJwtAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+
+        # Fetch User's Cart
+        cart = Cart.objects.filter(user=user).first()
+
+        if not cart:
+            return Response({
+                "item_count": 0  # No items in the cart
+            })
+
+        # Get the number of items in the cart
+        item_count = CartItem.objects.filter(cart=cart).count()  # Get the number of items
+
+        response_data = {
+            "item_count": item_count,  # Only return the item count
+        }
+
+        return Response(response_data)
 
 
