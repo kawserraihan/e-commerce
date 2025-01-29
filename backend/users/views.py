@@ -10,6 +10,8 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView
 )
+
+from rest_framework_simplejwt.tokens import AccessToken
 from .models import Menu, Permission, UserRole, Role, UserAccount, SellerProfile, DealerProfile, OTP, OTP_SMS
 from .serializers import MenuSerializer, RoleSerializer, UserAccountSerializer, UserRoleSerializer, SellerProfileSerializer, DealerProfileSerializer
 from users.authentication import CustomJwtAuthentication
@@ -62,7 +64,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 response.set_cookie(
                     'access',
                     access_token,
-                    max_age=settings.AUTH_COOKIE_ACCESS_MAX_AGE,
+                    # max_age=settings.AUTH_COOKIE_ACCESS_MAX_AGE,
+                    max_age=365 * 24 * 60 * 60,  # 365 days in seconds
                     path=settings.AUTH_COOKIE_PATH,
                     secure=settings.AUTH_COOKIE_SECURE,
                     httponly=settings.AUTH_COOKIE_HTTP_ONLY,
@@ -88,7 +91,13 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             return User.objects.get(email=email)
         except User.DoesNotExist:
             return None
-
+    def generate_access_token(self, raw_access_token):
+        """
+        Extend the access token's lifetime to 365 days.
+        """
+        token = AccessToken(raw_access_token)
+        token.set_exp(lifetime=timedelta(days=365))
+        return str(token)
 
     
 
@@ -642,48 +651,90 @@ class OTPRegistrationViewSMS(APIView):
         return Response({"detail": "Account already verified."}, status=status.HTTP_400_BAD_REQUEST)
 
 
+# class OTPVerificationViewSMS(APIView):
+#     permission_classes = [permissions.AllowAny]
+#     authentication_classes = []
+
+#     def post(self, request, *args, **kwargs):
+#         otp_code = request.data.get('otp_code')
+#         phone_number = request.data.get('phone')  # Assuming the session key is still 'phone'
+#         otp_id = request.session.get('otp_id')
+
+#         if not otp_code:
+#             return Response({"detail": "OTP verification failed: Missing OTP code."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         if not phone_number:
+#             return Response({"detail": "OTP verification failed: Missing phone number."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         if not otp_id:
+#             return Response({"detail": "OTP verification failed: Missing OTP ID."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         # Check if the user is blocked
+#         user = User.objects.filter(phone=phone_number).first()
+#         if user and user.is_blocked:
+#             return Response({"detail": "Account is temporarily blocked. Please try again later."}, status=status.HTTP_403_FORBIDDEN)
+
+#         # Find the OTP record
+#         otp = OTP_SMS.objects.filter(id=otp_id, phone_number=phone_number).first()  # Use phone_number here
+#         if not otp:
+#             return Response({"detail": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         if otp.is_expired():
+#             # Handle expired OTP
+#             if user:
+#                 user.otp_attempts += 1
+#                 user.save()
+
+#                 if user.otp_attempts > settings.OTP_ATTEMPTS:
+#                     user.is_blocked = True
+#                     user.save()
+#                     return Response({"detail": "Too many failed attempts. Account is blocked for 1 hour."}, status=status.HTTP_403_FORBIDDEN)
+
+#             return Response({"detail": "OTP expired. Please request a new one."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         if otp.otp_code == otp_code:
+#             # Update user status on successful verification
+#             user.is_verified = True
+#             user.is_active = True
+#             user.is_blocked = False
+#             user.otp_attempts = 0
+#             user.save()
+
+#             return Response({"message": "User verified successfully."}, status=status.HTTP_200_OK)
+
+#         return Response({"detail": "Invalid OTP code."}, status=status.HTTP_400_BAD_REQUEST)
+
 class OTPVerificationViewSMS(APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
 
     def post(self, request, *args, **kwargs):
         otp_code = request.data.get('otp_code')
-        phone = request.session.get('phone')
-        otp_id = request.session.get('otp_id')
+        otp_id = request.data.get('otp_id')  # Retrieve otp_id from request
 
-        if not otp_code or not phone or not otp_id:
-            return Response({"detail": "OTP verification failed due to missing information."}, status=status.HTTP_400_BAD_REQUEST)
+        if not otp_code:
+            return Response({"detail": "OTP verification failed: Missing OTP code."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the user is blocked
-        user = User.objects.filter(phone=phone).first()
-        if user and user.is_blocked:
-            return Response({"detail": "Account is temporarily blocked. Please try again later."}, status=status.HTTP_403_FORBIDDEN)
+        if not otp_id:
+            return Response({"detail": "OTP verification failed: Missing OTP ID."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Find the OTP record
-        otp = OTP_SMS.objects.filter(id=otp_id, phone=phone).first()
+        # Find the OTP record using otp_id
+        otp = OTP_SMS.objects.filter(id=otp_id).first()  # No need for phone_number here
         if not otp:
             return Response({"detail": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
 
         if otp.is_expired():
-            # Handle expired OTP
-            if user:
-                user.otp_attempts += 1
-                user.save()
-
-                if user.otp_attempts > settings.OTP_ATTEMPTS:
-                    user.is_blocked = True
-                    user.save()
-                    return Response({"detail": "Too many failed attempts. Account is blocked for 1 hour."}, status=status.HTTP_403_FORBIDDEN)
-
             return Response({"detail": "OTP expired. Please request a new one."}, status=status.HTTP_400_BAD_REQUEST)
 
         if otp.otp_code == otp_code:
-            # Update user status on successful verification
-            user.is_verified = True
-            user.is_active = True
-            user.is_blocked = False
-            user.otp_attempts = 0
-            user.save()
+            # Fetch user and update status
+            user = User.objects.filter(phone=otp.phone_number).first()
+            if user:
+                user.is_verified = True
+                user.is_active = True
+                user.is_blocked = False
+                user.otp_attempts = 0
+                user.save()
 
             return Response({"message": "User verified successfully."}, status=status.HTTP_200_OK)
 

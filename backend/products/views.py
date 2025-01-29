@@ -277,6 +277,52 @@ class CartViewSet(viewsets.ModelViewSet):
 
 
 
+
+
+class MergeCartView(APIView):
+    """
+    Merge session-based cart with the authenticated user's cart.
+    """
+
+    def post(self, request):
+        user = request.user
+        session_cart = request.data.get("cart", [])
+        if not user.is_authenticated:
+            return Response({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            # Retrieve or create user's cart
+            cart, created = Cart.objects.get_or_create(user=user)
+
+            for item in session_cart:
+                product_id = item.get("productId")
+                quantity = item.get("quantity", 1)
+
+                # Ensure product exists
+                product = Product.objects.filter(id=product_id).first()
+                if not product:
+                    continue
+
+                # Add or update cart item
+                cart_item, created = CartItem.objects.get_or_create(
+                    cart=cart,
+                    product=product,
+                    defaults={"quantity": quantity},
+                )
+                if not created:
+                    cart_item.quantity += quantity
+                    cart_item.save()
+
+            return Response({"message": "Cart merged successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+        
+    
+
+
+
 #----------------------------------------------------------------Private END--------------------------------------------------------
 
 #----------------------------------------------------------------Publc Start-----------------------------------------------------------
@@ -288,6 +334,23 @@ class ProductPublicViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
     authentication_classes = []
+    lookup_field = 'slug'  # Use slug for lookups
+
+    def get_queryset(self):
+        """
+        Optionally filter active products or add any custom queryset logic.
+        """
+        return super().get_queryset().filter(is_active=True)
+
+    def get_object(self):
+        """
+        Debugging lookup for slug-based filtering.
+        """
+        print("Lookup kwargs:", self.kwargs)  # Check what slug is being passed
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = get_object_or_404(queryset, slug=self.kwargs['slug'])
+        return obj
+    
 
 class WholesalePricePublicViewSet(ModelViewSet):
 
@@ -468,8 +531,13 @@ class StoreProfileView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
+
 #----------------------------------------Products By Store---------------------------
-        
+
+
+
 
 class StoreProductView(APIView):
     permission_classes = [permissions.AllowAny]

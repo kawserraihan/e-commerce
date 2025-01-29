@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import xss from "xss";
+import Cookies from "js-cookie";
 import CryptoJS from "crypto-js";
 
 function convertKeysToNestedObject(input) {
@@ -82,13 +83,13 @@ export function formField(target) {
 
 export async function request(url, method, body, headers = {}, params = {}) {
   try {
-    // Check if localStorage is available
-    const lS = typeof localStorage != "undefined" ? localStorage : null;
-    const token = lS ? lS.getItem("token") : null; // Get the token from localStorage if available
+    // Retrieve token from cookies
+    const encryptedToken = Cookies.get("authToken");
     let decryptedData;
-    if (token) {
+
+    if (encryptedToken) {
       const SECRET_KEY = process.env.NEXT_PUBLIC_SECRET_KEY; // Replace with a secure key
-      const bytes = CryptoJS.AES.decrypt(token, SECRET_KEY);
+      const bytes = CryptoJS.AES.decrypt(encryptedToken, SECRET_KEY);
       decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
     }
 

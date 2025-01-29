@@ -42,7 +42,7 @@ const ProductList: React.FC = () => {
 
   const [addProductToCart, { isLoading }] = useAddProductToCartMutation();
 
-  const handleAddToCart = async (id) => {
+  const handleAddToCart = async (id:any) => {
     try {
       const response = await addProductToCart({
         userId: 49,
@@ -56,6 +56,16 @@ const ProductList: React.FC = () => {
       console.error('Error adding product to cart:', error);
       alert('Failed to add product to cart. Please try again.');
     }
+  };
+
+  const getImageSrc = (image: string | File | null | undefined): string => {
+    if (image instanceof File) {
+      return URL.createObjectURL(image); // Create a temporary URL for the File
+    }
+    if (typeof image === "string") {
+      return image; // If it's already a string, return it
+    }
+    return "/default-image.jpg"; // Fallback for null or undefined
   };
 
   return (
@@ -132,7 +142,7 @@ const ProductList: React.FC = () => {
                     className="bg-white border border-gray rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow"
                   >
                     <Image
-                      src={product.product_image}
+                      src={getImageSrc(product?.product_image)} // Ensure string or StaticImport
                       alt={product.product_name}
                       width={170}
                       height={200}

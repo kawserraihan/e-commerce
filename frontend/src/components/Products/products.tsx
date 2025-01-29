@@ -34,7 +34,7 @@ interface Product {
 const ProductsComponent = () => {
   const router = useRouter();
   const [page, setPage] = useState<number>(1);
-  const [pageSize] = useState<number>(5);
+  const [pageSize] = useState<number>(10);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -69,6 +69,24 @@ const ProductsComponent = () => {
 
   const totalPages = Math.ceil((data?.count || 0) / pageSize);
 
+  const renderPageNumbers = () => {
+    let pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(
+        <button
+          key={i}
+          onClick={() => setPage(i)}
+          className={`px-3 py-1 rounded-md text-sm font-medium ${
+            page === i ? 'bg-primary text-white' : 'bg-white text-gray-700 border'
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+    return pageNumbers;
+  };
+  
   return (
     <div>
       {/* Header with Add New button and Search box */}
@@ -179,32 +197,28 @@ const ProductsComponent = () => {
         </table>
 
         {/* Pagination controls */}
-        <div className="flex justify-center items-center mt-4 space-x-2">
+        <div className="flex justify-end items-center mt-4 mb-4 mr-12 space-x-2">
+          {/* Previous Button */}
           <button
             onClick={() => setPage((prevPage) => Math.max(prevPage - 1, 1))}
-            disabled={page === 1}
-            className={`px-4 py-2 rounded border ${page === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-primary border-primary'
-              }`}
+            disabled={!data?.previous}
+            className={`px-4 py-2 text-center rounded-md border text-sm font-medium ${
+              !data?.previous ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white'
+            }`}
           >
             Previous
           </button>
 
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-            <button
-              key={pageNum}
-              onClick={() => setPage(pageNum)}
-              className={`px-4 py-2 rounded border ${pageNum === page ? 'bg-orange-500 text-white' : 'bg-white text-primary border-primary'
-                }`}
-            >
-              {pageNum}
-            </button>
-          ))}
+          {/* Page Numbers */}
+          {renderPageNumbers()}
 
+          {/* Next Button */}
           <button
-            onClick={() => setPage((prevPage) => Math.min(prevPage + 1, totalPages))}
-            disabled={page === totalPages}
-            className={`px-4 py-2 rounded border ${page === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-primary border-primary'
-              }`}
+            onClick={() => setPage((prevPage) => (data?.next ? prevPage + 1 : prevPage))}
+            disabled={!data?.next}
+            className={`px-4 py-2 text-center rounded-md border text-sm font-medium ${
+              !data?.next ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary text-white'
+            }`}
           >
             Next
           </button>

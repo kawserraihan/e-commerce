@@ -6,7 +6,7 @@ import ColorsComponent from "../../../components/Core/Core-Color/CoreColor";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Color",
+  title: "Msmart - Color",
   description:
     "MS- Mart - Color",
 };

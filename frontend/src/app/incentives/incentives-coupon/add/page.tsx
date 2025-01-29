@@ -4,7 +4,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import AddCouponModal from '@/components/Incentives/Incentives-Coupon/coupon';
 
 export const metadata: Metadata = {
-    title: "MS Mart - Coupons",
+    title: "Msmart - Coupons",
     description:
       "MS- Mart - Coupons",
   };

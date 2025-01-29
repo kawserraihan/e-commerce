@@ -28,6 +28,8 @@ const allowedRoutes = {
     '/',
     '/dashboard',
     '/profile',
+    '/orders',
+    '/orders/:id',
     '/settings',
   ],
 };

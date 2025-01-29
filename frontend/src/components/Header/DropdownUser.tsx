@@ -2,36 +2,32 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
-import Cookies from 'js-cookie'; // Ensure js-cookie is imported
-import { useLogoutMutation } from '../../../redux/features/authApiSlice'; // Replace with the correct path to your API slice
-import { useRouter } from 'next/navigation';
+import Cookies from "js-cookie";
+import { useLogoutMutation } from "../../../redux/features/authApiSlice";
+import { useRouter } from "next/navigation";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [logout] = useLogoutMutation(); // Hook for the logout mutation
-  const [isClient, setIsClient] = useState(false); // Track client-side rendering
-  const router = isClient ? useRouter() : null; // Use useRouter only on the client
+  const [isClient, setIsClient] = useState(false); // For client-side rendering
+  const [logout] = useLogoutMutation();
+  const router = useRouter(); // Hook moved outside conditional logic
 
-  // Ensure this runs only on the client
   useEffect(() => {
-    setIsClient(true);
+    setIsClient(true); // Only set the state for client-side
   }, []);
 
   // Retrieve user details from cookies
-  const userCookie = Cookies.get('user');
+  const userCookie = Cookies.get("user");
   const user = userCookie ? JSON.parse(userCookie) : null;
-  const userName = user ? `${user.first_name} ${user.last_name}` : 'Guest';
-  const userRole = user && user.roles && user.roles.length > 0 ? user.roles[0].name : 'User';
+  const userName = user ? `${user.first_name} ${user.last_name}` : "Guest";
+  const userRole =
+    user && user.roles && user.roles.length > 0 ? user.roles[0].name : "User";
 
   const handleLogout = async () => {
     try {
-      await logout({}).unwrap(); // Call the logout mutation with an empty object
-      Cookies.remove('user'); // Clear user cookies
-
-      // Redirect to login if on the client
-      if (router) {
-        router.push('/auth/login');
-      }
+      await logout({}).unwrap(); // Call the logout mutation
+      Cookies.remove("user"); // Clear user cookies
+      router.push("/auth/login"); // Use router unconditionally
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -82,15 +78,23 @@ const DropdownUser = () => {
       </Link>
 
       {dropdownOpen && (
-        <div className={`absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark`}>
+        <div
+          className={`absolute right-0 mt-4 flex w-62.5 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark`}
+        >
           <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-4 dark:border-strokedark">
             <li>
-              <Link href="/profile" className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
+              <Link
+                href="/profile"
+                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+              >
                 My Profile
               </Link>
             </li>
             <li>
-              <Link href="/settings" className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
+              <Link
+                href="/settings"
+                className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
+              >
                 Account Settings
               </Link>
             </li>

@@ -11,7 +11,12 @@ def get_or_refresh_token():
         # Check if the token exists
         if token:
             # Refresh token if it will expire in less than 5 minutes
-            time_to_expiry = (token.token_expiry - now()).total_seconds()
+                        # Debug: Print token details
+            print(f"Current Token in DB: {token}")
+            print(f"Token Expiry: {token.token_expiry}")
+
+            time_to_expiry = (token.token_expiry - (now()+ timedelta(hours=6) )).total_seconds()
+            print(f"Time to Expiry (seconds): {time_to_expiry}")
             if time_to_expiry > 60:
                 print(f"Bkash token is valid for another {time_to_expiry} seconds.")
                 return token.grant_token
@@ -42,7 +47,15 @@ def grant_new_token():
             "app_secret": settings.BKASH_APP_SECRET,
         }
 
+        print(f"Grant Token Headers: {headers}")
+        print(f"Grant Token Payload: {payload}")
+
+
         response = requests.post(url, json=payload, headers=headers)
+        
+        print(f"Grant Token Response Status Code: {response.status_code}")
+        print(f"Grant Token Response JSON: {response.json()}")
+
         data = response.json()
 
         if response.status_code == 200 and data.get("statusCode") == "0000":
@@ -50,8 +63,11 @@ def grant_new_token():
             token = BkashToken.objects.create(
                 grant_token=data["id_token"],
                 refresh_token=data["refresh_token"],
-                token_expiry=now() + timedelta(seconds=data["expires_in"]),
+                # token_expiry=now() + timedelta(seconds=data["expires_in"]) + timedelta(hours=6)
+                token_expiry= (now() + timedelta(hours=6)) + timedelta(minutes=4),  # Expiry set to 3 minutes
+
             )
+            print(f"Saved Token to DB: {token}")
             return token.grant_token
         else:
             print(f"Failed to grant new Bkash token: {data.get('statusMessage')}")
@@ -64,6 +80,8 @@ def grant_new_token():
 def refresh_token(refresh_token_value):
     try:
         print("Refreshing Bkash token using refresh token...")
+        print(f"Using Refresh Token: {refresh_token_value}")
+
         url = settings.BKASH_REFRESH_URL
         headers = {
             "Content-Type": "application/json",
@@ -77,7 +95,14 @@ def refresh_token(refresh_token_value):
             "refresh_token": refresh_token_value,
         }
 
+        print(f"Refresh Token Headers: {headers}")
+        print(f"Refresh Token Payload: {payload}")
+
         response = requests.post(url, json=payload, headers=headers)
+
+        print(f"Refresh Token Response Status Code: {response.status_code}")
+        print(f"Refresh Token Response JSON: {response.json()}")
+
         data = response.json()
 
         if response.status_code == 200 and data.get("statusCode") == "0000":
@@ -85,8 +110,11 @@ def refresh_token(refresh_token_value):
             token = BkashToken.objects.first()
             token.grant_token = data["id_token"]
             token.refresh_token = data["refresh_token"]
-            token.token_expiry = now() + timedelta(seconds=data["expires_in"])
+            token.token_expiry = now() + timedelta(seconds=data["expires_in"]) + timedelta(hours=6)
             token.save()
+
+            print(f"Updated Token in DB: {token}")
+            
             return token.grant_token
         else:
             print(f"Failed to refresh Bkash token: {data.get('statusMessage')}")

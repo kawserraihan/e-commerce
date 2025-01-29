@@ -1,750 +1,300 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { FiHeart, FiShoppingCart, FiUser, FiSearch, FiMapPin } from 'react-icons/fi';
-import { FiLogIn, FiUserPlus } from 'react-icons/fi'; // Import Login and Signup icons
-import { HiOutlineMenuAlt4 } from 'react-icons/hi';
-import { FaHeadset } from 'react-icons/fa';
-import { BsHeadphones } from 'react-icons/bs';
-import ProductDropdown from './ProductDropdown';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  FiHeart,
+  FiShoppingCart,
+  FiLogIn,
+  FiUserPlus,
+  FiSearch,
+  FiMapPin,
+} from "react-icons/fi";
+import { HiOutlineMenuAlt4, HiX } from "react-icons/hi";
+import Image from "next/image";
+import Cookies from "js-cookie";
+
+const NavLink = ({ href, label }: { href: string; label: string }) => (
+  <Link
+    href={href}
+    className="text-gray-600 hover:text-green-500 transition-colors duration-200"
+  >
+    {label}
+  </Link>
+);
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
+  const [cartCount, setCartCount] = useState<number>(0);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+
+  const refreshAccessToken = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_HOST}api//jwt/refresh/`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const newAccessToken = data.access;
+        if (newAccessToken) {
+          Cookies.set("accessToken", newAccessToken, {
+            path: "/",
+            secure: true,
+            sameSite: "Strict",
+          });
+          console.log("Access token refreshed successfully.");
+          return true;
+        }
+      } else {
+        console.error("Failed to refresh access token.");
+        Cookies.remove("accessToken");
+        Cookies.remove("refresh");
+      }
+    } catch (error) {
+      console.error("Error during token refresh:", error);
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    const fetchCartData = async () => {
+      let token = Cookies.get("accessToken");
+
+      if (!token) {
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          token = Cookies.get("accessToken");
+        } else {
+          setIsAuthenticated(false);
+          return;
+        }
+      }
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_HOST}/api/users/`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+        } else if (response.status === 401) {
+          console.log("Access token expired. Attempting to refresh...");
+          const refreshed = await refreshAccessToken();
+          if (refreshed) {
+            await fetchCartData();
+          } else {
+            setIsAuthenticated(false);
+          }
+        } else {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setCartCount(data?.item_count || 0);
+      } catch (error) {
+        console.error("Failed to fetch cart data:", error);
+        setIsAuthenticated(false);
+      }
+    };
+
+    fetchCartData();
+  }, []);
 
   return (
-    <header
-      style={{
-        backgroundColor: '#fff',
-        borderBottom: '1px solid #e5e7eb',
-        width: '100%',
-        zIndex: 1000,
-        fontFamily: 'Arial, sans-serif',
-      }}
-    >
-      {/*----------------------------------------------- Top Bar -----------------------------------------------*/}
-
-      <div
-        className="fixed top-0 left-0 w-full bg-white shadow-md z-50"
-        style={{
-          position: "fixed", // Ensures the navbar stays in place
-          top: 0, // Sticks to the top
-          width: "100%", // Takes full width
-          zIndex: 50, // Ensures it is above other content
-        }}>
-
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center', // Center both groups horizontally
-            alignItems: 'center', // Align items vertically
-            padding: '0.5rem 2rem',
-            fontSize: '0.750rem', // Adjust font size for better readability
-            color: '#6b7280',
-
-          }}>
-          {/* Inner Container for Centered Content */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: '6rem', // Space between the two sections
-              maxWidth: '1300px', // Limit the width of the content
-              width: '100%', // Ensure it fills the available space
-              height: '1.2rem',
-            }}>
-            {/* Left Links */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
-              <Link
-                href="/auth/login"
-                style={{
-                  textDecoration: 'none',
-                  color: '#6b7280',
-                  position: 'relative',
-                  paddingRight: '1rem',
-                  transition: 'color 0.3s', // Smooth hover effect
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')} // Hover green
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')} // Revert to gray
-                onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')} // Click dark green
-                onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')} // Revert to hover green
-              >
-                About Us
-                <span
-                  style={{
-                    content: '""',
-                    position: 'absolute',
-                    top: '50%',
-                    right: '0',
-                    height: '50%',
-                    borderRight: '1.6px solid #d1d5db', // Add light gray border
-                    transform: 'translateY(-50%)', // Center vertically
-                  }}
-                ></span>
-              </Link>
-
-              <Link
-                href="/auth/login"
-                style={{
-                  textDecoration: 'none',
-                  color: '#6b7280',
-                  position: 'relative',
-                  paddingRight: '1rem',
-                  transition: 'color 0.3s', // Smooth hover effect
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-                onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-                onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
-              >
-                My Account
-                <span
-                  style={{
-                    content: '""',
-                    position: 'absolute',
-                    top: '50%',
-                    right: '0',
-                    height: '50%',
-                    borderRight: '1.6px solid #d1d5db', // Add light gray border
-                    transform: 'translateY(-50%)', // Center vertically
-                  }}
-                ></span>
-              </Link>
-
-              <Link
-                href="/auth/login"
-                style={{
-                  textDecoration: 'none',
-                  color: '#6b7280',
-                  position: 'relative',
-                  paddingRight: '1rem',
-                  transition: 'color 0.3s', // Smooth hover effect
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-                onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-                onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
-              >
-                Wishlist
-                <span
-                  style={{
-                    content: '""',
-                    position: 'absolute',
-                    top: '50%',
-                    right: '0',
-                    height: '50%',
-                    borderRight: '1.6px solid #d1d5db', // Add light gray border
-                    transform: 'translateY(-50%)', // Center vertically
-                  }}
-                ></span>
-              </Link>
-
-              <Link
-                href="/auth/login"
-                style={{
-                  textDecoration: 'none',
-                  color: '#6b7280',
-                  transition: 'color 0.3s', // Smooth hover effect
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-                onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-                onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
-              >
-                Order Tracking
-              </Link>
-            </div>
-
-            {/* Right Info */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              {/* Phone Number Section */}
-              <span
-                style={{
-                  position: 'relative',
-                  paddingRight: '1rem', // Add padding for spacing
-                }}
-              >
-                Need help? Call Us:{" "}
-                <strong style={{ color: '#10b981' }}>+880 160 863 7246</strong>
-                <span
-                  style={{
-                    content: '""',
-                    position: 'absolute',
-                    top: '50%',
-                    right: '0',
-                    height: '50%', // Adjust height as needed
-                    borderRight: '1.6px solid #d1d5db', // Light gray border
-                    transform: 'translateY(-50%)', // Center vertically
-                  }}
-                ></span>
-              </span>
-
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <span
-                  style={{
-                    position: 'relative',
-                    paddingRight: '1rem',
-                  }}
-                >
-                  English
-                  <span
-                    style={{
-                      content: '""',
-                      position: 'absolute',
-                      top: '50%',
-                      right: '0',
-                      height: '50%',
-                      borderRight: '1.6px solid #d1d5db',
-                      transform: 'translateY(-50%)',
-                    }}
-                  ></span>
-                </span>
-                <span>BDT</span>
-              </div>
+    <div style={{ paddingTop: "6rem" }}>
+      <header className="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+        {/* Top Bar */}
+        <div className="hidden md:flex justify-between items-center px-6 py-2 text-xs border-b border-gray text-gray-500 ml-3 mr-3">
+          <div className="flex items-center gap-7">
+            <NavLink href="/auth/signup" label="Dealers" />
+            <NavLink href="/account" label="Wholesale Products" />
+            <NavLink href="/wishlist" label="Special Discount" />
+            <NavLink href="/tracking" label="Order Tracking" />
+          </div>
+          <div className="flex items-center gap-7">
+            <span className="text-xs">
+              Need help? Call Us: <strong className="text-green-500">+880 160 863 7246</strong>
+            </span>
+            <div className="flex items-center gap-7">
+              <span>English</span>
+              <span>BDT</span>
             </div>
           </div>
         </div>
-
-
-
-
-
-        {/* --------------------------------------Close Top Nav Bar ----------------------------------------- */}
-
-
-
-
 
         {/* Main Navbar */}
-        <div
-          style={{
-            width: '100%',
-            borderTop: '1px solid #e5e7eb', // Full-width top border
+        <nav className="flex items-center justify-between px-6 py-4 ml-5 mr-5">
+          {/* Logo */}
+          <Link href="/">
+            <Image
+              src="https://demoapi.anticbyte.com/media/banners/msmart.png"
+              alt="Logo"
+              width={100}
+              height={40}
+              priority
+            />
+          </Link>
 
-          }}
-        >
-          <div
-            style={{
-              maxWidth: '1400px',
-              margin: '0 auto',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '1rem 2rem',
-            }}
-          >
-            {/* Logo */}
-            <Link href="/">
-              <img
-                src="https://demoapi.anticbyte.com/media/banners/msmart.png"
-                alt="Nest Logo"
-                style={{
-                  width: '100px', // Reduced logo size
-                  objectFit: 'contain',
-                  marginRight: '2rem',
-                }}
+          {/* Search Bar and Categories */}
+          <div className="hidden md:flex items-center flex-1 gap-4">
+            {/* Browse All Categories */}
+            <div className="relative">
+              <button
+                className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-green-100"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <HiOutlineMenuAlt4 className="text-lg mr-2" />
+                Browse All Categories
+              </button>
+              {isMenuOpen && (
+                <div className="absolute left-0 mt-2 bg-white shadow-lg rounded-md p-4 z-50 w-64">
+                  <ul>
+                    <li className="hover:text-green-500">
+                      <Link href="/categories/electronics">Electronics</Link>
+                    </li>
+                    <li className="hover:text-green-500">
+                      <Link href="/categories/clothing">Clothing</Link>
+                    </li>
+                    <li className="hover:text-green-500">
+                      <Link href="/categories/home-appliances">Home Appliances</Link>
+                    </li>
+                    <li className="hover:text-green-500">
+                      <Link href="/categories/books">Books</Link>
+                    </li>
+                    <li className="hover:text-green-500">
+                      <Link href="/categories/beauty-products">Beauty Products</Link>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Search Box */}
+            <div
+              className={`flex items-center ml-10 border shadow rounded-sm overflow-hidden w-full max-w-lg transition-colors duration-200 ${
+                isFocused ? "border-2 border-[#8ce7ac]" : "border-gray-300"
+              }`}
+            >
+              <input
+                type="text"
+                placeholder="Search for items..."
+                className="flex-1 px-4 py-2 text-sm outline-none focus:ring-0 focus:border-none"
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
               />
-            </Link>
-
-            {/* Search Bar */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                flex: 1,
-                gap: '1rem',
-
-
-              }}
-            >
-              {/* Search Box */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  border: `1px solid ${isFocused ? "#10b981" : "#d1d5db"}`, // Dynamic border color
-                  borderRadius: "0.375rem",
-                  overflow: "hidden",
-                  width: "100%",
-                  maxWidth: "600px",
-                  height: "2.2rem", // Reduced height
-                }}
-              >
-                {/* Dropdown */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "0 0.75rem",
-                    borderRight: `1px solid ${isFocused ? "#10b981" : "#d1d5db"}`, // Dynamic separator color
-                    position: "relative", // For the arrow
-                  }}
-                >
-                  <select
-                    style={{
-                      border: "none",
-                      outline: "none",
-                      backgroundColor: "transparent",
-                      fontSize: "0.8rem",
-                      fontWeight: "bold",
-                      appearance: "none",
-                      color: "#374151",
-                      cursor: "pointer",
-                      paddingRight: "1.9rem",
-                    }}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                  >
-                    <option>All Categories</option>
-                    <option>Fruits</option>
-                    <option>Vegetables</option>
-                    <option>Beverages</option>
-                  </select>
-                </div>
-
-                {/* Search Input */}
-                <input
-                  type="text"
-                  placeholder="Search for items..."
-                  style={{
-                    flex: 1,
-                    padding: "0 1rem",
-                    border: "none",
-                    outline: "none",
-                    fontSize: "0.8rem",
-                    color: "#6b7280",
-                  }}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setIsFocused(false)}
-                />
-
-                {/* Search Button */}
-                <button
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "0.5rem 1rem",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    color: isFocused ? "#10b981" : "#6b7280", // Dynamic icon color
-                  }}
-                >
-                  <FiSearch style={{ fontSize: "1rem" }} />
-                </button>
-              </div>
-              {/* Location Box */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '0.5rem 0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.375rem',
-                  backgroundColor: '#fff',
-                  boxShadow: 'rgba(0, 0, 0, 0.05) 0px 2px 4px', // Subtle shadow
-                  cursor: 'pointer',
-                  gap: '0.5rem',
-                }}
-              >
-                <FiMapPin style={{ color: '#10b981', fontSize: '1rem' }} />
-                <span style={{ fontSize: '0.8rem', fontWeight: '500' }}>Your Location</span>
-              </div>
+              <button className="px-4 py-2 bg-transparent text-gray-600 hover:text-green-500">
+                <FiSearch size={20} />
+              </button>
             </div>
 
+            {/* Location */}
+            <div className="flex items-center gap-2 ml-10 px-4 py-2 border shadow border-gray-300 rounded-md text-gray-700 bg-gray-100 cursor-pointer hover:text-green-500">
+              <FiMapPin className="text-green-500" />
+              <span className="text-sm font-medium">Your Location</span>
+            </div>
+          </div>
 
-            {/* Icons */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '2rem',
-                marginLeft: '2rem',
-
-              }}
+          {/* Right Icons */}
+          <div className="flex items-center gap-7">
+            <Link
+              href="/cart"
+              className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-green-500 relative group"
             >
-
-
-              {/* Wishlist */}
-              <div>
-                {/* Wishlist */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <FiHeart style={{ fontSize: '1.2rem', color: '#374151', cursor: 'pointer' }} />
-                  <Link
-                    href="/cart"
-                    style={{
-                      textDecoration: 'none',
-                      color: '#6b7280',
-                      position: 'relative',
-                      paddingRight: '0.4rem',
-                      transition: 'color 0.3s',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-                    onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-                    onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
-                  >
-                    Wishlist
-                    <span
-                      style={{
-                        content: '""',
-                        position: 'absolute',
-                        top: '50%',
-                        right: '0',
-                        height: '50%',
-                        transform: 'translateY(-50%)',
-                      }}
-                    ></span>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Cart */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <FiShoppingCart style={{ fontSize: '1.2rem', color: '#374151', cursor: 'pointer' }} />
+              <FiShoppingCart size={24} />
+              <span>Cart</span>
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            {isAuthenticated ? (
+              <Link
+                href={`${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`}
+                className="hidden md:flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-green-500"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
                 <Link
-                  href="/cart"
-                  style={{
-                    textDecoration: 'none',
-                    color: '#6b7280',
-                    position: 'relative',
-                    paddingRight: '0.0rem',
-                    transition: 'color 0.3s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-                  onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-                  onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
+                  href="/auth/login"
+                  className="hidden md:flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-green-500"
                 >
-                  Cart
-                  <span
-                    style={{
-                      content: '""',
-                      position: 'absolute',
-                      top: '50%',
-                      right: '0',
-                      height: '50%',
-                      transform: 'translateY(-50%)',
-                    }}
-                  ></span>
+                  <FiLogIn size={20} />
+                  Login
                 </Link>
-              </div>
-
-              {/* Account */}
-              {/* <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <FiUser style={{ fontSize: '1.2rem', color: '#374151', cursor: 'pointer' }} />
                 <Link
-                  href="/account"
-                  style={{
-                    textDecoration: 'none',
-                    color: '#6b7280',
-                    position: 'relative',
-                    paddingRight: '0.4rem',
-                    transition: 'color 0.3s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-                  onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-                  onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
+                  href="/auth/signup"
+                  className="hidden md:flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-green-500"
                 >
-                  Account
-                  <span
-                    style={{
-                      content: '""',
-                      position: 'absolute',
-                      top: '50%',
-                      right: '0',
-                      height: '50%',
-                      transform: 'translateY(-50%)',
-                    }}
-                  ></span>
+                  <FiUserPlus size={20} />
+                  Signup
                 </Link>
-              </div> */}
+              </>
+            )}
 
-{/* Login & Signup */}
-<div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-  {/* Login Button */}
-  <Link
-    href="/auth/login"
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      textDecoration: 'none',
-      color: '#6b7280',
-      position: 'relative',
-      paddingRight: '1rem',
-      transition: 'color 0.3s',
-    }}
-    onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-    onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-    onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-    onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
-  >
-    <FiLogIn style={{ fontSize: '1.2rem', color: '#374151', marginRight: '0.3rem' }} />
-    Login
-    <span
-      style={{
-        content: '""',
-        position: 'absolute',
-        top: '50%',
-        right: '0',
-        height: '50%',
-        transform: 'translateY(-50%)',
-      }}
-    ></span>
-  </Link>
-
-  {/* Signup Button */}
-  <Link
-    href="/auth/signup"
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      textDecoration: 'none',
-      color: '#6b7280',
-      position: 'relative',
-      paddingRight: '0.4rem',
-      transition: 'color 0.3s',
-    }}
-    onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-    onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-    onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-    onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
-  >
-    <FiUserPlus style={{ fontSize: '1.2rem', color: '#374151', marginRight: '0.3rem' }} />
-    Signup
-    <span
-      style={{
-        content: '""',
-        position: 'absolute',
-        top: '50%',
-        right: '0',
-        height: '50%',
-        transform: 'translateY(-50%)',
-      }}
-    ></span>
-  </Link>
-</div>
-
-
-            </div>
+            {/* Hamburger Menu */}
+            <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              {isMenuOpen ? <HiX size={24} /> : <HiOutlineMenuAlt4 size={24} />}
+            </button>
           </div>
-        </div>
+        </nav>
 
-      </div>
-
-      {/* --------------------------------------------------Bottom Navbar------------------------------------------ */}
-
-      <nav
-        style={{
-          backgroundColor: '#fff',
-          borderBottom: '1px solid #e5e7eb',
-          padding: '0.5rem 2rem',
-          fontFamily: 'Arial, sans-serif',
-          borderTop: '1px solid #e5e7eb',
-          marginTop: "6.8rem",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: '1400px',
-            margin: '0 auto',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          {/* Browse Categories */}
-          {/* <button
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#10b981',
-            color: '#fff',
-            borderRadius: '0.375rem',
-            border: 'none',
-            fontWeight: '600',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }}
-        >
-          <HiOutlineMenuAlt4 style={{ fontSize: '1.25rem' }} />
-          Browse All Categories
-        </button> */}
-          <ProductDropdown />
-
-          {/* Navigation Links */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1.5rem',
-              fontSize: '0.875rem',
-            }}
-          >
-            <Link
-                href="/auth/login"
-              style={{
-                color: '#10b981',
-                fontWeight: '600',
-                textDecoration: 'none',
-                paddingRight: '0.4rem',
-              }}
-            >
-              Home
-            </Link>
-
-
-            <Link
-                href="/auth/login"
-              style={{
-                textDecoration: 'none',
-                color: '#6b7280',
-                position: 'relative',
-                paddingRight: '0.4rem',
-                transition: 'color 0.3s', // Smooth hover effect
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-              onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-              onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
-            >
-              About
-              <span
-                style={{
-                  content: '""',
-                  position: 'absolute',
-                  top: '50%',
-                  right: '0',
-                  height: '50%',
-                  transform: 'translateY(-50%)', // Center vertically
-                }}
-              ></span>
-            </Link>
-
-
-            <Link
-                href="/auth/login"
-              style={{
-                textDecoration: 'none',
-                color: '#6b7280',
-                position: 'relative',
-                paddingRight: '0.4rem',
-                transition: 'color 0.3s', // Smooth hover effect
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-              onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-              onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
-            >
-              Shops
-              <span
-                style={{
-                  content: '""',
-                  position: 'absolute',
-                  top: '50%',
-                  right: '0',
-                  height: '50%',
-                  transform: 'translateY(-50%)', // Center vertically
-                }}
-              ></span>
-            </Link>
-
-            <Link
-                href="/auth/login"
-              style={{
-                textDecoration: 'none',
-                color: '#6b7280',
-                position: 'relative',
-                paddingRight: '0.4rem',
-                transition: 'color 0.3s', // Smooth hover effect
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-              onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-              onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
-            >
-              Dealers
-              <span
-                style={{
-                  content: '""',
-                  position: 'absolute',
-                  top: '50%',
-                  right: '0',
-                  height: '50%',
-                  transform: 'translateY(-50%)', // Center vertically
-                }}
-              ></span>
-            </Link>
-            <Link
-                href="/auth/login"
-              style={{
-                textDecoration: 'none',
-                color: '#6b7280',
-                position: 'relative',
-                paddingRight: '1rem',
-                transition: 'color 0.3s', // Smooth hover effect
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#10b981')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
-              onMouseDown={(e) => (e.currentTarget.style.color = '#065f46')}
-              onMouseUp={(e) => (e.currentTarget.style.color = '#10b981')}
-            >
-              Contact Us
-              <span
-                style={{
-                  content: '""',
-                  position: 'absolute',
-                  top: '50%',
-                  right: '0',
-                  height: '50%',
-                  transform: 'translateY(-50%)', // Center vertically
-                }}
-              ></span>
-            </Link>
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-white p-4 shadow-md">
+            <ul className="space-y-4">
+              <li>
+                <NavLink href="/about" label="About Us" />
+              </li>
+              <li>
+                <NavLink href="/account" label="My Account" />
+              </li>
+              <li>
+                <NavLink href="/wishlist" label="Wishlist" />
+              </li>
+              <li>
+                <NavLink href="/tracking" label="Order Tracking" />
+              </li>
+              <li>
+                <Link
+                  href="/auth/login"
+                  className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-green-500"
+                >
+                  <FiLogIn size={20} />
+                  Login
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/auth/signup"
+                  className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-green-500"
+                >
+                  <FiUserPlus size={20} />
+                  Signup
+                </Link>
+              </li>
+            </ul>
           </div>
-
-          {/* Support Center */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.9rem',
-              fontSize: '0.875rem',
-              color: '#374151',
-            }}
-          >
-            <FaHeadset style={{ fontSize: '1.65rem', color: '#10b981' }} />
-            <div style={{ lineHeight: '1.2' }}> {/* Adjusted line-height */}
-              <span
-                style={{
-                  color: '#10b981',
-                  fontWeight: '600',
-                  fontSize: '0.70rem',
-                }}
-              >
-                +880 160 863 7246
-              </span>
-              <br />
-              <span
-                style={{
-                  color: '#6b7280',
-                  fontSize: '0.70rem',
-                }}
-              >
-                24/7 Support Center
-              </span>
-            </div>
-          </div>
-
-        </div>
-      </nav>
-
-
-    </header>
+        )}
+      </header>
+    </div>
   );
 }

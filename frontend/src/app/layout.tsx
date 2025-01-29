@@ -34,7 +34,10 @@ export default function RootLayout({
       <body suppressHydrationWarning={true}>
         <CustomProvider> {/* Use CustomProvider here */}
           <div className="dark:bg-boxdark-2 dark:text-bodydark">
-            {children}
+            {/* Add padding to ensure content doesn't overlap with Navbar */}
+            <div> {/* Adjust padding as needed */}
+              {children}
+            </div>
           </div>
           <ToastContainer />
         </CustomProvider>

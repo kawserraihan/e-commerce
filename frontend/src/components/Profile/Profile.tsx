@@ -3,6 +3,8 @@ import { useGetUserProfileQuery } from "../../../redux/features/profileApiSlice"
 // import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import Image from "next/image";
 import { useEffect, useState } from 'react';
+import Cookies from "js-cookie";
+
 
 const Profile = () => {
 
@@ -10,7 +12,8 @@ const Profile = () => {
 
     useEffect(() => {
       // Access localStorage only in the client-side environment
-      const accessToken = localStorage.getItem('access');
+      // const accessToken = localStorage.getItem('access');
+      const accessToken = Cookies.get("accessToken");
       setToken(accessToken || undefined);
     }, []);
   

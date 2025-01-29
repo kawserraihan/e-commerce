@@ -6,7 +6,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Edit Product",
+  title: "Msmart - Edit Product",
   description:
     "MS- Mart - Edit Product",
 };

@@ -4,7 +4,7 @@ import ViewSize from "../../../../components/Core/Core-Size/ViewSize";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Size",
+  title: "Msmart - Size",
   description:
     "MS- Mart - Size",
 };

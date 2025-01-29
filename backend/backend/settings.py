@@ -4,6 +4,7 @@ import dotenv
 from django.core.management.utils import get_random_secret_key
 import os
 import pymysql
+from datetime import timedelta
 
 pymysql.install_as_MySQLdb()
 
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
     'incentives',
     'site_settings',
     'payment_gateway',
+    'delivery_system',
 
 ]
 
@@ -128,7 +130,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Dhaka'  # Replace with your desired time zone
 
 USE_I18N = True
 
@@ -166,8 +169,15 @@ DJOSER = {
     'TOKEN_MODEL' : None
 }
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=365),  # Access token valid for 365 days
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=365),  # Ensure the refresh token matches the same duration if needed
+    'ROTATE_REFRESH_TOKENS': False,  # Optional: Disable rotation of refresh tokens
+    'BLACKLIST_AFTER_ROTATION': True,  # Optional: Blacklist rotated tokens
+}
+
 AUTH_COOKIE = 'access'
-AUTH_COOKIE_ACCESS_MAX_AGE = 60 * 60 * 24
+AUTH_COOKIE_ACCESS_MAX_AGE = 365 * 24 * 60 * 60,  # 365 days in seconds
 AUTH_COOKIE_REFRESH_MAX_AGE = 60 * 60 * 24
 AUTH_COOKIE_SECURE= getenv('AUTH_COOKIE_SECURE', 'True') == 'True'
 AUTH_COOKIE_HTTP_ONLY= True
@@ -216,18 +226,32 @@ DEFAULT_FROM_EMAIL = "830949001@smtp-brevo.com"  # Set a default 'from' email ad
 SMS_API_TOKEN = '118332345081736444708a0b31e394e3ec137ab6fbf38c547538a'
 
 
-# Bkash Settings
+# Bkash Settings For Sandobox
 BKASH_USERNAME = "01770618567"
 BKASH_PASSWORD = "D7DaC<*E*eG"
 BKASH_APP_KEY = "0vWQuCRGiUX7EPVjQDr0EUAYtc"
 BKASH_APP_SECRET = "jcUNPBgbcqEDedNKdvE4G1cAK7D3hCjmJccNPZZBq96QIxxwAMEx"
 
-# Bkash URLs
+#Bkash Settings for Live
+# BKASH_USERNAME = "01877716660"
+# BKASH_PASSWORD = "5VO_45Fcp98"
+# BKASH_APP_KEY = "9va7Sj3QY4lmeejPeWl1xzdTtc"
+# BKASH_APP_SECRET = "DNW55j1JBuf6x8vP0prW3IhvEcSqORlmiIqs0YbbUgh1pMRppD3B"
+
+# Bkash URLs For Sandbox
 BKASH_GRANT_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/token/grant"
 BKASH_REFRESH_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/token/refresh"
 BKASH_CREATE_PAYMENT_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/create"
 BKASH_EXECUTE_PAYMENT_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized/checkout/execute"
-BKASH_CALLBACK_URL = "https://msmart-production.vercel.app/cart"
+BKASH_CALLBACK_URL = "http://localhost:3000/payment/"
+
+#Bkash Urls For Live
+
+# BKASH_GRANT_URL = "https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/token/grant"
+# BKASH_REFRESH_URL = "https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/token/refresh"
+# BKASH_CREATE_PAYMENT_URL = "https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/create"
+# BKASH_EXECUTE_PAYMENT_URL = "https://tokenized.pay.bka.sh/v1.2.0-beta/tokenized/checkout/execute"
+# BKASH_CALLBACK_URL = "http://localhost:3000/payment/"
 
 
 

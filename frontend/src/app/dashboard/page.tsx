@@ -6,8 +6,8 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 export const metadata: Metadata = {
   title:
-    "MS Mart",
-  description: "MS Mart Admin Panel",
+    "Msmart",
+  description: "Msmart Admin Panel",
 };
 
 export default function Home() {

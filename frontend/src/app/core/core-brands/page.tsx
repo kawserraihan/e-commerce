@@ -4,7 +4,7 @@ import BrandsComponent from "../../../components/Core/Core-Brands/CoreBrands";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Brand",
+  title: "Msmart - Brand",
   description:
     "MS- Mart - Brand",
     

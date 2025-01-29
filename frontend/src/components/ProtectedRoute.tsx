@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAppSelector } from '../../redux/hooks';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import Cookies from "js-cookie";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,12 +15,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   useEffect(() => {
     if (loading) return; // If loading, do nothing
-    const accessToken = localStorage.getItem('access_token');
-    const refreshToken = localStorage.getItem('refresh_token');
+    // const accessToken = localStorage.getItem('access_token');
+    // const refreshToken = localStorage.getItem('refresh_token');
+        // Get tokens from cookies
+        const accessToken = Cookies.get("accessToken");
+        const refreshToken = Cookies.get("refreshToken");
 
     // Log the access and refresh tokens
-    console.log('Access_token:', accessToken);
-    console.log('Refresh_token:', refreshToken);
+    console.log('Access_token from cookies:', accessToken);
+    console.log('Refresh_token from cookies:', refreshToken);
 
     if (!isAuthenticated) {
       // Show toast notification and redirect to login page if not authenticated

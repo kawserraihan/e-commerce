@@ -1,57 +1,73 @@
-"use client"
+"use client";
 
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAppDispatch } from '../../redux/hooks';
-import { useLoginMutation } from '../../redux/features/authApiSlice';
-import { setAuth } from '../../redux/features/authSlice';
-import { toast } from 'react-toastify';
+import { useState, ChangeEvent, FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useAppDispatch } from "../../redux/hooks";
+import { useLoginMutation } from "../../redux/features/authApiSlice";
+import { setAuth } from "../../redux/features/authSlice";
+import { toast } from "react-toastify";
+import Cookies from "js-cookie";
 
-export default function useLogin() {
-	const router = useRouter();
-	const dispatch = useAppDispatch();
-	const [login, { isLoading }] = useLoginMutation();
+interface LoginFormProps {
+  onSuccess?: (accessToken: string, userEmail: string) => void;
+}
 
-	const [formData, setFormData] = useState({
-		email: '',
-		password: '',
-	});
+export default function useLogin(onSuccess?: LoginFormProps["onSuccess"]) {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const [login, { isLoading }] = useLoginMutation();
 
-	const { email, password } = formData;
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-	const onChange = (event: ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = event.target;
+  const { email, password } = formData;
 
-		setFormData({ ...formData, [name]: value });
-	};
+  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
-	const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-		login({ email, password })
-			.unwrap()
-			.then(({ access, refresh,email }) => {
-				console.log(email);
-				// Save tokens in localStorage
-				localStorage.setItem('access', access);
-				localStorage.setItem('refresh', refresh);
+    login({ email, password })
+      .unwrap()
+      .then(({ access, refresh, email }) => {
+        // Save tokens in cookies
+        Cookies.set("accessToken", access, {
+          secure: true,
+          sameSite: "Strict",
+          expires: 7,
+        });
+        Cookies.set("refreshToken", refresh, {
+          secure: true,
+          sameSite: "Strict",
+          expires: 7,
+        });
 
-				// Dispatch the setAuth action with tokens
-				dispatch(setAuth({ accessToken: access, refreshToken: refresh }));
+        // Dispatch the setAuth action with tokens
+        dispatch(setAuth({ accessToken: access, refreshToken: refresh }));
 
-				toast.success('Log In Successful');
-				router.push('/dashboard');
-			})
-			.catch(() => {
-				toast.error('Failed to log in');
-			});
-	};
+        // Trigger onSuccess callback
+        if (onSuccess) {
+          onSuccess(access, email);
+        }
 
-	return {
-		email,
-		password,
-		isLoading,
-		onChange,
-		onSubmit,
-	};
+        toast.success("Log In Successful");
+        router.push("/dashboard");
+      })
+      .catch(() => {
+        toast.error("Failed to log in");
+      });
+  };
+
+  return {
+    email,
+    password,
+    isLoading,
+    onChange,
+    onSubmit,
+  };
 }

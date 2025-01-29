@@ -17,7 +17,7 @@ interface Category {
   count: number;
 }
 
-const ProductList: React.FC = ({ data }) => {
+const ProductList: React.FC = ({  }) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const productsPerPage: number = 15;
@@ -204,7 +204,10 @@ const ProductList: React.FC = ({ data }) => {
           {/* Main Content */}
           <div className="col-span-9">
             {/* Products Grid */}
-            <div className="grid grid-cols-5 gap-4">
+
+
+            {/* TODO KAWSER  */}
+            {/* <div className="grid grid-cols-5 gap-4">
               {data?.map((product: { id: React.Key | null | undefined; product_image: string | undefined; name: string | undefined; product_name: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined; price: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined; originalPrice: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined; }) => (
                 <div
                   key={product.id}
@@ -242,7 +245,7 @@ const ProductList: React.FC = ({ data }) => {
                   </div>
                 </div>
               ))}
-            </div>
+            </div> */}
 
             {/* Pagination */}
             <div className="flex justify-center mt-8">

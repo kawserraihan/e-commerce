@@ -7,7 +7,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 
 export const metadata: Metadata = {
-  title: "MS Mart - Product",
+  title: "Msmart - Product",
   description:
     "MS- Mart - Product",
 };

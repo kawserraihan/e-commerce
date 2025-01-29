@@ -97,6 +97,7 @@ class UserOrder(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
     payment_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
     delivery_status = models.CharField(max_length=20, choices= DELIVERY_STATUS_COICES, default='not delivered')
+    payment_method = models.CharField(max_length=20, default='cod')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)

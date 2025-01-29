@@ -1,118 +1,160 @@
-import { useState } from "react";
-import Link from "next/link";
-import ClickOutside from "@/components/ClickOutside";
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
+
+interface CartItem {
+  id: number;
+  product: {
+    product_name: string;
+    product_image: string;
+    price: string;
+  };
+  quantity: number;
+}
 
 const DropdownNotification = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [notifying, setNotifying] = useState(true);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Retrieve user data and access token from cookies
+        const userCookie = Cookies.get("user");
+        const token = Cookies.get("accessToken");
+
+        if (!userCookie || !token) {
+          throw new Error("User data or access token not found in cookies.");
+        }
+
+        const user = JSON.parse(userCookie);
+        const userId = user.id;
+
+        if (!userId) {
+          throw new Error("User ID not found in the cookie.");
+        }
+
+        // Fetch cart data from the API
+        const response = await fetch(
+          `http://localhost:8000/api/carts/${userId}/`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const errorResponse = await response.text();
+          throw new Error(`Failed to fetch cart items: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        setCartItems(data.items || []);
+        setTotalPrice(data.total_price || 0);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCartItems();
+  }, []);
 
   return (
-    <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
-      <li>
-        <Link
-          onClick={() => {
-            setNotifying(false);
-            setDropdownOpen(!dropdownOpen);
-          }}
-          href="#"
-          className="relative flex h-8.5 w-8.5 items-center justify-center rounded-full border-[0.5px] border-stroke bg-gray hover:text-primary dark:border-strokedark dark:bg-meta-4 dark:text-white"
-        >
-          <span
-            className={`absolute -top-0.5 right-0 z-1 h-2 w-2 rounded-full bg-meta-1 ${
-              notifying === false ? "hidden" : "inline"
-            }`}
-          >
-            <span className="absolute -z-1 inline-flex h-full w-full animate-ping rounded-full bg-meta-1 opacity-75"></span>
-          </span>
-          {/* Cart Icon */}
-          <svg
-        xmlns="http://www.w3.org/2000/svg"
-        height="19px"
-        viewBox="0 -960 960 960"
-        width="19px"
-        fill="#5f6368"
-        className="custom-icon"
+    <div className="relative">
+      {/* Cart Button */}
+      <button
+        onClick={() => setDropdownOpen(!dropdownOpen)}
+        className="relative flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 bg-gray-100 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600"
       >
-        <path d="M280-80q-33 0-56.5-23.5T200-160q0-33 23.5-56.5T280-240q33 0 56.5 23.5T360-160q0 33-23.5 56.5T280-80Zm400 0q-33 0-56.5-23.5T600-160q0-33 23.5-56.5T680-240q33 0 56.5 23.5T760-160q0 33-23.5 56.5T680-80ZM246-720l96 200h280l110-200H246Zm-38-80h590q23 0 35 20.5t1 41.5L692-482q-11 20-29.5 31T622-440H324l-44 80h480v80H280q-45 0-68-39.5t-2-78.5l54-98-144-304H40v-80h130l38 80Zm134 280h280-280Z" />
-      </svg>
-        </Link>
-
-        {dropdownOpen && (
-          <div
-            className={`absolute -right-27 mt-2.5 flex h-90 w-75 flex-col rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark sm:right-0 sm:w-80`}
-          >
-            <div className="px-4.5 py-3">
-              <h5 className="text-sm font-medium text-bodydark2">
-                Cart
-              </h5>
-            </div>
-
-            <ul className="flex h-auto flex-col overflow-y-auto">
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  href="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      Smart Watch,
-                    </span>{" "}
-                    Quantity: 2
-                  </p>
-
-                  <p className="text-xs">12 May, 2025</p>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  href="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      Red Shirt,
-                    </span>{" "}
-                    Quantity: 2
-                  </p>
-
-                  <p className="text-xs">24 Feb, 2025</p>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  href="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      Apple Watch
-                    </span>{" "}
-                    Quantity: 1
-                  </p>
-
-                  <p className="text-xs">04 Jan, 2025</p>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  href="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      Leather Pant
-                    </span>{" "}
-                    Quantity: 2
-                  </p>
-
-                  <p className="text-xs">01 Dec, 2024</p>
-                </Link>
-              </li>
-            </ul>
-          </div>
+        {/* Notification Badge */}
+        {cartItems.length > 0 && (
+          <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
+            {cartItems.length}
+          </span>
         )}
-      </li>
-    </ClickOutside>
+        {/* Cart Icon */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          width="24px"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path d="M7 18c-1.104 0-2 .897-2 2s.896 2 2 2 2-.897 2-2-.896-2-2-2zm10 0c-1.104 0-2 .897-2 2s.896 2 2 2 2-.897 2-2-.896-2-2-2zM7.271 8l-.271-2h15l-1.981 8H7.271zm16.469-3H7l-1-4H2V1h5l1 4h16.469z" />
+        </svg>
+      </button>
+
+      {/* Cart Dropdown */}
+      {dropdownOpen && (
+        <div className="absolute right-0 mt-2 w-72 bg-white shadow-md rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700 z-50">
+          {loading ? (
+            <p className="text-center p-4 text-gray-500">Loading...</p>
+          ) : error ? (
+            <p className="text-center p-4 text-red-500">{error}</p>
+          ) : cartItems.length === 0 ? (
+            <p className="text-center p-4 text-gray-500">Your cart is empty.</p>
+          ) : (
+            <div>
+              <div className="max-h-60 overflow-y-auto">
+                {cartItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center p-3 border-b border-gray-200 dark:border-gray-700"
+                  >
+                    <img
+                      src={item.product.product_image}
+                      alt={item.product.product_name}
+                      className="w-12 h-12 rounded-md object-cover"
+                    />
+                    <div className="ml-3 flex-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {item.product.product_name}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Quantity: {item.quantity}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Price: ৳{parseFloat(item.product.price).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-right font-semibold text-gray-900 dark:text-gray-100">
+                  Total: ৳{totalPrice.toFixed(2)}
+                </p>
+                <div className="flex justify-between mt-3">
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_BASE}/cart`}
+                    className="px-4 py-2 bg-gray-200 rounded-md text-sm font-semibold text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
+                  >
+                    Update Cart
+                  </a>
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_BASE}/cart/checkout`}
+                    className="px-4 py-2 bg-primary rounded-md text-sm font-semibold text-white hover:bg-primary-dark"
+                  >
+                    Checkout
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 

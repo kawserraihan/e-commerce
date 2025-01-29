@@ -4,8 +4,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { SellerProfileForm } from '@/components/forms';
 
 export const metadata = {
-  title: "Seller Profile| MS Mart",
-  description: "Seller Profile | MS Mart",
+  title: "Seller Profile| Msmart",
+  description: "Seller Profile | Msmart",
 };
 
 const Seller: React.FC = () => {

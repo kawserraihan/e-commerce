@@ -139,7 +139,7 @@ class UserOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserOrder
-        fields = ['id', 'user', 'user_name', 'user_phone', 'delivery_status', 'payment_status', 'amount_paid', 'total_amount', 'created_at', 'items']
+        fields = ['id', 'user', 'user_name', 'user_phone', 'delivery_status', 'payment_status', 'payment_method', 'amount_paid', 'total_amount', 'created_at', 'items']
         read_only_fields = ['id', 'user', 'user_phone', 'total_amount', 'created_at']
 
     def get_user_name(self, obj):
@@ -153,7 +153,8 @@ class UserOrderSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
-        order = UserOrder.objects.create(**validated_data)
+        payment_method = validated_data.pop('payment_method', 'cod')
+        order = UserOrder.objects.create(payment_method=payment_method, **validated_data)
 
         with transaction.atomic():
             for item_data in items_data:

@@ -9,15 +9,15 @@ const StorePage = () => {
   const { id } = useParams()
   console.log(id, "id");
 
-  const { data, error, isLoading } = useGetStoreProductsByIdQuery({
-    id: id,
-    page: 1,
-    page_size: 20
-  });
+  // const { data, error, isLoading } = useGetStoreProductsByIdQuery({
+  //   data: data,
+  //   page: 1,
+  //   page_size: 20
+  // });
   return (
     <div>
       <Navbar />
-      <ProductsByStore data={data?.results} />
+      {/* <ProductsByStore data={data?.results} /> */}
       <Footer />
     </div>
   );

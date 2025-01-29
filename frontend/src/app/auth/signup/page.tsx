@@ -9,8 +9,8 @@ import "react-toastify/dist/ReactToastify.css";
 
 
 export const metadata: Metadata = {
-  title: "Next.js Signup Page | MS Mart",
-  description: "Next.js Signup Page | MS Mart",
+  title: "Next.js Signup Page | Msmart",
+  description: "Next.js Signup Page | Msmart",
 };
 
 const SignUp: React.FC = () => {
@@ -38,7 +38,7 @@ const SignUp: React.FC = () => {
                 />
               </Link>
               <p className="2xl:px-30">
-                Signup To MS Mart & Find the best clothing that suits your style.
+                Signup To Msmart & Find the best clothing that suits your style.
               </p>
 
               <span className="mt-15 inline-block">
@@ -170,7 +170,7 @@ const SignUp: React.FC = () => {
             <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
               <span className="mb-1.5 block font-medium">Sign Up for free</span>
               <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-                Sign Up to MS Mart
+                Sign Up to Msmart
               </h2>
               <div className="-mt-6">
               <RegisterForm/>

@@ -13,6 +13,7 @@ urlpatterns = [
     path('api/', include('incentives.urls')),
     path('api/', include('site_settings.urls')),
     path('api/', include('payment_gateway.urls')),
+    path('api/', include('delivery_system.urls')),   
 ]
 
 if settings.DEBUG:

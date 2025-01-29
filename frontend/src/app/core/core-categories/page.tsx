@@ -6,7 +6,7 @@ import CategoriesComponent from "../../../components/Core/Core-Categories/CoreCa
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Category",
+  title: "Msmart - Category",
   description:
     "MS- Mart - Category",
 };

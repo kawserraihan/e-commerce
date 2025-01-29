@@ -12,7 +12,7 @@ from .views import ProductPublicViewSet, ProductVariantPublicViewSet, ProductIma
 
 # ------Dashboards ------
 
-from .views import UserSummaryView, UserAnalyticsView, UserCartView
+from .views import UserSummaryView, UserAnalyticsView, UserCartView, MergeCartView
 
 router = DefaultRouter()
 
@@ -35,9 +35,11 @@ router.register(r'wholesale-public', WholesalePricePublicViewSet, basename='whol
 router.register(r'public-variants', ProductVariantPublicViewSet, basename='public-variant')
 router.register(r'additional-images', ProductImagePublicViewSet, basename='additional-image')
 
+print(router.urls)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('merge-cart/', MergeCartView.as_view(), name='merge-cart'),
     path('products/<int:pk>/update-stock/', ProductStockUpdateView.as_view(), name='product-update-stock'),
     path('stores/', StoreProfileView.as_view()),
     path('stores/<int:user_id>/', StoreProfileView.as_view()),

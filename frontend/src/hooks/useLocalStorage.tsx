@@ -1,50 +1,45 @@
 "use client";
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 type SetValue<T> = T | ((val: T) => T);
 
-function useLocalStorage<T>(
+function useCookieStorage<T>(
   key: string,
-  initialValue: T,
+  initialValue: T
 ): [T, (value: SetValue<T>) => void] {
   // State to store our value
-  // Pass  initial state function to useState so logic is only executed once
-  const [storedValue, setStoredValue] = useState(() => {
+  const [storedValue, setStoredValue] = useState<T>(() => {
     try {
-      // Get from local storage by key
-      if (typeof window !== "undefined") {
-        // browser code
-        const item = window.localStorage.getItem(key);
-        // Parse stored json or if none return initialValue
-        return item ? JSON.parse(item) : initialValue;
-      }
+      // Retrieve value from cookies
+      const cookieValue = Cookies.get(key);
+      return cookieValue ? JSON.parse(cookieValue) : initialValue;
     } catch (error) {
-      // If error also return initialValue
-      console.log(error);
+      console.error("Error reading cookie:", error);
       return initialValue;
     }
   });
 
-  // useEffect to update local storage when the state changes
+  // useEffect to update cookies when the state changes
   useEffect(() => {
     try {
-      // Allow value to be a function so we have same API as useState
       const valueToStore =
         typeof storedValue === "function"
           ? storedValue(storedValue)
           : storedValue;
-      // Save state
-      if (typeof window !== "undefined") {
-        // browser code
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
-      }
+
+      // Save value to cookies
+      Cookies.set(key, JSON.stringify(valueToStore), {
+        secure: true,
+        sameSite: "Strict",
+        expires: 7, // Optional: Cookie expiration in days
+      });
     } catch (error) {
-      // A more advanced implementation would handle the error case
-      console.log(error);
+      console.error("Error setting cookie:", error);
     }
   }, [key, storedValue]);
 
   return [storedValue, setStoredValue];
 }
 
-export default useLocalStorage;
+export default useCookieStorage;

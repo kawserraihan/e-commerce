@@ -5,7 +5,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import ProtectedPage from "@/components/ProtectedPage";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Products",
+  title: "Msmart - Products",
   description:
     "MS- Mart - Products",
 };

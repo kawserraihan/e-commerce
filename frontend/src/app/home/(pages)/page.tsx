@@ -1,27 +1,34 @@
-"use client";
+import { Metadata } from "next";
 
-import React from 'react';
-import BestSell from "@/components/BestSell/BestSell";
-import Categories from "@/components/Category/Categories";
-import PopularProductsSection from '@/components/Dashboard/FeaturedProducts/FeaturedProducts';
-import Hero from '@/components/Dashboard/Hero/Hero';
-import DealsOfTheDaySection from '@/components/Dashboard/DealsOfTheDay/DealsOfTheDay';
+import Stores from "@/components/Dashboard/Store/Stores"
+import DealsOfTheDay from "@/components/Dashboard/DealsOfTheDay/DealsOfTheDay";
+import PopularProducts from "@/components/Dashboard/PublicProducts/FeaturedProducts";
+import Footer from "@/components/Dashboard/Footer/Footer";
+import Hero from "@/components/Dashboard/Hero/Hero";
+import Navbar from "@/components/Dashboard/NavBar/Navbar";
 
-interface Props {
-  children: React.ReactNode;
-}
 
-export default function HomePage() {
+
+export const metadata: Metadata = {
+  title:
+    "Msmart",
+  description: "Msmart Admin Panel",
+};
+
+export default function Home() {
+
+
   return (
-    <div>
-      {/* <Navbar /> */}
-      <Hero />
-      <Categories />
-      {/* <FeaturedProducts /> */}
-      {/* <PopularProductsSection /> */}
-      {/* <BestSell /> */}
-      {/* <DealsOfTheDaySection /> */}
-      {/* <Footer /> */}
+    <div className="flex flex-col min-h-screen bg-white">
+      <Navbar/>
+      <Hero/>
+      <Stores/>
+      <PopularProducts/>
+      <DealsOfTheDay/>
+
+      <Footer/>
+
+
     </div>
-  );
+  )
 }

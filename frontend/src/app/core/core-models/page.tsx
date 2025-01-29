@@ -4,7 +4,7 @@ import ModelsComponent from "../../../components/Core/Core-Models/CoreModels";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Model",
+  title: "Msmart - Model",
   description:
     "MS- Mart - Model",
     

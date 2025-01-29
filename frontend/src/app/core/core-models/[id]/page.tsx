@@ -3,7 +3,7 @@ import ViewModel from "@/components/Core/Core-Models/ViewModel";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Model",
+  title: "Msmart - Model",
   description:
     "MS- Mart - Brand",
 };

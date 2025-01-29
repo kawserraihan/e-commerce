@@ -13,18 +13,40 @@ import {
 } from '../../../redux/features/authApiSlice';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ProductImageComponent from './ProductImageComponent';
+import ProductImageComponent from './Add/ProductImageComponent';
 import ColorSize from './ColorSize';
 import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
+
+
+interface ColorSizeField {
+  colorId: string | number | null;
+  sizeId: string | number | null;
+  price: string | number | null;
+  discount?: string | number | null;
+  stockQuantity?: string | number | null;
+  variantImage?: File | null;
+}
+
+interface ColorSizeProps {
+  fields: ColorSizeField[];
+  setFields: React.Dispatch<React.SetStateAction<ColorSizeField[]>>;
+  setSelectedSizeId: (sizes: (string | number | null)[]) => void;
+  selectedSizeId: (string | number | null)[]; // Add this
+  setSelectedColorId: (colors: (string | number | null)[]) => void;
+  selectedColorId: (string | number | null)[]; // Add this
+}
 
 const AddProductPage = () => {
+  const router = useRouter();
   const userCookie = Cookies.get('user');
-  const user = JSON.parse(decodeURIComponent(userCookie));
+  const user = userCookie ? JSON.parse(decodeURIComponent(userCookie)) : null;
   let { role_id } = user;
 
   const [productName, setProductName] = useState<string>('');
   const [productType, setProductType] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
+  const [discount, setDiscount] = useState<string>('');
   const [productCode, setProductCode] = useState<string>('');
   const [stockQuantity, setStockQuantity] = useState<string>('');
   const [productPrice, setProductPrice] = useState<number>(0);
@@ -39,10 +61,11 @@ const AddProductPage = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   //select sizes and color
-  const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
-  const [selectedSizeId, setSelectedSizeId] = useState<number | null>(null);
-  const [fields, setFields] = useState([
-    { colorId: '', sizeId: '', price: '', discount: '', stockQuantity: '', variantImage: null | File },
+  const [selectedSizeId, setSelectedSizeId] = useState<(string | number | null)[]>([]);
+  const [selectedColorId, setSelectedColorId] = useState<(string | number | null)[]>([]);
+
+  const [fields, setFields] = useState<ColorSizeField[]>([
+    { colorId: '', sizeId: '', price: '', discount: '', stockQuantity: '', variantImage: null },
   ]);
 
   // Additional states for multiple images
@@ -82,6 +105,13 @@ const AddProductPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+
+    if (!productImage) {
+      toast.error("Please select a product image before submitting.");
+      return; // Stop further execution
+    }
+
     // Validate if all dropdowns are selected
     if (!selectedCategoryId || !selectedSubcategoryId || !selectedChildcategoryId || !selectedBrandId || !selectedModelId) {
       toast.error('Please select all the dropdown fields');
@@ -103,9 +133,12 @@ const AddProductPage = () => {
     formData.append('product_name', productName);
     formData.append('product_type', productType);
     formData.append('product_description', productDescription);
+    formData.append('discount', discount);  
     formData.append('product_code', productCode);
     formData.append('quantity', stockQuantity);
-    formData.append('product_image', productImage);
+
+    formData.append("product_image", productImage);
+
     formData.append('price', productPrice.toString());
     if (role_id === 1) {
       formData.append('is_active', isActive.toString());
@@ -131,8 +164,8 @@ const AddProductPage = () => {
         if (field.colorId && field.sizeId && field.price) {
           const variantFormData = new FormData();
           variantFormData.append('product', productId.toString());
-          variantFormData.append('color', field.colorId);
-          variantFormData.append('size', field.sizeId);
+          variantFormData.append('color', field.colorId.toString());
+          variantFormData.append('size', field.sizeId.toString());
           variantFormData.append('price', field.price.toString());
           if (field.variantImage) {
             variantFormData.append('variantImage', field.variantImage);
@@ -153,6 +186,7 @@ const AddProductPage = () => {
         }
       }
       toast.success('Product and variants added successfully!');
+      router.push(`/products`);
     } catch (error) {
       toast.error('Failed to add Product. Please try again.');
       console.error('Error adding Product:', error);
@@ -184,13 +218,13 @@ const AddProductPage = () => {
         {/* right side form container */}
         <div className="flex-1 bg-white p-6 rounded-lg shadow-md ">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <label htmlFor="productCode" className="text-sm font-medium">Product Code</label>
+            <label htmlFor="productCode" className="text-sm font-medium">Product Code (Required)</label>
             <input id="productCode" type="text" value={productCode} onChange={(e) => setProductCode(e.target.value)} placeholder="Enter product code" required className="border border-[#B1C7E5] rounded-md p-2" />
             {/* Product Name */}
-            <label htmlFor="productName" className="text-sm font-medium">Product Name</label>
+            <label htmlFor="productName" className="text-sm font-medium">Product Name (Required)</label>
             <input id="productName" type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Enter product name" required className="border border-[#B1C7E5] rounded-md p-2" />
             {/* Product Type */}
-            <label htmlFor="productType" className="text-sm font-medium">Product Type</label>
+            <label htmlFor="productType" className="text-sm font-medium">Product Type (Required)</label>
             <select id="productType" value={productType} onChange={(e) => setProductType(e.target.value)} required className="border border-[#B1C7E5] rounded-md p-2">
               <option value="" disabled>--Select a Product Type--</option>
               <option value="wholesale">Wholesale</option>
@@ -252,7 +286,7 @@ const AddProductPage = () => {
               </>
             )}
             {/* Dropdown for Brand Selection */}
-            <label htmlFor="brand" className="text-sm font-medium">Brand</label>
+            <label htmlFor="brand" className="text-sm font-medium">Brand (Optional)</label>
             <select
               id="brand"
               value={selectedBrandId ?? ''}
@@ -276,7 +310,7 @@ const AddProductPage = () => {
 
             {/* Additional form fields here */}
             {/* Dropdown for Model Selection */}
-            <label htmlFor="model" className="text-sm font-medium">Model</label>
+            <label htmlFor="model" className="text-sm font-medium">Model (Optional)</label>
             <select
               id="model"
               value={selectedModelId ?? ''}
@@ -300,7 +334,7 @@ const AddProductPage = () => {
 
 
             {/* Product Price Input */}
-            <label htmlFor="productPrice" className="text-sm font-medium">Regular/Seller Price</label>
+            <label htmlFor="productPrice" className="text-sm font-medium">Regular/Seller Price (Required)</label>
             <input
               id="productPrice"
               type="text"
@@ -312,39 +346,48 @@ const AddProductPage = () => {
             />
 
             {/* Product Description Input */}
-            <label htmlFor="productDescription" className="text-sm font-medium">Product Description</label>
-            <input
+            <label htmlFor="productDescription" className="text-sm font-medium">Product Description (Required)</label>
+            <textarea
               id="productDescription"
-              type="text"
               value={productDescription}
               onChange={(e) => setProductDescription(e.target.value)}
               placeholder="Enter product description"
-              required
-              className="border border-[#B1C7E5] rounded-md p-2"
+              className="expandable-textarea border border-[#B1C7E5] rounded-md p-2 w-full outline-none"
+              style={{
+                minHeight: '100px',
+                resize: 'none', // Prevent manual resizing
+                overflow: 'hidden', // Hide scrollbar while expanding
+              }}
+              rows={1} // Initial rows (single line to start with)
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = 'auto'; // Reset height to calculate scrollHeight
+                target.style.height = `${target.scrollHeight}px`; // Set to scrollHeight
+              }}
             />
             {/* Product discount Input */}
-            <label htmlFor="discount" className="text-sm font-medium">Discount</label>
+            <label htmlFor="discount" className="text-sm font-medium">Discount (Input 0 if no discount)</label>
             <input
               id="discount"
               type="text"
-              onChange={(e) => setProductDescription(e.target.value)}
+              onChange={(e) => setDiscount(e.target.value)}
               placeholder="Enter product description"
               required
               className="border border-[#B1C7E5] rounded-md p-2"
             />
             {/* Product stock quantity Input */}
-            <label htmlFor="stockquantity" className="text-sm font-medium">Stock Quantity</label>
+            <label htmlFor="stockquantity" className="text-sm font-medium">Stock Quantity (Required)</label>
             <input
               id="stockquantity"
               type="text"
               // value={d}
               onChange={(e) => setStockQuantity(e.target.value)}
-              placeholder="Enter product description"
+              placeholder="Enter stock quantity"
               required
               className="border border-[#B1C7E5] rounded-md p-2"
             />
             {/* Dropdown for Category Selection */}
-            <label htmlFor="category" className="text-sm font-medium">Category</label>
+            <label htmlFor="category" className="text-sm font-medium">Category (Required)</label>
             <select
               id="category"
               value={selectedCategoryId ?? ''}
@@ -366,7 +409,7 @@ const AddProductPage = () => {
               )}
             </select>
             {/* Dropdown for Subcategory Selection */}
-            <label htmlFor="subcategory" className="text-sm font-medium">Subcategory</label>
+            <label htmlFor="subcategory" className="text-sm font-medium">Subcategory (Required)</label>
             <select
               id="subcategory"
               value={selectedSubcategoryId ?? ''}
@@ -389,7 +432,7 @@ const AddProductPage = () => {
             </select>
 
             {/* Dropdown for Childcategory Selection */}
-            <label htmlFor="childcategory" className="text-sm font-medium">Childcategory</label>
+            <label htmlFor="childcategory" className="text-sm font-medium">Childcategory (Required)</label>
             <select
               id="childcategory"
               value={selectedChildcategoryId ?? ''}
@@ -441,12 +484,11 @@ const AddProductPage = () => {
           />
           {/* select color and size */}
           <ColorSize
-            setSelectedSizeId={setSelectedSizeId}
-            selectedSizeId={selectedSizeId}
-            selectedColorId={selectedColorId}
-            setSelectedColorId={setSelectedColorId}
             fields={fields}
             setFields={setFields}
+            setSelectedSizeId={setSelectedSizeId}
+            setSelectedColorId={setSelectedColorId}
+
           />
         </div>
       </div>

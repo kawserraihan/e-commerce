@@ -6,7 +6,7 @@ import SubcategoriesComponent from "@/components/Core/Core-Subcategories/CoreSub
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MS Mart - SubCategory",
+  title: "Msmart - SubCategory",
   description:
     "MS- Mart - SubCategory",
 };

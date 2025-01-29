@@ -94,6 +94,7 @@ interface CreateUserResponse {
 }
 
 interface Product {
+  product_variants: any;
 	id: number;
 	product_name: string;
 	product_type: string;
@@ -152,6 +153,7 @@ interface UserOrder {
 	user_name: string;
 	user_phone: string;
 	payment_status: string;
+	payment_method:string;
 	amount_paid: number;
 	total_amount: number;
 	delivery_status: string;
@@ -232,14 +234,31 @@ const authApiSlice = apiSlice.injectEndpoints({
 					const { access, refresh } = data;
 
 					// Save tokens in localStorage
-					localStorage.setItem('access', access);
-					localStorage.setItem('refresh', refresh);
+					// localStorage.setItem('access', access);	
+					// localStorage.setItem('refresh', refresh);
+
+						// Save tokens in cookies
+						Cookies.set("accessToken", access, {
+							secure: true,
+							sameSite: "Strict",
+							expires: 7, // Token expiration in days
+						});
+						Cookies.set("refreshToken", refresh, {
+							secure: true,
+							sameSite: "Strict",
+							expires: 7,
+						});
+
 
 					console.log('Access token saved:', access);
 					console.log('Refresh token saved:', refresh);
 
 					// Dispatch to update your auth state with tokens
+					// dispatch(setAuth({ accessToken: access, refreshToken: refresh }));
+
+
 					dispatch(setAuth({ accessToken: access, refreshToken: refresh }));
+
 
 
 					const role_id = data.roles && data.roles.length > 0 ? data.roles[0].id : null;
@@ -697,6 +716,10 @@ const authApiSlice = apiSlice.injectEndpoints({
 			query: (id) => `productspub/${id}/`, // Adjust the endpoint according to your API
 		}),
 
+		getProductBySlug: builder.query<Product, string>({
+			query: (slug) => `productspub/${slug}/`, // Adjust the endpoint to use slug
+		  }),
+
 		addProduct: builder.mutation<Product, FormData>({
 			query: (formData) => ({
 				url: '/products/',
@@ -885,6 +908,15 @@ const authApiSlice = apiSlice.injectEndpoints({
 			}),
 		}),
 
+		// -------------------- Checkout ----------------------------
+		checkout: builder.mutation({
+			query: (data) => ({
+			  url: "checkout/",
+			  method: "POST",
+			  body: data,
+			}),
+		  }),
+
 		// --------------------- END Coupon --------------------------
 
 		getMenu: builder.query<Menu[], void>({
@@ -958,6 +990,7 @@ export const {
 
 	useGetColorsQuery,
 	useLazyGetColorByIdQuery,
+	useGetColorByIdQuery,
 	useAddColorMutation,
 	useUpdateColorMutation,
 	useDeleteColorMutation,
@@ -997,6 +1030,7 @@ export const {
 	// Product queries
 
 	useGetProductsQuery,
+	useGetProductBySlugQuery,
 	useGetProductByIdQuery,
 	useAddProductMutation,
 	useUpdateProductMutation,
@@ -1040,7 +1074,11 @@ export const {
 
 	// Menu Permission Queries
 
-	useGetMenuQuery
+	useGetMenuQuery,
+
+	// Checkout
+
+	useCheckoutMutation 
 
 
 } = authApiSlice;

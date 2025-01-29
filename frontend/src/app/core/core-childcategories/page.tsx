@@ -6,7 +6,7 @@ import ChildcategoriesComponent from "@/components/Core/Core-Childcategories/Cor
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "MS Mart - Child Cateogry",
+  title: "Msmart - Child Cateogry",
   description:
     "MS- Mart - Child Category",
 };
