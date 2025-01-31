@@ -12,7 +12,8 @@ from .views import ProductPublicViewSet, ProductVariantPublicViewSet, ProductIma
 
 # ------Dashboards ------
 
-from .views import UserSummaryView, UserAnalyticsView, UserCartView, MergeCartView
+from .views import UserSummaryView, UserAnalyticsView, UserCartView, MergeCartView, product_search
+
 
 router = DefaultRouter()
 
@@ -47,6 +48,7 @@ urlpatterns = [
     path('dashboard/user/summary/', UserSummaryView.as_view(), name='user-summary'),
     path('dashboard/user/analytics/', UserAnalyticsView.as_view(), name='user-analytics'),
     path('dashboard/user/cart/', UserCartView.as_view(), name='user-cart'),
+    path('search/', product_search, name='product_search'),
 
 ]
 

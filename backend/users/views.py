@@ -145,14 +145,36 @@ class CustomTokenVerifyView(TokenVerifyView):
     def post(self, request, *args, **kwargs):
         access_token = request.COOKIES.get('access')
 
-        if access_token:
-            request.data['token'] = access_token
+        if not access_token:
+            return Response(
+                {"detail": "Access token is missing or expired. Please log in again."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
-        return super().post(request, *args, **kwargs)
+        request.data['token'] = access_token
+
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            return Response(
+                {"message": "Token is valid.", "status": "success"},
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"detail": "Invalid or expired token.", "status": "error"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
     
 class LogoutView(APIView):
     def post(self, request, *args, **kwargs):
-        response = Response(status=status.HTTP_204_NO_CONTENT)
+        response = Response(
+            {"message": "Logout successful. Tokens have been removed.", "status": "success"},
+            status=status.HTTP_200_OK
+        )
+        
+        # Remove authentication tokens from cookies
         response.delete_cookie('access')
         response.delete_cookie('refresh')
 

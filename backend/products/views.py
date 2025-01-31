@@ -1,6 +1,9 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.viewsets import ModelViewSet
 
+from django.db.models import Q
+from rest_framework.decorators import api_view
+
 from .models import Product, ProductImage, UserOrder, ProductVariant, WholesalePrice, Cart, CartItem
 from users.models import SellerProfile, DealerProfile
 
@@ -686,5 +689,31 @@ class UserCartView(APIView):
         }
 
         return Response(response_data)
+
+
+
+
+
+@api_view(['GET'])
+def product_search(request):
+    query = request.GET.get('query', '')
+
+    if not query:
+        return Response({"error": "Search query is required"}, status=400)
+
+    # Searching across multiple fields, including related ForeignKey fields
+    products = Product.objects.filter(
+        Q(product_name__icontains=query) |
+        Q(product_description__icontains=query) |
+        Q(product_code__icontains=query) |
+        Q(category__category_name__icontains=query) |  # Corrected ForeignKey lookup
+        Q(sub_category__subcategory_name__icontains=query) |  # Sub-category
+        Q(child_category__childcategory_name__icontains=query) |  # Child category
+        Q(brand__brand_name__icontains=query) |  # Brand
+        Q(model__model_name__icontains=query)  # Model
+    ).distinct()
+
+    serializer = ProductPublicSerializer(products, many=True)
+    return Response(serializer.data)
 
 
