@@ -1,6 +1,6 @@
 # E-Commerce Web Application
 
-A full-featured **E-Commerce web application** built with **Python, Django, and Tailwind CSS**.  
+A full-featured **E-Commerce web application** built with **Python, Django, Next and Tailwind CSS**.  
 The project features **bKash payment gateway integration** and **OTP verification** for secure user registration.
 
 ---
@@ -21,9 +21,9 @@ The project features **bKash payment gateway integration** and **OTP verificatio
 ## Tech Stack
 
 - **Backend:** Python, Django, Django REST Framework  
-- **Frontend:** HTML, Tailwind CSS  
-- **Database:** MySQL / PostgreSQL  
-- **Authentication:** JWT / Django auth, OTP verification  
+- **Frontend:** HTML, Next, & Tailwind CSS  
+- **Database:** MySQL
+- **Authentication:** JWT & OTP verification  
 - **Payment Gateway:** bKash  
-- **Deployment:** cPanel / Hosting  
+- **Deployment:** cPanel & Vercel
 
